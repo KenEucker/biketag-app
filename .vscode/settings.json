@@ -1,0 +1,17 @@
+{
+    "git.enableSmartCommit": true,
+    "editor.renderWhitespace": "all",
+    "workbench.iconTheme": "vscode-icons",
+    "vsicons.dontShowNewVersionMessage": true,
+    "gitlens.advanced.messages": {
+        "suppressShowKeyBindingsNotice": true
+    },
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false,
+    "files.trimFinalNewlines": false,
+    "prettier.printWidth": 100,
+    "files.insertFinalNewline": true,
+    "window.zoomLevel": 0,
+    "prettier.semi": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
