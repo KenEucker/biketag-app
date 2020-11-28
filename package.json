@@ -33,7 +33,7 @@
 	},
 	"keywords": [],
 	"dependencies": {
-		"sexpress": "^0.6.17"
+		"sexpress": "^0.6.19"
 	},
 	"devDependencies": {
 		"prettier": "^2.2.1"
