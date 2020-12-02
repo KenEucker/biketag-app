@@ -9,19 +9,7 @@
         "compile": "./node_modules/.bin/swagger-jsdoc -d api/swagger/index.js -o api/biketag/swagger.json && ./node_modules/.bin/jsdoc -d templates/jsdocs api/biketag/swagger.json api/biketag/index.js",
         "dev": "node app.js -- --debug=true",
         "start": "node app.js",
-        "server-erase-config": "rm ~/biketag-app/config.json && rm ~/config.json",
-        "server-copy-config": "mv ~/config.json ~/biketag-app/config.json",
-        "server-update": "git pull",
-        "server-reinstall": "rm -rf node_modules && rm -rf package-lock.json && npm install",
-        "server-logs": "sudo pm2 logs BikeTagApp",
-        "server-dev": "sudo pm2 start ecosystem.config.js --env dev",
-        "server-start": "sudo pm2 start ecosystem.config.js --env production",
-        "server-restart": "sudo pm2 restart ecosystem.config.js --env production",
-        "server-run": "sudo pm2 start ecosystem.config.js --env production",
-        "server-stop": "sudo pm2 stop BikeTagApp",
-        "server-rerun": "sudo pm2 delete BikeTagApp && sudo pm2 start ecosystem.config.js --env production",
-        "server-deploy": "npm run server-update && npm run server-restart && npm run server-logs",
-        "prettier-all": "yarn prettier . --write"
+        "clean": "yarn prettier . --write"
     },
     "main": "index.js",
     "repository": {
@@ -39,10 +27,6 @@
     },
     "devDependencies": {
         "prettier": "^2.2.1"
-    },
-    "generate": {
-        "enabled": true,
-        "source": "https://codeload.github.com/KenEucker/biketag-website/zip/production"
     },
     "license": "Unlicense"
 }

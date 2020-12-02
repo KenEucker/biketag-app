@@ -1,13 +1,24 @@
 {
     "index": {
-        "template": "biketag",
+        "template": "home",
         "imgur": {
-            "albumHash": "Y9PKtpI",
-            "queueHash": "qpCYTPZ"
+            "albumHash": "qpCYTPZ",
+            "queueHash": "PnLzAHj"
         },
         "reddit": {
             "subreddit": "CyclePDX"
         },
         "adminEmailAddresses": []
-    }
+	},
+	"biketag": {
+        "template": "biketag",
+        "imgur": {
+            "albumHash": "qpCYTPZ",
+            "queueHash": "PnLzAHj"
+        },
+        "reddit": {
+            "subreddit": "CyclePDX"
+        },
+        "adminEmailAddresses": []
+	}
 }
