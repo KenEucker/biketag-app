@@ -63,7 +63,6 @@ uploads
 .DS_Store
 yarn.lock
 temp
-public/js
 .vscode
 
 *.pem
