@@ -26,25 +26,24 @@ class IndexController {
     }
 
     indexHandler(subdomain, req, res, host) {
-		const template = this.app.getTemplateNameFromSubdomain(subdomain)
+        const template = this.app.getTemplateNameFromSubdomain(subdomain)
         const pageData = this.app.getPublicData(subdomain, host, undefined, res)
-		const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-		
-		if (subdomainConfig.imgur && subdomain !== 'index') {
-			const { albumHash, imgurClientID } = subdomainConfig.imgur
-			return biketag.getTagInformation(imgurClientID, 'current', albumHash, (data) => {
-				const bikeTagPageData = { ...pageData, currentBikeTag: data || {} }
+        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
-				return this.app.renderTemplate(template, bikeTagPageData, res)
-			})
-		}
+        if (subdomainConfig.imgur && subdomain !== 'index') {
+            const { albumHash, imgurClientID } = subdomainConfig.imgur
+            return biketag.getTagInformation(imgurClientID, 'current', albumHash, (data) => {
+                const bikeTagPageData = { ...pageData, currentBikeTag: data || {} }
 
-		return this.app.renderTemplate(template, pageData, res)
-	}
+                return this.app.renderTemplate(template, bikeTagPageData, res)
+            })
+        }
+
+        return this.app.renderTemplate(template, pageData, res)
+    }
 
     getUserTags(subdomain, req, res, host) {
         const username = getFromQueryOrPathOrBody(req, 'username')
-        console.log({ username })
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -128,7 +127,6 @@ class IndexController {
         return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             // data.host = host
             // data.region = subdomainConfig.region
-            console.log({ data })
 
             return req.pipe(request(data.nextTagURL)).pipe(res)
         })
@@ -156,13 +154,11 @@ class IndexController {
                 })
             }
 
-            console.log({ data, subdomainConfig })
             data.host = `${
                 subdomainConfig.requestSubdomain ? `${subdomainConfig.requestSubdomain}.` : ''
             }${subdomainConfig.requestHost || host}`
             data.region = subdomainConfig.region
 
-            console.log({ redditTemplatePath })
             return res.render(redditTemplatePath, data)
         })
     }

@@ -9,8 +9,8 @@
             "subreddit": "CyclePDX"
         },
         "adminEmailAddresses": []
-	},
-	"biketag": {
+    },
+    "biketag": {
         "template": "biketag",
         "imgur": {
             "albumHash": "qpCYTPZ",
@@ -20,5 +20,5 @@
             "subreddit": "CyclePDX"
         },
         "adminEmailAddresses": []
-	}
+    }
 }

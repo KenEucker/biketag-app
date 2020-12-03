@@ -13,18 +13,24 @@ class bikeTagController {
         subdomainConfig.version = this.app.config.version
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
-        return getTagInformation(imgurClientID, 'current', albumHash, (currentTagInfo) => {
-            subdomainConfig.currentTagNumber = currentTagInfo.currentTagNumber
+        return getTagInformation(
+            imgurClientID,
+            'current',
+            albumHash,
+            (currentTagInfo) => {
+                subdomainConfig.currentTagNumber = currentTagInfo.currentTagNumber
 
-            return postLatestBikeTagToReddit(subdomainConfig, (response) => {
-                if (!!response.error) {
-                } else {
-                    this.app.log.status('posted to reddit', response)
-                }
+                return postCurrentBikeTagToReddit(subdomainConfig, (response) => {
+                    if (!!response.error) {
+                    } else {
+                        this.app.log.status('posted to reddit', response)
+                    }
 
-                return res.json({ success: response })
-            })
-        }).catch((e) => {
+                    return res.json({ success: response })
+                })
+            },
+            true,
+        ).catch((e) => {
             this.app.log.error({ redditApiError: e })
 
             return res.json({ error: e.message })
@@ -33,7 +39,7 @@ class bikeTagController {
 
     async sendEmailToAdministrators(subdomain, req, res, host) {
         try {
-            const tagnumber = biketag.getTagNumberFromRequest(req)
+            const tagnumber = biketag.getTagNumberFromRequest(req) || 'current'
             const subdomainConfig = this.app.getSubdomainOpts(subdomain)
             const { albumHash, imgurClientID } = subdomainConfig.imgur
 
@@ -46,9 +52,17 @@ class bikeTagController {
 
             return biketag.getTagInformation(
                 imgurClientID,
-                tagnumber || 'current',
+                tagnumber,
                 albumHash,
                 (currentTagInfo) => {
+                    if (!currentTagInfo) {
+                        this.app.log.error('how did this happen??', {
+                            albumHash,
+                            tagnumber,
+                            currentTagInfo,
+                        })
+                        return
+                    }
                     const currentTagNumber = (subdomainConfig.currentTagNumber =
                         currentTagInfo.currentTagNumber)
                     const subject = this.app.renderSync('mail/newBikeTagSubject', {

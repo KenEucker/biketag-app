@@ -1,15 +1,14 @@
 {
     "name": "biketag-app",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "An application for biketag.org",
     "author": "Ken Eucker <keneucker@gmail.com>",
     "contributors": [],
     "bin": {},
     "scripts": {
-        "compile": "./node_modules/.bin/swagger-jsdoc -d api/swagger/index.js -o api/biketag/swagger.json && ./node_modules/.bin/jsdoc -d templates/jsdocs api/biketag/swagger.json api/biketag/index.js",
         "dev": "node app.js -- --debug=true",
         "start": "node app.js",
-        "clean": "yarn prettier . --write"
+        "clean": "./node_modules/.bin/prettier . --write"
     },
     "main": "index.js",
     "repository": {
@@ -22,7 +21,7 @@
     "keywords": [],
     "dependencies": {
         "imgur": "^0.3.1",
-        "sexpress": "github:KenEucker/sexpress#production",
+        "sexpress": "^0.6.45",
         "snoowrap": "^1.21.0"
     },
     "devDependencies": {
