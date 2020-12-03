@@ -112,6 +112,8 @@ class IndexController {
     }
 
     getCurrent(subdomain, req, res, host) {
+        const size = getFromQueryOrPathOrBody(req, 's') || getFromQueryOrPathOrBody(req, 'size')
+
         const tagnumber = 'current'
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -127,8 +129,9 @@ class IndexController {
         return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             // data.host = host
             // data.region = subdomainConfig.region
+            let imageUri = biketag.getBiketagImageUrl(data.nextTagURL, size)
 
-            return req.pipe(request(data.nextTagURL)).pipe(res)
+            return req.pipe(request(imageUri)).pipe(res)
         })
     }
 
