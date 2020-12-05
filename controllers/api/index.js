@@ -44,7 +44,7 @@ class bikeTagController {
             const { albumHash, imgurClientID } = subdomainConfig.imgur
 
             /// Wait for the data to hit reddit
-            const getTagInformationSleep = 5000
+            const getTagInformationSleep = 10000
             this.app.log.status(
                 `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
 			)
@@ -63,7 +63,7 @@ class bikeTagController {
                             tagnumber,
                             currentTagInfo,
                         })
-                        return
+                        return res.json({currentTagInfo})
                     }
                     const currentTagNumber = (subdomainConfig.currentTagNumber =
                         currentTagInfo.currentTagNumber)
@@ -106,6 +106,7 @@ class bikeTagController {
 
                     Promise.all(emailPromises).then(() => {
                         return res.json({
+							currentTagInfo,
                             emailResponses,
                         })
                     })
