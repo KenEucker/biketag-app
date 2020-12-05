@@ -1,0 +1,64 @@
+{{ "css/jsoneditor.min.css" | asset_url | stylesheet_tag: nonce }}
+{{ "js/jsoneditor.min.js" | asset_url | javascript_tag: nonce }}
+
+<!-- Grid -->
+<div class="row">
+
+<!-- Nav pills -->
+<ul class="nav md-pills nav-justified pills-rounded pills-purple-gradient row"></ul>
+
+<!-- Tab panels -->
+<div class="tab-content row"></div>
+
+</div>
+<!-- /Grid -->
+
+<!-- Mount -->
+<script type="text/javascript" nonce="{{ nonce }}">
+	document.addEventListener("DOMContentLoaded", function(event) { 
+		const allConfigData =  JSON.parse(`{{ configData | json }}`)
+		let firstClass = 'active', count = 1
+
+		const createJsonEditorTab = (name, data) => {
+
+			/// Get the nav and tab containers and set relevant IDs
+			const navContainer = document.querySelector('ul.nav')
+			const tabContainer = document.querySelector('div.tab-content')
+			const containerID = `tab-${name}`
+			const editorContainerID = `${containerID}-editor`
+
+			/// Create the nav link
+			const navPill = `
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#${containerID}" role="tab">${name}</a>
+			</li>`
+			navContainer.insertAdjacentHTML( 'beforeend', navPill)
+
+			/// Create the tab container content
+			const tabContent = `
+			<!--Panel ${count}-->
+			<div class="tab-pane fade in show ${firstClass}" id="${containerID}" role="tabpanel">
+				<div id="${editorContainerID}"></div>
+			</div>
+			<!--/.Panel ${count}-->`
+			tabContainer.insertAdjacentHTML( 'beforeend', tabContent)
+			const editorContainer = document.getElementById(editorContainerID)
+
+			// create the editor
+			const editor = new JSONEditor(editorContainer, {})
+			console.log(`Set up JSON editor #${count} - ${name}`, {data})
+			editor.set(data)
+
+			// get json
+			// const updatedJson = editor.get()
+
+			/// No longer the first
+			firstClass = ''
+			count++
+
+		}
+
+		Object.keys(allConfigData).forEach(name => createJsonEditorTab(name, allConfigData[name]))
+	})
+
+</script> 
