@@ -48,72 +48,83 @@ class bikeTagController {
             this.app.log.status(
                 `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
 			)
-			
-			await biketag.flushCache()
-			res.json({okay: 'fuck it'})
-			await sleep(getTagInformationSleep)
 
-            return biketag.getTagInformation(
-                imgurClientID,
-                tagnumber,
-                albumHash,
-                (currentTagInfo) => {
-                    if (!currentTagInfo) {
-                        this.app.log.error('how did this happen??', {
-                            albumHash,
-                            tagnumber,
-                            currentTagInfo,
-                        })
-                        return res.json({currentTagInfo})
-                    }
-                    const currentTagNumber = (subdomainConfig.currentTagNumber =
-                        currentTagInfo.currentTagNumber)
-                    const subject = this.app.renderSync('mail/newBikeTagSubject', {
-                        currentTagNumber,
-                        subdomain,
-                    })
-                    const renderOpts = {
-                        region: subdomainConfig.region,
-                        subdomainIcon: subdomainConfig.meta.image,
-                        host: `${
-                            subdomainConfig.requestSubdomain
-                                ? `${subdomainConfig.requestSubdomain}.`
-                                : ''
-                        }${subdomainConfig.requestHost || host}`,
-                        currentTagInfo,
-                        subreddit: subdomainConfig.reddit.subreddit,
-                    }
+			res.json({ok: "ok"})
 
-                    const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
-                    const html = this.app.renderSync('mail/newBikeTag', renderOpts)
+			const tryGettingLatest = async (attempt = 1) => {
+				await biketag.flushCache()
+				await sleep(getTagInformationSleep)
 
-                    const emailPromises = []
-                    const emailResponses = []
+				return biketag.getTagInformation(
+					imgurClientID,
+					tagnumber,
+					albumHash,
+					(currentTagInfo) => {
+						if (!currentTagInfo) {
+							this.app.log.error('how did this happen??', {
+								albumHash,
+								tagnumber,
+								currentTagInfo,
+							})
 
-                    subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
-                        emailPromises.push(
-                            this.app.sendEmail(subdomainConfig, {
-                                to: emailAddress,
-                                subject,
-                                text,
-                                callback: (info) => {
-                                    this.app.log.status(`email sent to ${emailAddress}`, info)
-                                    emailResponses.push(info.response)
-                                },
-                                html,
-                            }),
-                        )
-                    })
+							if (attempt <= 3) {
+								this.app.log.status('making another attempt to get latest tag information')
+								tryGettingLatest(attempt++)
+							}
 
-                    Promise.all(emailPromises).then(() => {
-                        return res.json({
+							return 
+						}
+						const currentTagNumber = (subdomainConfig.currentTagNumber =
+							currentTagInfo.currentTagNumber)
+						const subject = this.app.renderSync('mail/newBikeTagSubject', {
+							currentTagNumber,
+							subdomain,
+						})
+						const renderOpts = {
+							region: subdomainConfig.region,
+							subdomainIcon: subdomainConfig.meta.image,
+							host: `${
+								subdomainConfig.requestSubdomain
+									? `${subdomainConfig.requestSubdomain}.`
+									: ''
+							}${subdomainConfig.requestHost || host}`,
 							currentTagInfo,
-                            emailResponses,
-                        })
-                    })
-                },
-                true,
-            )
+							subreddit: subdomainConfig.reddit.subreddit,
+						}
+
+						const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
+						const html = this.app.renderSync('mail/newBikeTag', renderOpts)
+
+						const emailPromises = []
+						const emailResponses = []
+
+						subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
+							emailPromises.push(
+								this.app.sendEmail(subdomainConfig, {
+									to: emailAddress,
+									subject,
+									text,
+									callback: (info) => {
+										this.app.log.status(`email sent to ${emailAddress}`, info)
+										emailResponses.push(info.response)
+									},
+									html,
+								}),
+							)
+						})
+
+						Promise.all(emailPromises).then(() => {
+							return res.json({
+								currentTagInfo,
+								emailResponses,
+							})
+						})
+					},
+					true,
+				)
+			}
+
+			return tryGettingLatest()
         } catch (error) {
             this.app.log.error('email api error', {
                 error,
