@@ -49,8 +49,8 @@ class bikeTagController {
                 `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
 			)
 			
-			await sleep(getTagInformationSleep)
             await biketag.flushCache()
+			await sleep(getTagInformationSleep)
 
             return biketag.getTagInformation(
                 imgurClientID,
