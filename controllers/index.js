@@ -170,7 +170,7 @@ class IndexController {
 		app.use((req, res, next) => {
 			const flushcache = getFromQueryOrPathOrBody(req, 'flushcache')
 			if (flushcache === 'true') {
-				this.log('flushing cache')
+				this.app.log.status('flushing cache')
 				biketag.flushCache()
 			}
 			next()
