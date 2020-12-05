@@ -49,7 +49,8 @@ class bikeTagController {
                 `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
 			)
 			
-            await biketag.flushCache()
+			await biketag.flushCache()
+			res.json({okay: 'fuck it'})
 			await sleep(getTagInformationSleep)
 
             return biketag.getTagInformation(
