@@ -167,6 +167,15 @@ class IndexController {
     }
 
     routes(app) {
+		app.use((req, res, next) => {
+			const flushcache = getFromQueryOrPathOrBody(req, 'flushcache')
+			if (flushcache === 'true') {
+				this.log('flushing cache')
+				biketag.flushCache()
+			}
+			next()
+		})
+
         app.route('/get/reddit/:tagnumber?', this.getRedditPostTemplate)
 
         app.route('/user', this.getUserTags)
