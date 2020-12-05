@@ -47,8 +47,9 @@ class bikeTagController {
             const getTagInformationSleep = 5000
             this.app.log.status(
                 `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
-            )
-            await sleep(getTagInformationSleep)
+			)
+			
+            biketag.flushCache()
 
             return biketag.getTagInformation(
                 imgurClientID,
