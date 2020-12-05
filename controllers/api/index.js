@@ -189,7 +189,7 @@ class bikeTagController {
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
         return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-            const imageUrl = getProof ? data.proofTagURLDirect : data.previousMysteryTagURL
+            const imageUrl = getProof ? data.proofTagURLDirect : data.previousMysteryTag.link
             this.app.log.status(`sending the reponse from imgur direct ${imageUrl}`, imageUrl)
             return req.pipe(request(imageUrl)).pipe(res)
         })

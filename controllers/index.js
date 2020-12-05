@@ -129,7 +129,7 @@ class IndexController {
         return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             // data.host = host
             // data.region = subdomainConfig.region
-            let imageUri = biketag.getBiketagImageUrl(data.nextTagURL, size)
+            let imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
             return req.pipe(request(imageUri)).pipe(res)
         })
