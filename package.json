@@ -1,6 +1,6 @@
 {
     "name": "biketag-app",
-    "version": "0.0.6",
+    "version": "0.1.0",
     "description": "An application for biketag.org",
     "author": "Ken Eucker <keneucker@gmail.com>",
     "contributors": [],
@@ -21,7 +21,7 @@
     "keywords": [],
     "dependencies": {
         "imgur": "^0.3.1",
-        "sexpress": "^0.6.52",
+        "sexpress": "^0.7.0",
         "snoowrap": "^1.21.0"
     },
     "devDependencies": {

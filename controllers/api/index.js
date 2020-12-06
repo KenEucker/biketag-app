@@ -5,7 +5,8 @@ const biketag = require('../../lib/biketag')
 const { sleep, getFromQueryOrPathOrBody } = require('../../lib/util')
 const request = require('request')
 class bikeTagController {
-    postToReddit(subdomain, req, res, host) {
+    postToReddit(req, res) {
+		const {subdomain, host} = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         subdomainConfig.requestSubdomain = subdomain
         subdomainConfig.host = host
@@ -37,8 +38,9 @@ class bikeTagController {
         })
     }
 
-    async sendEmailToAdministrators(subdomain, req, res, host) {
+    async sendEmailToAdministrators(req, res) {
         try {
+			const {subdomain, host} = res.locals
             const tagnumber = biketag.getTagNumberFromRequest(req) || 'current'
             const subdomainConfig = this.app.getSubdomainOpts(subdomain)
             const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -135,7 +137,8 @@ class bikeTagController {
         }
     }
 
-    getRedditPost(subdomain, req, res, host) {
+    getRedditPost(req, res) {
+		const {subdomain, host} = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -156,7 +159,8 @@ class bikeTagController {
         })
     }
 
-    getBikeTag(subdomain, req, res, host) {
+    getBikeTag(req, res) {
+		const {subdomain, host} = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -177,7 +181,8 @@ class bikeTagController {
         })
     }
 
-    getBikeTagImage(subdomain, req, res, host, getProof = false) {
+    getBikeTagImage(req, res, getProof = false) {
+		const {subdomain} = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -195,7 +200,9 @@ class bikeTagController {
         })
     }
 
-    getBikeTagsByUser(subdomain, req, res, host, next, username) {
+    getBikeTagsByUser(req, res, username) {
+		username = typeof username === 'string' ? username : null
+		const {subdomain} = res.locals
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -364,9 +371,7 @@ class bikeTagController {
          */
         app.apiRoute(
             '/t/:tagnumber?',
-            (s, r, q, h) => {
-                return this.getBikeTagImage(s, r, q, h)
-            },
+            this.getBikeTagImage,
             ['get', 'post'],
         )
 
@@ -400,8 +405,8 @@ class bikeTagController {
          */
         app.apiRoute(
             '/p/:tagnumber?',
-            (s, r, q, h, n) => {
-                return this.getBikeTagImage(s, r, q, h, n, true)
+            (req, res) => {
+                return this.getBikeTagImage(req, res, true)
             },
             ['get', 'post'],
         )
@@ -436,9 +441,9 @@ class bikeTagController {
          */
         app.apiRoute(
             '/u/:username?',
-            (s, r, q, h, n) => {
+            (req, res) => {
                 const username = getFromQueryOrPathOrBody(r, 'username')
-                return this.getBikeTagsByUser(s, r, q, h, n, username)
+                return this.getBikeTagsByUser(req, res, username)
             },
             ['get', 'post'],
         )

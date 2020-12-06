@@ -25,7 +25,8 @@ class IndexController {
         })
     }
 
-    indexHandler(subdomain, req, res, host) {
+    indexHandler(req, res) {
+		const {subdomain, host} = res.locals
         const template = this.app.getTemplateNameFromSubdomain(subdomain)
         const pageData = this.app.getPublicData(subdomain, host, undefined, res)
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
@@ -42,7 +43,8 @@ class IndexController {
         return this.app.renderTemplate(template, pageData, res)
     }
 
-    getUserTags(subdomain, req, res, host) {
+    getUserTags(req, res) {
+		const {subdomain, host} = res.locals
         const username = getFromQueryOrPathOrBody(req, 'username')
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -67,7 +69,8 @@ class IndexController {
         })
     }
 
-    getLeaderboard(subdomain, req, res, host) {
+    getLeaderboard(req, res) {
+		const {subdomain, host} = res.locals
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -111,10 +114,11 @@ class IndexController {
         })
     }
 
-    getCurrent(subdomain, req, res, host) {
+    getCurrent(req, res) {
+		const {subdomain} = res.locals
         const size = getFromQueryOrPathOrBody(req, 's') || getFromQueryOrPathOrBody(req, 'size')
-
-        const tagnumber = 'current'
+		const tagnumber = 'current'
+		
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -135,7 +139,8 @@ class IndexController {
         })
     }
 
-    getRedditPostTemplate(subdomain, req, res, host) {
+    getRedditPostTemplate(req, res) {
+		const {subdomain, host} = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         const redditTemplatePath = 'reddit/post'
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
