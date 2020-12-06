@@ -26,7 +26,7 @@ class IndexController {
     }
 
     indexHandler(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         const template = this.app.getTemplateNameFromSubdomain(subdomain)
         const pageData = this.app.getPublicData(subdomain, host, undefined, res)
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
@@ -44,7 +44,7 @@ class IndexController {
     }
 
     getUserTags(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         const username = getFromQueryOrPathOrBody(req, 'username')
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -70,7 +70,7 @@ class IndexController {
     }
 
     getLeaderboard(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -115,10 +115,10 @@ class IndexController {
     }
 
     getCurrent(req, res) {
-		const {subdomain} = res.locals
+        const { subdomain } = res.locals
         const size = getFromQueryOrPathOrBody(req, 's') || getFromQueryOrPathOrBody(req, 'size')
-		const tagnumber = 'current'
-		
+        const tagnumber = 'current'
+
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -140,7 +140,7 @@ class IndexController {
     }
 
     getRedditPostTemplate(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         const redditTemplatePath = 'reddit/post'
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
@@ -172,14 +172,14 @@ class IndexController {
     }
 
     routes(app) {
-		app.use((req, res, next) => {
-			const flushcache = getFromQueryOrPathOrBody(req, 'flushcache')
-			if (flushcache === 'true') {
-				this.app.log.status('flushing cache')
-				biketag.flushCache()
-			}
-			next()
-		})
+        app.use((req, res, next) => {
+            const flushcache = getFromQueryOrPathOrBody(req, 'flushcache')
+            if (flushcache === 'true') {
+                this.app.log.status('flushing cache')
+                biketag.flushCache()
+            }
+            next()
+        })
 
         app.route('/get/reddit/:tagnumber?', this.getRedditPostTemplate)
 

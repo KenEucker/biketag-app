@@ -6,7 +6,7 @@ const { sleep, getFromQueryOrPathOrBody } = require('../../lib/util')
 const request = require('request')
 class bikeTagController {
     postToReddit(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         subdomainConfig.requestSubdomain = subdomain
         subdomainConfig.host = host
@@ -40,7 +40,7 @@ class bikeTagController {
 
     async sendEmailToAdministrators(req, res) {
         try {
-			const {subdomain, host} = res.locals
+            const { subdomain, host } = res.locals
             const tagnumber = biketag.getTagNumberFromRequest(req) || 'current'
             const subdomainConfig = this.app.getSubdomainOpts(subdomain)
             const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -49,84 +49,86 @@ class bikeTagController {
             const getTagInformationSleep = 10000
             this.app.log.status(
                 `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
-			)
+            )
 
-			res.json({ok: "ok"})
+            res.json({ ok: 'ok' })
 
-			const tryGettingLatest = async (attempt = 1) => {
-				await biketag.flushCache()
-				await sleep(getTagInformationSleep)
+            const tryGettingLatest = async (attempt = 1) => {
+                await biketag.flushCache()
+                await sleep(getTagInformationSleep)
 
-				return biketag.getTagInformation(
-					imgurClientID,
-					tagnumber,
-					albumHash,
-					(currentTagInfo) => {
-						if (!currentTagInfo) {
-							this.app.log.error('how did this happen??', {
-								albumHash,
-								tagnumber,
-								currentTagInfo,
-							})
+                return biketag.getTagInformation(
+                    imgurClientID,
+                    tagnumber,
+                    albumHash,
+                    (currentTagInfo) => {
+                        if (!currentTagInfo) {
+                            this.app.log.error('how did this happen??', {
+                                albumHash,
+                                tagnumber,
+                                currentTagInfo,
+                            })
 
-							if (attempt <= 3) {
-								this.app.log.status('making another attempt to get latest tag information')
-								tryGettingLatest(attempt++)
-							}
+                            if (attempt <= 3) {
+                                this.app.log.status(
+                                    'making another attempt to get latest tag information',
+                                )
+                                tryGettingLatest(attempt++)
+                            }
 
-							return 
-						}
-						const currentTagNumber = (subdomainConfig.currentTagNumber =
-							currentTagInfo.currentTagNumber)
-						const subject = this.app.renderSync('mail/newBikeTagSubject', {
-							currentTagNumber,
-							subdomain,
-						})
-						const renderOpts = {
-							region: subdomainConfig.region,
-							subdomainIcon: subdomainConfig.meta.image,
-							host: `${
-								subdomainConfig.requestSubdomain
-									? `${subdomainConfig.requestSubdomain}.`
-									: ''
-							}${subdomainConfig.requestHost || host}`,
-							currentTagInfo,
-							subreddit: subdomainConfig.reddit.subreddit,
-						}
+                            return
+                        }
+                        const currentTagNumber = (subdomainConfig.currentTagNumber =
+                            currentTagInfo.currentTagNumber)
+                        const subject = this.app.renderSync('mail/newBikeTagSubject', {
+                            currentTagNumber,
+                            subdomain,
+                        })
+                        const renderOpts = {
+                            region: subdomainConfig.region,
+                            subdomainIcon: subdomainConfig.meta.image,
+                            host: `${
+                                subdomainConfig.requestSubdomain
+                                    ? `${subdomainConfig.requestSubdomain}.`
+                                    : ''
+                            }${subdomainConfig.requestHost || host}`,
+                            currentTagInfo,
+                            subreddit: subdomainConfig.reddit.subreddit,
+                        }
 
-						const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
-						const html = this.app.renderSync('mail/newBikeTag', renderOpts)
+                        const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
+                        const html = this.app.renderSync('mail/newBikeTag', renderOpts)
 
-						const emailPromises = []
-						const emailResponses = []
+                        const emailPromises = []
+                        const emailResponses = []
 
-						subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
-							emailPromises.push(
-								this.app.sendEmail(subdomainConfig, {
-									to: emailAddress,
-									subject,
-									text,
-									callback: (info) => {
-										this.app.log.status(`email sent to ${emailAddress}`, info)
-										emailResponses.push(info.response)
-									},
-									html,
-								}),
-							)
-						})
+                        subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
+                            emailPromises.push(
+                                this.app.sendEmail(subdomainConfig, {
+                                    to: emailAddress,
+                                    subject,
+                                    text,
+                                    callback: (info) => {
+                                        this.app.log.status(`email sent to ${emailAddress}`, info)
+                                        emailResponses.push(info.response)
+                                    },
+                                    html,
+                                }),
+                            )
+                        })
 
-						Promise.all(emailPromises).then(() => {
-							return res.json({
-								currentTagInfo,
-								emailResponses,
-							})
-						})
-					},
-					true,
-				)
-			}
+                        Promise.all(emailPromises).then(() => {
+                            return res.json({
+                                currentTagInfo,
+                                emailResponses,
+                            })
+                        })
+                    },
+                    true,
+                )
+            }
 
-			return tryGettingLatest()
+            return tryGettingLatest()
         } catch (error) {
             this.app.log.error('email api error', {
                 error,
@@ -138,7 +140,7 @@ class bikeTagController {
     }
 
     getRedditPost(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -160,7 +162,7 @@ class bikeTagController {
     }
 
     getBikeTag(req, res) {
-		const {subdomain, host} = res.locals
+        const { subdomain, host } = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -182,7 +184,7 @@ class bikeTagController {
     }
 
     getBikeTagImage(req, res, getProof = false) {
-		const {subdomain} = res.locals
+        const { subdomain } = res.locals
         const tagnumber = biketag.getTagNumberFromRequest(req)
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -201,8 +203,8 @@ class bikeTagController {
     }
 
     getBikeTagsByUser(req, res, username) {
-		username = typeof username === 'string' ? username : null
-		const {subdomain} = res.locals
+        username = typeof username === 'string' ? username : null
+        const { subdomain } = res.locals
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -325,7 +327,7 @@ class bikeTagController {
 
         /**
          * @swagger
-         * /get/users
+         * /get/users:
          *   post:
          *     produces:
          *       - application/json
@@ -369,11 +371,7 @@ class bikeTagController {
          * @tags biketag
          * @return {object} 200 - success response - application/json
          */
-        app.apiRoute(
-            '/t/:tagnumber?',
-            this.getBikeTagImage,
-            ['get', 'post'],
-        )
+        app.apiRoute('/t/:tagnumber?', this.getBikeTagImage, ['get', 'post'])
 
         /**
          * @swagger
