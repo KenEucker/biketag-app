@@ -6,7 +6,7 @@
     "contributors": [],
     "bin": {},
     "scripts": {
-        "dev": "node app.js -- --debug=true",
+        "dev": "node app.js debug=true",
         "start": "node app.js",
         "clean": "./node_modules/.bin/prettier . --write"
     },
@@ -21,7 +21,7 @@
     "keywords": [],
     "dependencies": {
         "imgur": "^0.3.1",
-        "sexpress": "^0.7.0",
+        "sexpress": "^0.7.2",
         "snoowrap": "^1.21.0"
     },
     "devDependencies": {
