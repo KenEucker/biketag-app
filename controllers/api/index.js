@@ -93,7 +93,7 @@ class bikeTagController {
                                     : ''
                             }${subdomainConfig.requestHost || host}`,
                             currentTagInfo,
-                            subreddit: subdomainConfig.reddit.subreddit,
+                            reddit: subdomainConfig.reddit.reddit,
                         }
 
                         const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
