@@ -137,7 +137,13 @@ class bikeTagController {
                 error,
             })
         }
-    }
+	}
+	
+	readFromReddit(req, res) {
+        const { subdomain, host } = res.locals
+        const subreddit = getFromQueryOrPathOrBody(req, 'subreddit')
+		
+	}
 
     getRedditPost(req, res) {
         const { subdomain, host } = res.locals
@@ -263,7 +269,27 @@ class bikeTagController {
          * @tags reddit
          * @return {object} 200 - success response - application/json
          */
-        app.apiRoute('/post/reddit/:tagnumber?', this.postToReddit)
+		app.apiRoute('/post/reddit/:tagnumber?', this.postToReddit)
+
+        /**
+         * @swagger
+         * /post/reddit/:
+         *   post:
+         *     security:
+         *       - basic: []
+         *     tags:
+         *       - biketag
+         *     description: Posts the current biketag to the configured subreddit
+         *     responses:
+         *       200:
+         *         description: reddit post information for generated posts
+         *       401:
+         *         $ref: '#/components/responses/UnauthorizedError'
+         * @summary Posts the current biketag to the configured subreddit
+         * @tags reddit
+         * @return {object} 200 - success response - application/json
+         */
+        app.apiRoute('/read/reddit/', this.readFromReddit)
 
         /**
          * @swagger
