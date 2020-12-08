@@ -6,5 +6,5 @@ module.exports = {
     rendering: {
         overrideViewEngine: ['liquid', 'ejs'],
     },
-    compilation: true,
+	compilation: true,
 }

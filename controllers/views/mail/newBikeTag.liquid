@@ -34,6 +34,13 @@
 				}
 			}
 
+			.postToRedditButton {
+				background-color: rgb(27, 94, 32);
+				color: white;
+				padding: 5px;
+				border-radius: 3px;
+			}
+
 			.biketagIcon {
 				text-align:center;
 				max-width: 15em;
@@ -105,6 +112,10 @@
 			<tr>
 				<td align="center" width="50%" valign="bottom" class="middleColumnContent">
 					<img src="{{ currentTagInfo.currentTagURL | biketag_image: imageSize }}" width="280" style="max-width:280px;" class="columnImage" />
+					<p>
+						Is the new tag ready to be posted? Click below to automatigically create the post on behalf of user {{ currentTagInfo.credit }}.
+					</p>
+					<a class="postToRedditButton" href="https://{{ host }}/reddit/post?expiry={{ expiryHash }}">Post to r/{{reddit.subreddit}}</a>
 				</td>
 			</tr>
 			<tr>
