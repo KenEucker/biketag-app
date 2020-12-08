@@ -16,13 +16,12 @@ class bikeTagController {
 		if (expiryHash) {
 			const expiryHashTime = new Date(expiryHash.expiry).getTime()
 			if (new Date().getTime() > expiryHashTime || subdomain !== expiryHash.subdomain) {
-				return res.json(`Link expired, check r/${subdomainConfig.reddit.subreddit} to see if it's already been posted?`)
+				/// TODO: add the request nonce to this hash so that we can ensure this action is only run once
+				return res.json(`Link expired. Check r/${subdomainConfig.reddit.subreddit} to see if it's already been posted?`)
 			}
 		} else {
 			return res.json({message:'cannot validate link', expiry})
 		}
-
-		console.log({expiryHash})
 
         subdomainConfig.requestSubdomain = subdomain
         subdomainConfig.host = host
