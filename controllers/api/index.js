@@ -28,9 +28,9 @@ class bikeTagController {
         subdomainConfig.requestSubdomain = subdomain
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
-		subdomainConfig.version = this.app.config.version
-		subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-		subdomainConfig.imgur = merge(subdomainConfig.imgur, this.authTokens[subdomain].imgur)
+        subdomainConfig.version = this.app.config.version
+        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
+        subdomainConfig.imgur = merge(subdomainConfig.imgur, this.authTokens[subdomain].imgur)
 
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
@@ -302,7 +302,7 @@ class bikeTagController {
          * @tags reddit
          * @return {object} 200 - success response - application/json
          */
-        app.route('/post/reddit/:tagnumber?', this.postToReddit, ['get','post'], false)
+        app.route('/post/reddit/:tagnumber?', this.postToReddit, ['get', 'post'], false)
 
         /**
          * @swagger
