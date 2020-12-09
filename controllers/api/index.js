@@ -28,7 +28,10 @@ class bikeTagController {
         subdomainConfig.requestSubdomain = subdomain
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
-        subdomainConfig.version = this.app.config.version
+		subdomainConfig.version = this.app.config.version
+		subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
+		subdomainConfig.imgur = merge(subdomainConfig.imgur, this.authTokens[subdomain].imgur)
+
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
         return biketag
@@ -37,7 +40,7 @@ class bikeTagController {
                 'current',
                 albumHash,
                 (currentTagInfo) => {
-                    subdomainConfig.currentTagNumber = currentTagInfo.currentTagNumber
+                    subdomainConfig.currentTagInfo = currentTagInfo
 
                     return biketag.postCurrentBikeTagToReddit(subdomainConfig, (response) => {
                         if (!!response.error) {
