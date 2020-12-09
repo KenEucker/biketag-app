@@ -299,7 +299,7 @@ class bikeTagController {
          * @tags reddit
          * @return {object} 200 - success response - application/json
          */
-        app.apiRoute('/post/reddit/:tagnumber?', this.postToReddit)
+        app.route('/post/reddit/:tagnumber?', this.postToReddit, ['get','post'], false)
 
         /**
          * @swagger
