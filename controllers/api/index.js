@@ -2,15 +2,19 @@
  * Module dependencies.
  */
 const biketag = require('../../lib/biketag')
-const { sleep, getFromQueryOrPathOrBody, merge } = require('../../lib/util')
 const request = require('request')
+const util = require('../../lib/util')
 
 class bikeTagController {
     postToReddit(req, res) {
         const { subdomain, host } = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-        const expiry = getFromQueryOrPathOrBody(req, 'expiry')
-        const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
+        const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
+		const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
+		
+		if (subdomainConfig.reddit.autoPost) {
+			
+		}
 
         /// Check the expiry, if no match then don't allow this post
         if (expiryHash) {
@@ -29,11 +33,11 @@ class bikeTagController {
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-        subdomainConfig.imgur = merge(subdomainConfig.imgur, this.app.authTokens[subdomain].imgur)
+		subdomainConfig.auth = this.app.authTokens[subdomain].redditBot ? this.app.authTokens[subdomain].redditBot.opts : subdomainConfig.reddit
+		subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+        subdomainConfig.imgur = this.app.middlewares.util.merge(subdomainConfig.imgur, this.app.authTokens[subdomain].imgur)
 
         const { albumHash, imgurClientID } = subdomainConfig.imgur
-
         return biketag
             .getTagInformation(
                 imgurClientID,
@@ -46,10 +50,15 @@ class bikeTagController {
                         if (!!response.error) {
                         } else {
                             this.app.log.status('posted to reddit', response)
-                        }
+						}
+						
+						/// TODO: Update imgur image with new Reddit discussion link
+						console.log({response})
+						
+						/// TODO: Update crossposted reddit post with appropriate flair from default account
 
                         return res.json({ success: response })
-                    })
+                    }, this.app.renderSync.bind(this.app))
                 },
                 true,
             )
@@ -88,7 +97,7 @@ class bikeTagController {
 
             const tryGettingLatest = async (attempt = 1) => {
                 await biketag.flushCache()
-                await sleep(getTagInformationSleep)
+                await util.sleep(getTagInformationSleep)
 
                 return biketag.getTagInformation(
                     imgurClientID,
@@ -175,7 +184,7 @@ class bikeTagController {
 
     readFromReddit(req, res) {
         const { subdomain, host } = res.locals
-        const subreddit = getFromQueryOrPathOrBody(req, 'subreddit')
+        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
     }
 
     getRedditPost(req, res) {
@@ -259,9 +268,9 @@ class bikeTagController {
 
     /********		controller methods			**********/
     init(app) {
+        this.app = app
         biketag.setLogger(app.log.debug)
 
-        this.app = app
         // this.index = this.show = 'apidocs'
     }
 
@@ -499,7 +508,7 @@ class bikeTagController {
         app.apiRoute(
             '/u/:username?',
             (req, res) => {
-                const username = getFromQueryOrPathOrBody(r, 'username')
+                const username = util.getFromQueryOrPathOrBody(r, 'username')
                 return this.getBikeTagsByUser(req, res, username)
             },
             ['get', 'post'],
