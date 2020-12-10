@@ -10,14 +10,14 @@ class bikeTagController {
         const { subdomain, host } = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
-		const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
-		
-		if (!subdomainConfig.reddit.autoPost) {
-			return res.json({
-				error: `Subdomain is not configured to support autoposting to Reddit, please contact support@biketag.org for help turning this feature on.`,
-				subdomain,
-			})
-		}
+        const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
+
+        if (!subdomainConfig.reddit.autoPost) {
+            return res.json({
+                error: `Subdomain is not configured to support autoposting to Reddit, please contact support@biketag.org for help turning this feature on.`,
+                subdomain,
+            })
+        }
 
         /// Check the expiry, if no match then don't allow this post
         if (expiryHash) {
@@ -36,9 +36,14 @@ class bikeTagController {
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
-		subdomainConfig.auth = this.app.authTokens[subdomain].redditBot ? this.app.authTokens[subdomain].redditBot.opts : subdomainConfig.reddit
-		subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
-        subdomainConfig.imgur = this.app.middlewares.util.merge(subdomainConfig.imgur, this.app.authTokens[subdomain].imgur)
+        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
+            ? this.app.authTokens[subdomain].redditBot.opts
+            : subdomainConfig.reddit
+        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+        subdomainConfig.imgur = this.app.middlewares.util.merge(
+            subdomainConfig.imgur,
+            this.app.authTokens[subdomain].imgur,
+        )
 
         const { albumHash, imgurClientID } = subdomainConfig.imgur
         return biketag
@@ -49,19 +54,71 @@ class bikeTagController {
                 (currentTagInfo) => {
                     subdomainConfig.currentTagInfo = currentTagInfo
 
-                    return biketag.postCurrentBikeTagToReddit(subdomainConfig, (response) => {
-                        if (!!response.error) {
-                        } else {
-                            this.app.log.status('posted to reddit', response)
-						}
-						
-						/// TODO: Update imgur image with new Reddit discussion link
-						console.log({response})
-						
-						/// TODO: Update crossposted reddit post with appropriate flair from default account
+                    return biketag.postCurrentBikeTagToReddit(
+                        subdomainConfig,
+                        async (response) => {
+                            if (!response.error && response.selfPostName) {
+                                this.app.log.status('posted to reddit', response)
+                                if (response.crossPostName) {
+                                    const mainRedditAccount =
+                                        this.app.config.authentication.reddit ||
+                                        subdomainConfig.reddit
+                                    const regionName = `${subdomain
+                                        .charAt(0)
+                                        .toUpperCase()}${subdomain.slice(1)}`
+                                    subdomainConfig.auth.username = mainRedditAccount.username
+                                    subdomainConfig.auth.password = mainRedditAccount.password
 
-                        return res.json({ success: response })
-                    }, this.app.renderSync.bind(this.app))
+                                    await biketag
+                                        .setBikeTagPostFlair(
+                                            subdomainConfig,
+                                            { selfPostName: response.crossPostName },
+                                            regionName,
+                                            (response) => {
+                                                this.app.log.status('setBikeTagPostFlair', response)
+                                            },
+                                        )
+                                        .catch((error) => {
+                                            this.app.log.error(`setBikeTagPostFlair failed`, error)
+                                        })
+                                }
+
+                                const discussionUrl = ` https://redd.it/${response.selfPostName.replace(
+                                    't3_',
+                                    '',
+                                )}`
+                                const updatedImage = {
+                                    id: subdomainConfig.currentTagInfo.image.id,
+                                    title: subdomainConfig.currentTagInfo.image.title,
+                                    description: `${subdomainConfig.currentTagInfo.image.description} | ${discussionUrl}`,
+                                }
+
+                                await biketag
+                                    .setTagImageInformation(
+                                        imgurClientID,
+                                        updatedImage,
+                                        (response) => {
+                                            console.log(
+                                                'setTagImageInformation',
+                                                response,
+                                                updatedImage,
+                                            )
+                                        },
+                                    )
+                                    .catch((error) => {
+                                        this.app.log.error(`setTagImageInformation failed`, {
+                                            error,
+                                            updatedImage,
+                                        })
+                                    })
+
+                                return res.json({ success: response })
+                            }
+
+                            return res.json({ error: response })
+                        },
+                        this.app.renderSync.bind(this.app),
+                    )
                 },
                 true,
             )
