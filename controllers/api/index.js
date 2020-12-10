@@ -30,7 +30,7 @@ class bikeTagController {
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
         subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-        subdomainConfig.imgur = merge(subdomainConfig.imgur, this.authTokens[subdomain].imgur)
+        subdomainConfig.imgur = merge(subdomainConfig.imgur, this.app.authTokens[subdomain].imgur)
 
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
