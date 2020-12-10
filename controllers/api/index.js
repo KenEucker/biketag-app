@@ -12,8 +12,11 @@ class bikeTagController {
         const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
 		const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
 		
-		if (subdomainConfig.reddit.autoPost) {
-			
+		if (!subdomainConfig.reddit.autoPost) {
+			return res.json({
+				error: `Subdomain is not configured to support autoposting to Reddit, please contact support@biketag.org for help turning this feature on.`,
+				subdomain,
+			})
 		}
 
         /// Check the expiry, if no match then don't allow this post
