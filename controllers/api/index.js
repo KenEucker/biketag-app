@@ -2,7 +2,7 @@
  * Module dependencies.
  */
 const biketag = require('../../lib/biketag')
-const { sleep, getFromQueryOrPathOrBody } = require('../../lib/util')
+const { sleep, getFromQueryOrPathOrBody, merge } = require('../../lib/util')
 const request = require('request')
 
 class bikeTagController {
