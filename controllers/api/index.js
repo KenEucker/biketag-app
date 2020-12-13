@@ -45,7 +45,7 @@ class bikeTagController {
             this.app.authTokens[subdomain].imgur,
         )
 
-        const { albumHash, imgurClientID } = subdomainConfig.imgur
+        const { albumHash, imgurClientID, imgurAccessToken } = subdomainConfig.imgur
         return biketag
             .getTagInformation(
                 imgurClientID,
@@ -95,7 +95,7 @@ class bikeTagController {
 
                                 await biketag
                                     .setTagImageInformation(
-                                        imgurClientID,
+                                        imgurAccessToken,
                                         updatedImage,
                                         (response) => {
                                             console.log(
