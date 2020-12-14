@@ -244,7 +244,16 @@ class bikeTagController {
 
     readFromReddit(req, res) {
         const { subdomain, host } = res.locals
-        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+		const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+		
+		return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
+			// if (!posts || posts.error) {
+			// 	return res.json({ error: posts.error})
+			// }
+
+			return res.json(posts)
+		})
     }
 
     getRedditPost(req, res) {
