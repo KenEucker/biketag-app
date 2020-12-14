@@ -89,8 +89,8 @@ class bikeTagController {
                                 )}`
                                 const updatedImage = {
                                     id: subdomainConfig.currentTagInfo.image.id,
-                                    title: subdomainConfig.currentTagInfo.image.title,
-                                    description: `${subdomainConfig.currentTagInfo.image.description} | ${discussionUrl}`,
+                                    title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
+                                    description: subdomainConfig.currentTagInfo.image.description,
                                 }
 
                                 await biketag
