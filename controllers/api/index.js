@@ -252,89 +252,15 @@ class bikeTagController {
         subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
             ? this.app.authTokens[subdomain].redditBot.opts
             : subdomainConfig.reddit
-		subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
-		
-		const getTagNumbersFromText = (t) => {
-			/// TODO: build out testers for all current games of BikeTag on Reddit
-			const tagNumberText = t.match(/(?:Bike?\s*Tag)\s+#?(\d*)/gi) || t.match(/#(\d*)/)
-			console.log({tagNumberText, t})
-			if (!tagNumberText) return []
-
-			const tagNumbers = tagNumberText.reduce((numbers, text) => {
-				let tagNumber = text.match(/\d+/)
-				tagNumber = tagNumber && tagNumber.length ? tagNumber[0] : null
-
-				if (!tagNumber) numbers
-
-				numbers.push(Number.parseInt(tagNumber))
-
-				return numbers
-			}, [])
-
-			return tagNumbers
-		}
-
-		const getTagImageURLsFromText = (t) => {
-			/// TODO: make this image validator more intelligent
-			const validImageURLs = ['imgur']
-			
-			const selfTextURLs =
-				t.match(/\b(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*\b)/gi) || []
-			const tagImageURLs  = selfTextURLs.reduce((urls, url) => {
-				if (!url || !new RegExp(validImageURLs.join('|')).test(url))
-					return urls
-
-				urls.push(url)
-
-				return urls
-			}, [])
-
-			return tagImageURLs
-		}
+        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
         return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
-            // if (!posts || posts.error) {
-            // 	return res.json({ error: posts.error})
-            // }
-            const postTexts = posts.reduce((redditPosts, p) => {
-                if (p.selftext.length) {
-                    const selftext = p.selftext
-                    const tagNumberText = selftext.match(/(?:Bike?\s*Tag)\s+#?(\d*)/gi) || selftext.match(/#(\d*)/)
-                    const selfTextURLs =
-						selftext.match(/\b(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*\b)/gi) || []
-						
-                    const tagImageURLs = getTagImageURLsFromText(selftext)
-                    const tagNumbers = getTagNumbersFromText(selftext)
-
-                    redditPosts.push({
-						isSelfPost: true,
-                        selftext,
-                        selfTextURLs,
-                        tagNumberText,
-                        tagNumbers,
-                        tagImageURLs,
-                    })
-                } else if (p.media && p.media.oembed) {
-                    /// Might be a single tag?
-                    let tagNumber = p.title.match(/(?:Bike?\s*Tag)\s+#?(\d*)/gi)
-                    tagNumber = tagNumber ? tagNumber[0] : -1
-                    const tagImageURLs = getTagImageURLsFromText(p.media.oembed.url)
-                    const tagNumbers = getTagNumbersFromText(tagNumber)
-
-                    redditPosts.push({
-						isSelfPost: false,
-                        selftext: `${p.media.oembed.title} ${p.media.oembed.description}`,
-                        selfTextURLs: [p.media.oembed.url],
-						tagNumberText: tagNumber,
-                        tagNumbers,
-                        tagImageURLs,
-                    })
-                }
-
-                return redditPosts
-            }, [])
-
-            return res.json({ postTexts })
+            if (!posts || posts.error) {
+            	return res.json({ error: posts.error})
+			}
+            const bikeTags = biketag.getBikeTagsFromRedditPosts(posts)
+            return res.json({ bikeTags })
+			
         })
     }
 
@@ -357,6 +283,27 @@ class bikeTagController {
             data.region = subdomainConfig.region
 
             return res.json(data)
+        })
+	}
+	
+	updateBikeTagGameFromReddit(req, res) {
+        const { subdomain, host } = res.locals
+        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+
+        subdomainConfig.host = host
+        subdomainConfig.version = this.app.config.version
+        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
+            ? this.app.authTokens[subdomain].redditBot.opts
+            : subdomainConfig.reddit
+        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+
+        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
+            if (!posts || posts.error) {
+            	return res.json({ error: posts.error})
+			}
+			
+            const bikeTags = biketag.getBikeTagsFromRedditPosts(posts)
         })
     }
 
