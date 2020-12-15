@@ -33,7 +33,7 @@ class IndexController {
 
         if (subdomainConfig.imgur && subdomain !== 'index') {
             const { albumHash, imgurClientID } = subdomainConfig.imgur
-            return biketag.getTagInformation(imgurClientID, 'current', albumHash, (data) => {
+            return biketag.getBikeTagInformation(imgurClientID, 'current', albumHash, (data) => {
                 const bikeTagPageData = { ...pageData, currentBikeTag: data || {} }
 
                 return this.app.renderTemplate(template, bikeTagPageData, res)
@@ -130,7 +130,7 @@ class IndexController {
 
         this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
 
-        return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             // data.host = host
             // data.region = subdomainConfig.region
             let imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
@@ -141,7 +141,7 @@ class IndexController {
 
     getRedditPostTemplate(req, res) {
         const { subdomain, host } = res.locals
-        const tagnumber = biketag.getTagNumberFromRequest(req)
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
         const redditTemplatePath = 'reddit/post'
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
@@ -154,7 +154,7 @@ class IndexController {
 
         this.app.log.status(`reddit endpoint request for tag #${tagnumber}`, { redditTemplatePath })
 
-        return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             if (!data) {
                 return res.json({
                     tagNumberNotFound: tagnumber,

@@ -47,7 +47,7 @@ class bikeTagController {
 
         const { albumHash, imgurClientID, imgurAccessToken } = subdomainConfig.imgur
         return biketag
-            .getTagInformation(
+            .getBikeTagInformation(
                 imgurClientID,
                 'current',
                 albumHash,
@@ -94,19 +94,11 @@ class bikeTagController {
                                 }
 
                                 await biketag
-                                    .setTagImageInformation(
-                                        imgurAccessToken,
-                                        updatedImage,
-                                        (response) => {
-                                            console.log(
-                                                'setTagImageInformation',
-                                                response,
-                                                updatedImage,
-                                            )
-                                        },
-                                    )
+                                    .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
+                                        console.log('updateImgurInfo', response, updatedImage)
+                                    })
                                     .catch((error) => {
-                                        this.app.log.error(`setTagImageInformation failed`, {
+                                        this.app.log.error(`updateImgurInfo failed`, {
                                             error,
                                             updatedImage,
                                         })
@@ -132,7 +124,7 @@ class bikeTagController {
     async sendEmailToAdministrators(req, res) {
         try {
             const { subdomain, host } = res.locals
-            const tagnumber = biketag.getTagNumberFromRequest(req) || 'current'
+            const tagnumber = biketag.getBikeTagNumberFromRequest(req) || 'current'
             const subdomainConfig = this.app.getSubdomainOpts(subdomain)
             const { albumHash, imgurClientID } = subdomainConfig.imgur
             const expiry = new Date(
@@ -147,19 +139,19 @@ class bikeTagController {
             const expiryHash = encodeURIComponent(this.app.crypto().encrypt(emailSecurityHashData))
 
             /// Wait for the data to hit reddit
-            const getTagInformationSleep = 10000
+            const getBikeTagInformationSleep = 10000
             this.app.log.status(
-                `waiting for ${getTagInformationSleep}ms until getting new tag information for recent post`,
+                `waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`,
             )
 
             console.log({ expiryHash })
-            res.json({ wait: getTagInformationSleep })
+            res.json({ wait: getBikeTagInformationSleep })
 
             const tryGettingLatest = async (attempt = 1) => {
                 await biketag.flushCache()
-                await util.sleep(getTagInformationSleep)
+                await util.sleep(getBikeTagInformationSleep)
 
-                return biketag.getTagInformation(
+                return biketag.getBikeTagInformation(
                     imgurClientID,
                     tagnumber,
                     albumHash,
@@ -244,42 +236,41 @@ class bikeTagController {
 
     readFromReddit(req, res) {
         const { host } = res.locals
-		let subdomain = 'index'
-		const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        let subdomain = 'index'
+        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
 
-		for (const [s, c] of Object.entries(this.app.config.subdomains)) {
-			if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
-				subdomain = s
-				continue
-			}
-		}
+        for (const [s, c] of Object.entries(this.app.config.subdomains)) {
+            if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
+                subdomain = s
+                continue
+            }
+        }
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
         subdomainConfig.auth = this.app.authTokens.default.redditBot
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
-		console.log({auth: subdomainConfig.auth})
+        console.log({ auth: subdomainConfig.auth })
 
-		return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
+        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
             if (!posts || posts.error) {
-            	return res.json({ error: posts.error})
-			}
+                return res.json({ error: posts.error })
+            }
             const bikeTags = biketag.getBikeTagsFromRedditPosts(posts)
             return res.json({ bikeTags })
-			
         })
     }
 
     getRedditPost(req, res) {
         const { subdomain, host } = res.locals
-        const tagnumber = biketag.getTagNumberFromRequest(req)
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
         this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
 
-        return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             data = data || {
                 error: {
                     message: 'tagnumber: Not Found',
@@ -291,24 +282,26 @@ class bikeTagController {
 
             return res.json(data)
         })
-	}
-	
-	updateBikeTagGameFromReddit(req, res) {
-        const { host } = res.locals
-		const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-		let subdomain
+    }
 
-		for (const [s, c] of Object.entries(this.app.config.subdomains)) {
-			if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
-				subdomain = s
-				continue
-			}
-		}
-		
-		if (!subdomain) {
-			return res.json({error: `unsupported subreddit, cannot match subdomain or region to the provided subreddit. Try a read/reddit instead.`})
-		}
-		const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+    updateBikeTagGameFromReddit(req, res) {
+        const { host } = res.locals
+        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        let subdomain
+
+        for (const [s, c] of Object.entries(this.app.config.subdomains)) {
+            if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
+                subdomain = s
+                continue
+            }
+        }
+
+        if (!subdomain) {
+            return res.json({
+                error: `unsupported subreddit, cannot match subdomain or region to the provided subreddit. Try a read/reddit instead.`,
+            })
+        }
+        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
@@ -317,23 +310,21 @@ class bikeTagController {
 
         return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
             if (!posts || posts.error) {
-            	return res.json({ error: posts.error})
-			}
-			
-			const bikeTagPosts = biketag.getBikeTagsFromRedditPosts(posts)
-			return res.json({bikeTagPosts})
-			const bikeTagImagesData = []
-			bikeTagPosts.forEach((post) => {
-				const tagData = 
-				
-				bikeTagImagesData.push(biketag.constructBikeTagImageFromData(post))
-			})
+                return res.json({ error: posts.error })
+            }
+
+            const bikeTagPosts = biketag.getBikeTagsFromRedditPosts(posts)
+            return res.json({ bikeTagPosts })
+            const bikeTagImagesData = []
+            bikeTagPosts.forEach((post) => {
+                const tagData = bikeTagImagesData.push(biketag.constructBikeTagImageFromData(post))
+            })
         })
     }
 
     getBikeTag(req, res) {
         const { subdomain, host } = res.locals
-        const tagnumber = biketag.getTagNumberFromRequest(req)
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -345,7 +336,7 @@ class bikeTagController {
 
         this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
 
-        return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             data.host = host
             data.region = subdomainConfig.region
 
@@ -355,7 +346,7 @@ class bikeTagController {
 
     getBikeTagImage(req, res, getProof = false) {
         const { subdomain } = res.locals
-        const tagnumber = biketag.getTagNumberFromRequest(req)
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -365,7 +356,7 @@ class bikeTagController {
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
-        return biketag.getTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             const imageUrl = getProof ? data.proofTag.link : data.previousMysteryTag.link
             this.app.log.status(`sending the reponse from imgur direct ${imageUrl}`, imageUrl)
             return req.pipe(request(imageUrl)).pipe(res)
@@ -453,8 +444,8 @@ class bikeTagController {
          * @tags reddit
          * @return {object} 200 - success response - application/json
          */
-		app.apiRoute('/read/reddit/:subreddit', this.readFromReddit)
-		
+        app.apiRoute('/read/reddit/:subreddit', this.readFromReddit)
+
         /**
          * @swagger
          * /patch/reddit/{subreddit}:
@@ -474,7 +465,7 @@ class bikeTagController {
          * @return {object} 200 - success response - application/json
          */
         app.apiRoute('/patch/reddit/:subreddit', this.updateBikeTagGameFromReddit)
-		
+
         /**
          * @swagger
          * /get/biketag/{tagnumber}:
