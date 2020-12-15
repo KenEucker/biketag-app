@@ -314,11 +314,14 @@ class bikeTagController {
             }
 
             const bikeTagPosts = biketag.getBikeTagsFromRedditPosts(posts)
-            return res.json({ bikeTagPosts })
+            // return res.json({ bikeTagPosts })
             const bikeTagImagesData = []
             bikeTagPosts.forEach((post) => {
-                const tagData = bikeTagImagesData.push(biketag.constructBikeTagImageFromData(post))
-            })
+				const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
+                bikeTagImagesData.push(bikeTagInformation)
+			})
+			
+			return res.json({bikeTagImagesData})
         })
     }
 
