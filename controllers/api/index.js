@@ -243,18 +243,25 @@ class bikeTagController {
     }
 
     readFromReddit(req, res) {
-        const { subdomain, host } = res.locals
-        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        const { host } = res.locals
+		let subdomain = 'index'
+		const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+
+		for (const [s, c] of Object.entries(this.app.config.subdomains)) {
+			if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
+				subdomain = s
+				continue
+			}
+		}
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-            ? this.app.authTokens[subdomain].redditBot.opts
-            : subdomainConfig.reddit
+        subdomainConfig.auth = this.app.authTokens.default.redditBot
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+		console.log({auth: subdomainConfig.auth})
 
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
+		return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
             if (!posts || posts.error) {
             	return res.json({ error: posts.error})
 			}
@@ -287,15 +294,25 @@ class bikeTagController {
 	}
 	
 	updateBikeTagGameFromReddit(req, res) {
-        const { subdomain, host } = res.locals
-        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+        const { host } = res.locals
+		const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+		let subdomain
+
+		for (const [s, c] of Object.entries(this.app.config.subdomains)) {
+			if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
+				subdomain = s
+				continue
+			}
+		}
+		
+		if (!subdomain) {
+			return res.json({error: `unsupported subreddit, cannot match subdomain or region to the provided subreddit. Try a read/reddit instead.`})
+		}
+		const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-            ? this.app.authTokens[subdomain].redditBot.opts
-            : subdomainConfig.reddit
+        subdomainConfig.auth = this.app.authTokens.default.redditBot
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
         return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
@@ -303,7 +320,14 @@ class bikeTagController {
             	return res.json({ error: posts.error})
 			}
 			
-            const bikeTags = biketag.getBikeTagsFromRedditPosts(posts)
+			const bikeTagPosts = biketag.getBikeTagsFromRedditPosts(posts)
+			return res.json({bikeTagPosts})
+			const bikeTagImagesData = []
+			bikeTagPosts.forEach((post) => {
+				const tagData = 
+				
+				bikeTagImagesData.push(biketag.constructBikeTagImageFromData(post))
+			})
         })
     }
 
@@ -413,24 +437,44 @@ class bikeTagController {
 
         /**
          * @swagger
-         * /post/reddit/:
+         * /post/reddit/{subreddit}:
          *   post:
          *     security:
          *       - basic: []
          *     tags:
          *       - biketag
-         *     description: Posts the current biketag to the configured subreddit
+         *     description: Reads a given subreddit for BikeTag posts
+         *     responses:
+         *       200:
+         *         description: reddit post information for found posts
+         *       401:
+         *         $ref: '#/components/responses/UnauthorizedError'
+         * @summary Reads a given subreddit for BikeTag posts
+         * @tags reddit
+         * @return {object} 200 - success response - application/json
+         */
+		app.apiRoute('/read/reddit/:subreddit', this.readFromReddit)
+		
+        /**
+         * @swagger
+         * /patch/reddit/{subreddit}:
+         *   post:
+         *     security:
+         *       - basic: []
+         *     tags:
+         *       - biketag
+         *     description: Reads a given subreddit for BikeTag posts and creates images for the subdomain with that subreddit assigned
          *     responses:
          *       200:
          *         description: reddit post information for generated posts
          *       401:
          *         $ref: '#/components/responses/UnauthorizedError'
-         * @summary Posts the current biketag to the configured subreddit
+         * @summary Reads a given subreddit for BikeTag posts and creates images for the subdomain with that subreddit assigned
          * @tags reddit
          * @return {object} 200 - success response - application/json
          */
-        app.apiRoute('/read/reddit/:subreddit', this.readFromReddit)
-
+        app.apiRoute('/patch/reddit/:subreddit', this.updateBikeTagGameFromReddit)
+		
         /**
          * @swagger
          * /get/biketag/{tagnumber}:
