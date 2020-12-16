@@ -141,8 +141,8 @@ class bikeTagController {
             /// Wait for the data to hit reddit
             const getBikeTagInformationSleep = 10000
             this.app.log.status(
-				`waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`,
-				{expiryHash}
+                `waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`,
+                { expiryHash },
             )
 
             res.json({ wait: getBikeTagInformationSleep })
@@ -238,7 +238,7 @@ class bikeTagController {
         const { host } = res.locals
         let subdomain = 'index'
         const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-		const translateData = util.getFromQueryOrPathOrBody(req, 'translated') === 'true'
+        const translateData = util.getFromQueryOrPathOrBody(req, 'translated') === 'true'
 
         for (const [s, c] of Object.entries(this.app.config.subdomains)) {
             if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
@@ -257,16 +257,16 @@ class bikeTagController {
             if (!posts || posts.error) {
                 return res.json({ error: posts.error })
             }
-			const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
-			
-			if (translateData) {
-				const bikeTagImagesData = []
-            	bikeTagPosts.forEach((post) => {
-					const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
-					bikeTagImagesData.push(bikeTagInformation)
-				})
-				return res.json({ bikeTagImagesData })
-			}
+            const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
+
+            if (translateData) {
+                const bikeTagImagesData = []
+                bikeTagPosts.forEach((post) => {
+                    const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
+                    bikeTagImagesData.push(bikeTagInformation)
+                })
+                return res.json({ bikeTagImagesData })
+            }
             return res.json({ bikeTagPosts })
         })
     }
@@ -327,16 +327,22 @@ class bikeTagController {
             bikeTagPosts.forEach((post) => {
                 const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
                 bikeTagImagesData.push(bikeTagInformation)
-			})
-			
-			const imgurOpts = this.app.middlewares.util.merge(
-				subdomainConfig.imgur,
-				this.app.authTokens[subdomain].imgur,
-			)
-			return biketag.setBikeTagImages(imgurOpts.opts.clientID, imgurOpts.authorization || imgurOpts.opts.authorization, bikeTagImagesData, subdomainConfig.imgur.albumHash, 'Url', (results) => {
-				return res.json({ results })
-			})
+            })
 
+            const imgurOpts = this.app.middlewares.util.merge(
+                subdomainConfig.imgur,
+                this.app.authTokens[subdomain].imgur,
+            )
+            return biketag.setBikeTagImages(
+                imgurOpts.opts.clientID,
+                imgurOpts.authorization || imgurOpts.opts.authorization,
+                bikeTagImagesData,
+                subdomainConfig.imgur.albumHash,
+                'Url',
+                (results) => {
+                    return res.json({ results })
+                },
+            )
         })
     }
 
