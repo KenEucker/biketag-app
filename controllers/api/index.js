@@ -239,7 +239,6 @@ class bikeTagController {
         let subdomain = 'index'
         const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
 		const translateData = util.getFromQueryOrPathOrBody(req, 'translated') === 'true'
-		console.log({translateData})
 
         for (const [s, c] of Object.entries(this.app.config.subdomains)) {
             if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
@@ -324,14 +323,20 @@ class bikeTagController {
             }
 
             const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
-            // return res.json({ bikeTagPosts })
             const bikeTagImagesData = []
             bikeTagPosts.forEach((post) => {
                 const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
                 bikeTagImagesData.push(bikeTagInformation)
-            })
+			})
+			
+			const imgurOpts = this.app.middlewares.util.merge(
+				subdomainConfig.imgur,
+				this.app.authTokens[subdomain].imgur,
+			)
+			return biketag.setBikeTagImages(imgurOpts.opts.clientID, imgurOpts.authorization || imgurOpts.opts.authorization, bikeTagImagesData, subdomainConfig.imgur.albumHash, 'Url', (results) => {
+				return res.json({ results })
+			})
 
-            return res.json({ bikeTagImagesData })
         })
     }
 
