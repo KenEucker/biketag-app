@@ -253,11 +253,11 @@ class bikeTagController {
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
         console.log({ auth: subdomainConfig.auth })
 
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
+        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, async (posts) => {
             if (!posts || posts.error) {
                 return res.json({ error: posts.error })
             }
-            const bikeTags = biketag.getBikeTagsFromRedditPosts(posts)
+            const bikeTags = await biketag.getBikeTagsFromRedditPosts(posts)
             return res.json({ bikeTags })
         })
     }
@@ -308,20 +308,20 @@ class bikeTagController {
         subdomainConfig.auth = this.app.authTokens.default.redditBot
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, (posts) => {
+        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, async (posts) => {
             if (!posts || posts.error) {
                 return res.json({ error: posts.error })
             }
 
-            const bikeTagPosts = biketag.getBikeTagsFromRedditPosts(posts)
-            // return res.json({ bikeTagPosts })
+            const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
+            return res.json({ bikeTagPosts })
             const bikeTagImagesData = []
             bikeTagPosts.forEach((post) => {
-				const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
+                const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
                 bikeTagImagesData.push(bikeTagInformation)
-			})
-			
-			return res.json({bikeTagImagesData})
+            })
+
+            return res.json({ bikeTagImagesData })
         })
     }
 
