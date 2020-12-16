@@ -1,655 +1,927 @@
-/**
- * Module dependencies.
- */
-const biketag = require('../../lib/biketag')
-const request = require('request')
-const util = require('../../lib/util')
+const imgur = require('imgur')
+const reddit = require('snoowrap')
+const nodeCache = require('node-cache')
+const { extname } = require('path')
+const merge = require('deepmerge')
+const namespace = 'biketag'
+let singleton
 
-class bikeTagController {
-    postToReddit(req, res) {
-        const { subdomain, host } = res.locals
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-        const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
-        const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
+class BikeTagModel {
+	constructor(opts) {
+		return {
+			...opts,
+		}
+	}
+}
 
-        if (!subdomainConfig.reddit.autoPost) {
-            return res.json({
-                error: `Subdomain is not configured to support autoposting to Reddit, please contact support@biketag.org for help turning this feature on.`,
-                subdomain,
-            })
+class BikeTagApi {
+    /// TODO: add jsdocs here and tie this class to the controller in controllers/api/index using res.locals
+    constructor(logger = (m) => m, cache) {
+        const cacheOptions = {
+            stdTTL: 600,
+            checkperiod: 450,
         }
+        this.cacheKeys = {
+            albumHash: `imgur::`,
+            bikeTagImage: `biketag::`,
+            bikeTagsByUser: `usertags::`,
+        }
+        this.setLogger(logger)
+        this.setCache(cache || new nodeCache(cacheOptions, this.cacheKeys))
 
-        /// Check the expiry, if no match then don't allow this post
-        if (expiryHash) {
-            const expiryHashTime = new Date(expiryHash.expiry).getTime()
-            if (new Date().getTime() > expiryHashTime || subdomain !== expiryHash.subdomain) {
-                /// TODO: add the request nonce to this hash so that we can ensure this action is only run once
-                return res.json(
-                    `Link expired. Check r/${subdomainConfig.reddit.subreddit} to see if it's already been posted?`,
-                )
-            }
+        this.log(`BikeTag Cache Configured`, cache)
+    }
+
+    getBikeTagImages(imgurClientID, albumHash, callback, uncached = false) {
+        const cacheKey = `${this.cacheKeys.albumHash}${imgurClientID}::${albumHash}`
+        const getBikeTagImagesResponse = this.cache.get(cacheKey)
+
+        if (!getBikeTagImagesResponse || uncached) {
+            return this.getImgurAlbumInfo(imgurClientID, albumHash, (data) => {
+                const images = this.getImagesByBikeTagNumber(data.images)
+                this.cache.set(cacheKey, images)
+
+                this.log('got new getBikeTagImages', { cacheKey, image: { images } })
+                return callback(images)
+            }).catch((e) => console.log('ERROR: getBikeTagImages:', { e }))
         } else {
-            return res.json({ message: 'cannot validate link', expiry })
+            this.log('getting cached getBikeTagImages', { cacheKey, getBikeTagImagesResponse })
+            return callback(getBikeTagImagesResponse)
+        }
+    }
+
+    getBiketagImageUrl(url, size = '') {
+        const ext = extname(url)
+        /// Make sure the image type is supported
+        if (['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) === -1) return url
+
+        switch (size) {
+            default:
+            case 'original':
+            case '':
+                break
+
+            case 'small':
+                size = 's'
+            case 's':
+                break
+
+            case 'medium':
+                size = 's'
+            case 'm':
+                break
+
+            case 'large':
+                size = 'l'
+            case 'l':
+                break
         }
 
-        subdomainConfig.requestSubdomain = subdomain
-        subdomainConfig.host = host
-        subdomainConfig.viewsFolder = this.app.config.viewsFolder
-        subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-            ? this.app.authTokens[subdomain].redditBot.opts
-            : subdomainConfig.reddit
-        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
-        subdomainConfig.imgur = this.app.middlewares.util.merge(
-            subdomainConfig.imgur,
-            this.app.authTokens[subdomain].imgur,
-        )
+        return url.replace(ext, `${size}${ext}`)
+    }
 
-        const { albumHash, imgurClientID, imgurAccessToken } = subdomainConfig.imgur
-        return biketag
-            .getBikeTagInformation(
+    getBikeTagInformation(
+        imgurClientID,
+        tagNumberRequested,
+        albumHash,
+        callback,
+        uncached = false,
+    ) {
+        const cacheKey = `${this.cacheKeys.bikeTagImage}${albumHash}::${tagNumberRequested}`
+        const getBikeTagInformationResponse = this.cache.get(cacheKey)
+
+        if (!getBikeTagInformationResponse || uncached) {
+            return this.getBikeTagImages(
                 imgurClientID,
-                'current',
                 albumHash,
-                (currentTagInfo) => {
-                    subdomainConfig.currentTagInfo = currentTagInfo
+                (images) => {
+                    if (images.length) {
+                        const currentTagNumber = this.getBikeTagNumberFromImage(images[0])
+                        const tagNumber =
+                            tagNumberRequested == 'current'
+                                ? currentTagNumber
+                                : parseInt(tagNumberRequested)
 
-                    return biketag.postCurrentBikeTagToReddit(
-                        subdomainConfig,
-                        async (response) => {
-                            if (!response.error && response.selfPostName) {
-                                this.app.log.status('posted to reddit', response)
-                                if (response.crossPostName) {
-                                    const mainRedditAccount =
-                                        this.app.config.authentication.reddit ||
-                                        subdomainConfig.reddit
-                                    const regionName = `${subdomain
-                                        .charAt(0)
-                                        .toUpperCase()}${subdomain.slice(1)}`
-                                    subdomainConfig.auth.username = mainRedditAccount.username
-                                    subdomainConfig.auth.password = mainRedditAccount.password
+                        const tagData = {
+                            tagNumberRequested,
+                        }
+                        const proofTagNumber = tagNumber > 1 ? tagNumber - 1 : 1
+                        const mysteryTagNumber = tagNumber > 1 ? tagNumber : 1
+                        const previousMysteryTagNumber = proofTagNumber > 1 ? tagNumber - 1 : 1
 
-                                    await biketag
-                                        .setBikeTagPostFlair(
-                                            subdomainConfig,
-                                            { selfPostName: response.crossPostName },
-                                            regionName,
-                                            (response) => {
-                                                this.app.log.status('setBikeTagPostFlair', response)
-                                            },
-                                        )
-                                        .catch((error) => {
-                                            this.app.log.error(`setBikeTagPostFlair failed`, error)
-                                        })
-                                }
+                        const currentTagIndex = this.getBikeTagNumberIndexFromImages(
+                            images,
+                            mysteryTagNumber,
+                        )
+                        const proofTagIndex = this.getBikeTagNumberIndexFromImages(
+                            images,
+                            proofTagNumber,
+                            true,
+                        )
+                        const previousMysterTagIndex = this.getBikeTagNumberIndexFromImages(
+                            images,
+                            previousMysteryTagNumber,
+                        )
 
-                                const discussionUrl = ` https://redd.it/${response.selfPostName.replace(
-                                    't3_',
-                                    '',
-                                )}`
-                                const updatedImage = {
-                                    id: subdomainConfig.currentTagInfo.image.id,
-                                    title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
-                                    description: subdomainConfig.currentTagInfo.image.description,
-                                }
+                        if (currentTagIndex === -1) {
+                            return callback(null)
+                        }
 
-                                await biketag
-                                    .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
-                                        console.log('updateImgurInfo', response, updatedImage)
-                                    })
-                                    .catch((error) => {
-                                        this.app.log.error(`updateImgurInfo failed`, {
-                                            error,
-                                            updatedImage,
-                                        })
-                                    })
+                        const currentTag = images[currentTagIndex]
+                        const currentTagURL = currentTag.link
+                        const currentTagURLExt = extname(currentTagURL)
+                        const proofTag = images[proofTagIndex] || {}
+                        const proofText = proofTag.description
+                        const imgurBaseUrl = 'https://imgur.com'
+                        const creditSplit = proofText
+                            ? proofText.split('by')
+                            : currentTag.description.split('by')
+                        const hintSplit = currentTag.description.split('hint:')
 
-                                return res.json({ success: response })
-                            }
+                        tagData.imgurBaseUrl = imgurBaseUrl
+                        tagData.image = currentTag
+                        tagData.currentTagNumber = mysteryTagNumber
+                        tagData.currentTagURL = currentTagURL
+                        tagData.currentTagURLExt = currentTagURLExt
+                        tagData.currentTagURLThumb = currentTagURL.replace(
+                            currentTagURLExt,
+                            `m${currentTagURLExt}`,
+                        )
+                        tagData.credit = creditSplit[creditSplit.length - 1].trim()
+                        tagData.hint = hintSplit.length > 1 ? hintSplit[1].trim() : ''
+                        tagData.previousMysteryTag =
+                            previousMysterTagIndex !== -1 ? images[previousMysterTagIndex] : {}
+                        tagData.previousMysteryTagNumber = previousMysteryTagNumber
+                        tagData.proofTag = proofTag
+                        tagData.proofTagURL = proofTag ? `${imgurBaseUrl}/${proofTag.id}` : null
+                        tagData.proofText = proofText
+						tagData.proofTagNumber = proofTagNumber
+						
+						const bikeTagInformation = new BikeTagModel(tagData)
 
-                            return res.json({ error: response })
-                        },
-                        this.app.renderSync.bind(this.app),
-                    )
+                        // if (!uncached)
+                        this.cache.set(cacheKey, bikeTagInformation)
+                        this.log('got new getBikeTagInformation', { cacheKey, bikeTagInformation })
+
+                        return callback(bikeTagInformation)
+                    }
+
+                    return callback(null)
+                },
+                uncached,
+            )
+        } else {
+            this.log('getting cached getBikeTagInformation', {
+                cacheKey,
+                getBikeTagInformationResponse,
+            })
+            return callback(getBikeTagInformationResponse)
+        }
+    }
+
+    getBikeTagInformationFromRedditData(redditPostData) {
+		if (!redditPostData.tagNumbers) {
+			/// TODO: handle a link that is an image gallery and has only one tag number attached
+			redditPostData.tagNumbers = [redditPostData.tagNumber]
+		}
+
+		const imgurBaseUrl = `https://imgur.com`
+		const mysteryTagNumber = Math.max(...redditPostData.tagNumbers)
+		const proofTagNumber = mysteryTagNumber - 1
+		const previousMysteryTagNumber = proofTagNumber > 1 ? mysteryTagNumber - 1 : 1
+		const currentTagURLIndex = redditPostData.tagNumbers.indexOf(mysteryTagNumber)
+		const currentTagURL = redditPostData.tagImageURLs[currentTagURLIndex]
+		const proofTagUrlIndex = redditPostData.tagNumbers.indexOf(previousMysteryTagNumber)
+		const proofTagURL = proofTagUrlIndex !== -1 ? redditPostData.tagImageURLs[proofTagUrlIndex] : null
+		const currentTagURLExt = extname(currentTagURL)
+
+        const tagData = {
+            author_flair: redditPostData.author_flair,
+			credit: redditPostData.credit,
+			hint: redditPostData.hint,
+            gps: redditPostData.gps,
+			discussionLink: `https://redd.it/${redditPostData.id}`,
+			link: currentTagURL,
+
+			currentTagNumber: mysteryTagNumber,
+			currentTagURL,
+			currentTagURLExt,
+			currentTagURLThumb: currentTagURL.replace(
+				currentTagURLExt,
+				`m${currentTagURLExt}`,
+			),
+			imgurBaseUrl,
+			previousMysteryTagNumber,
+			previousMysteryTag: {},
+			proofTagURL,
+			previousMysteryTagNumber,
+		}
+
+		tagData.image = {
+			title: this.getBikeTagTitleFromData(tagData),
+			description: this.getBikeTagDescriptionFromData(tagData),
+			link: currentTagURL,
+			imageUrl: currentTagURL,
+		}
+		tagData.proofTag = {
+			title: this.getBikeTagProofTitleFromData(tagData),
+			description: this.getBikeTagProofDescriptionFromData(tagData),
+			link: proofTagURL,
+			imageUrl: proofTagURL,
+		}
+		tagData.proofText = tagData.proofTag.description
+
+		const bikeTagInformation = new BikeTagModel(tagData)
+
+        return bikeTagInformation
+	}
+	
+	getBikeTagDescriptionFromData(data) {
+		return `#${data.currentTagNumber} tag ${data.hint ? `(hint: ${data.hint})` : ''} by ${data.credit}`
+	}
+	
+	getBikeTagTitleFromData(data) {
+		return `(${data.gps ? data.gps : ''}) {${data.discussionLink ? data.discussionLink : ''}}`
+	}
+	
+	getBikeTagProofDescriptionFromData(data) {
+		return `#${data.proofTagNumber} found at (${data.foundAt}) by ${data.credit}`
+	}
+	
+	getBikeTagProofTitleFromData(data) {
+		return `(${data.gps ? data.gps : ''})`
+	}
+
+    getBikeTagNumberFromImage(image) {
+        let tagNumber
+
+        if (image.description) {
+            const split = image.description.split(' ')
+            tagNumber = Number.parseInt(split[0].substring(1))
+
+            if (image.description.indexOf('proof') !== -1) {
+                tagNumber = 0 - tagNumber
+            }
+        }
+
+        return tagNumber
+    }
+
+    getBikeTagNumberFromRequest(req) {
+        const pathTagNumber = parseInt(req.params.tagnumber)
+        const bodyTagNumber = parseInt(req.body.tagnumber)
+        // console.log({ bodyTagNumber, pathTagNumber, body: req.body })
+        if (!!pathTagNumber) return pathTagNumber
+        if (!!bodyTagNumber) return bodyTagNumber
+
+        return 'current'
+    }
+
+    getBikeTagNumberIndexFromImages(images, tagNumber, proof = false) {
+        let tagNumberIndex = images.length + 1 - (tagNumber - (tagNumber % 2) + 1) * 2
+
+        const verifyTagNumber = function (index) {
+            if (!images[index] || !images[index].description) {
+                return false
+            }
+
+            let compare = `#${tagNumber} tag`
+            if (proof) {
+                compare = `#${tagNumber} proof`
+            }
+
+            return index > -1 && !!images[index]
+                ? images[index].description.indexOf(compare) !== -1
+                : false
+        }
+
+        if (verifyTagNumber(tagNumberIndex)) {
+            return tagNumberIndex
+        }
+        if (tagNumberIndex < images.length + 1 && verifyTagNumber(tagNumberIndex + 1)) {
+            return tagNumberIndex + 1
+        }
+        if (tagNumberIndex > 0 && verifyTagNumber(tagNumberIndex - 1)) {
+            return tagNumberIndex - 1
+        }
+
+        for (let i = 0; i < images.length; ++i) {
+            if (verifyTagNumber(i)) {
+                return i
+            }
+        }
+
+        return -1
+    }
+
+    getBikeTagPostsFromSubreddit(config, subreddit, sort = 'year', callback) {
+        const r = new reddit(config.auth)
+        const query = `subreddit:${subreddit} title:Bike Tag`
+
+        if (typeof sort === 'function') {
+            callback = sort
+            sort = 'year'
+        }
+
+        return r.getSubreddit(subreddit).search({ query, sort: 'year' }).then(callback)
+    }
+
+    /// TODO: cache this response
+    getBikeTagsByUser(imgurClientID, albumHash, username, callback, uncached = false) {
+        const cacheKey = `${this.cacheKeys.bikeTagsByUser}${albumHash}::${username}`
+        const getBikeTagsByUserResponse = this.cache.get(cacheKey)
+
+        if (!getBikeTagsByUserResponse || uncached) {
+            return this.getBikeTagImages(imgurClientID, albumHash, (images) => {
+                if (username) {
+                    const usersImages = images.filter((i) => {
+                        return i.description.indexOf(username) !== -1
+                    })
+
+                    return callback(usersImages)
+                } else {
+                    const usernames = [],
+                        imagesGroupedByUsername = {}
+                    const sortedImages = images.sort((a, b) => {
+                        const usernameA = this.getBikeTagUsernameFromImage(a)
+                        const usernameB = this.getBikeTagUsernameFromImage(b)
+
+                        // record the username
+                        if (usernames.indexOf(usernameA) === -1) usernames.push(usernameA)
+
+                        return ('' + usernameA).localeCompare(usernameB)
+                    })
+                    usernames.forEach((username) => {
+                        imagesGroupedByUsername[username] = sortedImages.filter(
+                            (i) =>
+                                this.getBikeTagUsernameFromImage(i).localeCompare(username) === 0,
+                        )
+                    })
+
+                    this.cache.set(cacheKey, imagesGroupedByUsername)
+
+                    return callback(imagesGroupedByUsername)
+                }
+            })
+        } else {
+            this.log('getting cached getBikeTagInformation', {
+                cacheKey,
+                getBikeTagInformationResponse: getBikeTagsByUserResponse,
+            })
+            return callback(getBikeTagsByUserResponse)
+        }
+    }
+
+    async getBikeTagsFromRedditPosts(posts) {
+        let selftext = '',
+            postBody,
+            isSelfPost = true
+		const postTexts = []
+		for (let i = 0; i < posts.length; i++) {
+			const p = posts[i]
+
+			const imgurBaseUrl = 'https://imgur.com'
+			const galleryBaseUrl = `${imgurBaseUrl}/gallery/`
+			const albumBaseUrl = `${imgurBaseUrl}/a/`
+
+            if (p.selftext && p.selftext.length) {
+                postBody = selftext = p.selftext
+            } else if (p.media && p.media.oembed) {
+                /// Might be a single tag?
+                postBody = `${p.media.oembed.title} ${p.media.oembed.description}`
+                selftext = p.media.oembed.url
+                isSelfPost = false
+			}
+
+            let tagImageURLs = this.getImageURLsFromText(selftext)
+            let tagNumbers = this.getTagNumbersFromText(postBody)
+            let hint = this.getHintFromText(postBody)
+            let foundAt = this.getFoundLocationFromText(postBody)
+            let gps = this.getGPSLocationFromText(postBody)
+			let credit = this.getCreditFromText(postBody, `u/${p.author.name}`)
+			let addToReadablePosts = true
+			
+			if (tagImageURLs.length < 2) {
+				if (tagImageURLs.length) {
+					const singleImageUrl = tagImageURLs[0]
+					const galleryIndex = singleImageUrl.indexOf(galleryBaseUrl)
+					const albumIndex = singleImageUrl.indexOf(albumBaseUrl)
+					const imageIsMultipleIndex = galleryIndex !== -1 ? galleryIndex : albumIndex
+					const imageIsMultipleLength = galleryIndex !== -1 ? galleryBaseUrl.length : albumBaseUrl.length
+
+					/// If the one image is a gallery, we need to go get it's images and parse those
+					if (galleryIndex !== -1 || albumIndex !== -1) {
+						const galleryID = singleImageUrl.substring(imageIsMultipleIndex + imageIsMultipleLength)
+						const galleryInfoResponse = await imgur.getGalleryInfo(galleryID)
+
+						if (galleryInfoResponse.data) {
+							tagImageURLs = []
+							tagNumbers = []
+							galleryInfoResponse.data.images.forEach((image) => {
+								const imageText = `${image.title} ${image.description}`
+
+								tagNumbers = tagNumbers.concat(this.getTagNumbersFromText(imageText))
+								tagImageURLs.push(image.link)
+
+								hint = hint || this.getHintFromText(imageText)
+								foundAt = foundAt || this.getFoundLocationFromText(postBody)
+								credit = credit || this.getCreditFromText(postBody)
+								gps = gps || this.getGPSLocationFromText(postBody)
+							})
+							credit = credit || info.account_url
+						}
+					}
+				} else {
+					/// No tag numbers found?
+					this.log({unreadableRedditPost: p})
+					addToReadablePosts = false
+				}
+			}
+
+			if (addToReadablePosts) {
+
+				if (!foundAt) {
+					foundAt = postBody
+					const removeStringFromFoundAt = (s) => foundAt = foundAt.replace(s,'')
+					const foundAtRemnantRegex = /\s*at\s*/gi
+					tagImageURLs.forEach(removeStringFromFoundAt)
+					tagNumbers.forEach(s => removeStringFromFoundAt(`#${s}`))
+	
+					if (credit) removeStringFromFoundAt(`(@|#|u/)?${credit}`)
+					if (gps) removeStringFromFoundAt(new RegExp(`(@|#)?${gps.replace(' ','.?').replace(',', '\s?')}|(@|#)?${gps}`, "gi"))
+					if (hint) removeStringFromFoundAt(new RegExp(`(\()?(hint:?)?\s*(${hint})(\s?\))?`, "gi"))
+
+					removeStringFromFoundAt(/\[(?:bike)?\s*tag\s*\d*\]\(\s*\)/gi)
+					removeStringFromFoundAt(/\[\s*\]\(http.*\)/gi)
+					removeStringFromFoundAt(/\[(?!(?:bike)?\s*tag\s*).*\]\(.*\)/gi)
+					removeStringFromFoundAt(/\[(?:bike)?\s*tag\s*\d*\s*-/gi)
+					removeStringFromFoundAt(/\]\(\s*\)/gi)
+					removeStringFromFoundAt(/\r?\n?/gi)
+					removeStringFromFoundAt(/\\/gi)
+					removeStringFromFoundAt(/&#.*;/gi)
+
+					if (foundAt.endsWith('at') || foundAt.endsWith('at ')) removeStringFromFoundAt(foundAtRemnantRegex)
+					if (foundAt.startsWith('-') || foundAt.startsWith(' -')) removeStringFromFoundAt(/^\s*-/i)
+					if (foundAt.startsWith(',') || foundAt.startsWith(' ,')) removeStringFromFoundAt(/^\s*,/i)
+
+					foundAt = foundAt.trim()
+				}
+
+				postTexts.push({
+					id: p.id,
+					isSelfPost,
+					selftext,
+					postBody,
+					tagNumbers,
+					tagImageURLs,
+					credit,
+					gps,
+					foundAt,
+					hint,
+					author_flair: p.author_flair_text,
+				})
+			}
+		}
+
+        return postTexts
+    }
+
+    getBikeTagUsernameFromImage(image) {
+        let username
+
+        if (image.description) {
+            const split =
+                image.description.indexOf('by') !== -1
+                    ? image.description.split('by')
+                    : image.description.split('for')
+            username = split[split.length - 1].substring(1)
+            /// normalize
+            username = username.replace('"', '')
+        }
+
+        return username
+    }
+
+    /// TODO: cache this response
+    getUsernameFromBikeTag(tagnumber = 'current') {
+        if (typeof tagnumber === 'string') {
+            return this.getBikeTagInformation(imgurClientID, tagnumber, albumHash, () => {})
+        } else {
+            return this.getUsernameFromBikeTag(tagnumber)
+        }
+    }
+
+    async postCurrentBikeTagToReddit(config, tagNumberToPost, callback, renderer) {
+        /// Support getting the current tag if no number is passed as second param
+        if (typeof tagNumberToPost === 'function') {
+            renderer = callback
+            callback = tagNumberToPost
+        }
+
+        /// Otherwise, fetch the most recent image
+        tagNumberToPost = tagNumberToPost || config.currentTagInfo.currentTagNumber
+        let currentTagInfo = config.currentTagInfo
+
+        /// Support passing an image in instead of the tagNumber
+        if (typeof tagNumberToPost === 'object') {
+            currentTagInfo = tagNumberToPost
+        } else {
+            await this.getBikeTagInformation(
+                config.imgur.imgurClientID,
+                config.currentTagInfo.currentTagNumber,
+                config.imgur.albumHash,
+                (tagData) => {
+                    currentTagInfo = tagData
+                },
+            )
+        }
+
+        /// Make sure we're working with the most up to date image data
+        let r = new reddit(config.auth),
+            selfPostName,
+            crossPostName,
+            error
+
+        currentTagInfo.host = config.host
+
+        const renderOpts = merge(currentTagInfo, {
+            region: config.region,
+            subdomainIcon: config.meta.image,
+            host: config.host,
+        })
+
+        const currentTagTemplate = renderer('reddit/post', renderOpts)
+
+        /// Create a new BikeTag self post
+        await r
+            .getSubreddit(config.reddit.subreddit)
+            .submitSelfpost({
+                title: `Bike Tag #${currentTagInfo.currentTagNumber}`,
+                text: currentTagTemplate.replace('<pre>', '').replace('</pre>', ''),
+            })
+            .assignFlair({
+                text: config.reddit.postFlair || 'BikeTag',
+            })
+            .approve()
+            .sticky()
+            .distinguish()
+            .then((response) => {
+                error = response.error
+                selfPostName = response.name
+            })
+
+        /// this crosspost can't be submitted with a different user
+        await r
+            .getSubmission(selfPostName)
+            .submitCrosspost({
+                subredditName: 'biketag',
+                title: `[X-Post r/${config.reddit.subreddit}] Bike Tag #${config.currentTagInfo.currentTagNumber} (${config.region})`,
+                resubmit: false,
+            })
+            .then((response) => {
+                error = error || response.error
+                crossPostName = response.name
+            })
+
+        callback({ error, crossPostName, selfPostName })
+    }
+
+    async setBikeTagCrossPostFlair(config, callback) {
+        const r = new reddit(config.auth)
+
+        await r
+            .getSubmission(redditData.name)
+            .fetch()
+            .then((submission) => {
+                if (!!submission) {
+                    return r
+                        .getSubreddit(config.reddit.subreddit)
+                        .assignFlair({
+                            text: regionName,
+                        })
+                        .then(callback)
+                        .catch(callback)
+                } else {
+                    console.error('post to reddit error!')
+                }
+            })
+            .catch(callback)
+    }
+
+    async setBikeTagImages(
+        imgurClientID,
+        imgurAuthorization,
+        images,
+        albumHash,
+        imagesType = 'Url',
+        callback,
+    ) {
+        imgur.setClientId(imgurClientID)
+        imgur.setAccessToken(imgurAuthorization.replace('Bearer ', ''))
+
+        const self = this
+        const newImages = []
+        const updatedTagsInformation = []
+
+        for (let i = 0; i < images.length; i++) {
+            const image = images[i]
+            await this.getBikeTagInformation(
+                imgurClientID,
+                image.tagNumber,
+                albumHash,
+                (existingImage) => {
+                    if (existingImage) {
+                        const updateImage = {
+                            id: image.id || existingImage.id,
+                            title: image.title || existingImage.title,
+                            description: image.description || existingImage.description,
+                        }
+                        /// Update the image now
+                        return imgur
+                            .updateInfo(updateImage.id, updateImage.title, updateImage.description)
+                            .then((json) => {
+                                self.log(`image updated (${updateImage.id})`, { json })
+                                updatedTagsInformation.push(json.data)
+                            })
+                    } else {
+                        newImages.push(image)
+                    }
                 },
                 true,
             )
-            .catch((e) => {
-                this.app.log.error({ redditApiError: e })
-
-                return res.json({ error: e.message })
-            })
-    }
-
-    async sendEmailToAdministrators(req, res) {
-        try {
-            const { subdomain, host } = res.locals
-            const tagnumber = biketag.getBikeTagNumberFromRequest(req) || 'current'
-            const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-            const { albumHash, imgurClientID } = subdomainConfig.imgur
-            const expiry = new Date(
-                new Date().getTime() + 60 * 60 * 1000 * (this.app.config.expiryDays || 2),
-            )
-            const emailSecurityHashData = {
-                subdomain,
-                tagnumber,
-                expiry,
-                emails: subdomainConfig.adminEmailAddresses,
-            }
-            const expiryHash = encodeURIComponent(this.app.crypto().encrypt(emailSecurityHashData))
-
-            /// Wait for the data to hit reddit
-            const getBikeTagInformationSleep = 10000
-            this.app.log.status(
-                `waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`,
-            )
-
-            console.log({ expiryHash })
-            res.json({ wait: getBikeTagInformationSleep })
-
-            const tryGettingLatest = async (attempt = 1) => {
-                await biketag.flushCache()
-                await util.sleep(getBikeTagInformationSleep)
-
-                return biketag.getBikeTagInformation(
-                    imgurClientID,
-                    tagnumber,
-                    albumHash,
-                    (currentTagInfo) => {
-                        if (!currentTagInfo) {
-                            this.app.log.error('how did this happen??', {
-                                albumHash,
-                                tagnumber,
-                                currentTagInfo,
-                            })
-
-                            if (attempt <= 3) {
-                                this.app.log.status(
-                                    'making another attempt to get latest tag information',
-                                )
-                                tryGettingLatest(attempt++)
-                            }
-
-                            return
-                        }
-                        const currentTagNumber = (subdomainConfig.currentTagNumber =
-                            currentTagInfo.currentTagNumber)
-                        const subject = this.app.renderSync('mail/newBikeTagSubject', {
-                            currentTagNumber,
-                            subdomain,
-                        })
-                        const renderOpts = {
-                            region: subdomainConfig.region,
-                            subdomainIcon: subdomainConfig.meta.image,
-                            host: `${
-                                subdomainConfig.requestSubdomain
-                                    ? `${subdomainConfig.requestSubdomain}.`
-                                    : ''
-                            }${subdomainConfig.requestHost || host}`,
-                            currentTagInfo,
-                            expiryHash,
-                            reddit: subdomainConfig.reddit.subreddit,
-                        }
-
-                        const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
-                        const html = this.app.renderSync('mail/newBikeTag', renderOpts)
-
-                        const emailPromises = []
-                        const emailResponses = []
-
-                        subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
-                            emailPromises.push(
-                                this.app.sendEmail(subdomainConfig, {
-                                    to: emailAddress,
-                                    subject,
-                                    text,
-                                    callback: (info) => {
-                                        this.app.log.status(`email sent to ${emailAddress}`, info)
-                                        emailResponses.push(info.response)
-                                    },
-                                    html,
-                                }),
-                            )
-                        })
-
-                        // Promise.all(emailPromises).then(() => {
-                        //     return res.json({
-                        //         currentTagInfo,
-                        //         emailResponses,
-                        //     })
-                        // })
-                    },
-                    true,
-                )
-            }
-
-            return tryGettingLatest()
-        } catch (error) {
-            this.app.log.error('email api error', {
-                error,
-            })
-            return res.json({
-                error,
-            })
         }
-    }
 
-    readFromReddit(req, res) {
-        const { host } = res.locals
-        let subdomain = 'index'
-        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        /// Create the new images
+        await imgur.uploadImages(newImages, imagesType, albumHash).then((json) => {
+            self.log(`[${newImages.length}] images uploaded to album ${albumHash}`)
 
-        for (const [s, c] of Object.entries(this.app.config.subdomains)) {
-            if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
-                subdomain = s
-                continue
-            }
-        }
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-
-        subdomainConfig.host = host
-        subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens.default.redditBot
-        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
-        console.log({ auth: subdomainConfig.auth })
-
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, async (posts) => {
-            if (!posts || posts.error) {
-                return res.json({ error: posts.error })
-            }
-            const bikeTags = await biketag.getBikeTagsFromRedditPosts(posts)
-            return res.json({ bikeTags })
+            callback({ updatedTagsInformation, newTagsInformations: json.data })
         })
     }
 
-    getRedditPost(req, res) {
-        const { subdomain, host } = res.locals
-        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-        const { albumHash, imgurClientID } = subdomainConfig.imgur
+    async setBikeTagPostFlair(config, tagNumberToUpdate, flair, callback) {
+        /// Support setting the current tag if no number is passed as second param
+        if (typeof flair === 'function') {
+            callback = flair
+            flair = tagNumberToUpdate
+        }
 
-        this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
+        /// Otherwise, fetch the most recent image
+        tagNumberToUpdate = tagNumberToUpdate || config.currentTagInfo.currentTagNumber
+        let redditPostName
 
-        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-            data = data || {
-                error: {
-                    message: 'tagnumber: Not Found',
-                    tagnumber,
+        /// Support passing an object with the selfPostName in instead of the tagNumber
+        if (typeof tagNumberToUpdate === 'object' && tagNumberToUpdate.selfPostName) {
+            redditPostName = tagNumberToUpdate.selfPostName
+        } else if (!config.currentTagInfo && tagNumberToUpdate.description) {
+            config.currentTagInfo = { image: tagNumberToUpdate }
+        } else if (!config.currentTagInfo) {
+            await this.getBikeTagInformation(
+                config.imgur.imgurClientID,
+                config.currentTagInfo.currentTagNumber,
+                config.imgur.albumHash,
+                (tagData) => {
+                    config.currentTagInfo = tagData
                 },
-            }
-            data.host = host
-            data.region = subdomainConfig.region
-
-            return res.json(data)
-        })
-    }
-
-    updateBikeTagGameFromReddit(req, res) {
-        const { host } = res.locals
-        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-        let subdomain
-
-        for (const [s, c] of Object.entries(this.app.config.subdomains)) {
-            if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
-                subdomain = s
-                continue
-            }
+            )
         }
 
-        if (!subdomain) {
-            return res.json({
-                error: `unsupported subreddit, cannot match subdomain or region to the provided subreddit. Try a read/reddit instead.`,
-            })
+        /// If the redditPostName was not passed in, parse it from the current image's description
+        if (!redditPostName) {
+            const searchRedditUrlPrefix = '://redd.it/'
+            const redditUrlIndex = config.currentTagInfo.image.description.indexOf(
+                searchRedditUrlPrefix,
+            )
+
+            /// If the reddit url doesn't exist in the image we can't udpate anything
+            if (redditUrlIndex === -1) return callback(null)
+
+            redditPostName = `t3_${config.currentTagInfo.image.description.substring(
+                redditUrlIndex + searchRedditUrlPrefix.length,
+            )}`
         }
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
-        subdomainConfig.host = host
-        subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens.default.redditBot
-        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+        let r = new reddit(config.auth)
 
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, async (posts) => {
-            if (!posts || posts.error) {
-                return res.json({ error: posts.error })
-            }
-
-            const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
-            return res.json({ bikeTagPosts })
-            const bikeTagImagesData = []
-            bikeTagPosts.forEach((post) => {
-                const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
-                bikeTagImagesData.push(bikeTagInformation)
+        return r
+            .getSubmission(redditPostName)
+            .assignFlair({
+                text: flair ? flair : config.reddit.postFlair || 'BikeTag',
             })
+            .then(callback)
+    }
 
-            return res.json({ bikeTagImagesData })
+    /// API passthroughs
+    getImgurAlbumInfo(imgurClientID, albumHash, callback) {
+        imgur.setClientId(imgurClientID)
+
+        return imgur.getAlbumInfo(albumHash).then((json) => {
+            return callback(json.data)
         })
     }
 
-    getBikeTag(req, res) {
-        const { subdomain, host } = res.locals
-        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-        /// TODO: put this into sexpress
-        const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
+    updateImgurInfo(imgurAuthorization, image, callback) {
+        imgur.setAccessToken(imgurAuthorization.replace('Bearer ', ''))
 
-        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
-        const { albumHash, imgurClientID } = subdomainConfig.imgur
+        return imgur.updateInfo(image.id, image.title, image.description).then((json) => {
+            return callback(json.data)
+        })
+	}
+	
+    /// OTHER METHODS
+    flushCache() {
+        this.log('Flushing the cache')
+        return this.cache.flushAll()
+    }
 
-        this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
+    getImagesByBikeTagNumber(images) {
+        return images.sort((image1, image2) => {
+            const tagNumber1 = this.getBikeTagNumberFromImage(image1)
+            const tagNumber2 = this.getBikeTagNumberFromImage(image2)
 
-        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-            data.host = host
-            data.region = subdomainConfig.region
+            const tagNumber1IsProof = tagNumber1 < 0
+            const difference = Math.abs(tagNumber2) - Math.abs(tagNumber1)
+            const sortResult = difference !== 0 ? difference : tagNumber1IsProof ? -1 : 1
 
-            return res.json(data)
+            return sortResult
         })
     }
 
-    getBikeTagImage(req, res, getProof = false) {
-        const { subdomain } = res.locals
-        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-        /// TODO: put this into sexpress
-        const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
-
-        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
-        const { albumHash, imgurClientID } = subdomainConfig.imgur
-
-        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-            const imageUrl = getProof ? data.proofTag.link : data.previousMysteryTag.link
-            this.app.log.status(`sending the reponse from imgur direct ${imageUrl}`, imageUrl)
-            return req.pipe(request(imageUrl)).pipe(res)
-        })
+    getImagesByUploadDate(images, newestFirst) {
+        if (!newestFirst) {
+            return images.sort(
+                (image1, image2) => new Date(image2.datetime) - new Date(image1.datetime),
+            )
+        }
+        return images.sort(
+            (image1, image2) => new Date(image1.datetime) - new Date(image2.datetime),
+        )
     }
 
-    getBikeTagsByUser(req, res, username) {
-        username = typeof username === 'string' ? username : null
-        const { subdomain } = res.locals
-        /// TODO: put this into sexpress
-        const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
-        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
-        const { albumHash, imgurClientID } = subdomainConfig.imgur
+    getTagNumbersFromText(inputText, fallback) {
+		/// TODO: build out testers for all current games of BikeTag on Reddit
+		//Bike Tag 759
+        const getTagNumbersRegex = new RegExp(
+            /((?:(?:bike\s*)?(?:\s*tag)?)#(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*.*\]))/gi,
+        )
+        const tagNumberText = inputText.match(getTagNumbersRegex)
+        if (!tagNumberText) return fallback
 
-        return biketag.getBikeTagsByUser(imgurClientID, albumHash, username, (images) => {
-            return res.json({ username, images })
-        })
+        const tagNumbers = tagNumberText.reduce((numbers, text) => {
+            let tagNumber = text.match(/\d+/)
+            tagNumber = tagNumber && tagNumber.length ? tagNumber[0] : null
+
+            if (!tagNumber) return numbers
+
+            const number = Number.parseInt(tagNumber)
+            if (numbers.indexOf(number) == -1) numbers.push(number)
+
+            return numbers
+        }, [])
+
+        if (!tagNumbers.length && fallback) return fallback
+
+        return tagNumbers
     }
 
-    /********		controller methods			**********/
-    init(app) {
-        this.app = app
-        biketag.setLogger(app.log.debug)
+    getCreditFromText(inputText, fallback) {
+        /// TODO: build out testers for all current games of BikeTag on Reddit
+        const creditRegex = new RegExp(
+            /((?:\[.*)(?:tag by\s*)(.+?)(?:\]))|((?:credit goes to:\s*)(.+?)(?:for))/gi,
+        )
+        const creditText = creditRegex.exec(inputText)
+        if (!creditText) return fallback
 
-        // this.index = this.show = 'apidocs'
-    }
-
-    routes(app) {
-        /********	api documented endpoints	**********/
-        /**
-         * @swagger
-         * /post/email:
-         *   post:
-         *     tags:
-         *       - biketag
-         *     description: Sends notification emails to BikeTag Ambassadors
-         *     responses:
-         *       200:
-         *         description: email success response
-         * @summary Sends notification emails to BikeTag Ambassadors
-         * @tags email
-         * @return {object} 200 - success response - application/json
-         */
-        app.route('/post/email/:tagnumber?', this.sendEmailToAdministrators, 'post', false)
-        /// How to create an insecure api route from the api controller {host}/api/post/email
-
-        /**
-         * @swagger
-         * /post/reddit/:
-         *   post:
-         *     security:
-         *       - basic: []
-         *     tags:
-         *       - biketag
-         *     description: Posts the current biketag to the configured subreddit
-         *     responses:
-         *       200:
-         *         description: reddit post information for generated posts
-         *       401:
-         *         $ref: '#/components/responses/UnauthorizedError'
-         * @summary Posts the current biketag to the configured subreddit
-         * @tags reddit
-         * @return {object} 200 - success response - application/json
-         */
-        app.route('/post/reddit/:tagnumber?', this.postToReddit, ['get', 'post'], false)
-
-        /**
-         * @swagger
-         * /post/reddit/{subreddit}:
-         *   post:
-         *     security:
-         *       - basic: []
-         *     tags:
-         *       - biketag
-         *     description: Reads a given subreddit for BikeTag posts
-         *     responses:
-         *       200:
-         *         description: reddit post information for found posts
-         *       401:
-         *         $ref: '#/components/responses/UnauthorizedError'
-         * @summary Reads a given subreddit for BikeTag posts
-         * @tags reddit
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute('/read/reddit/:subreddit', this.readFromReddit)
-
-        /**
-         * @swagger
-         * /patch/reddit/{subreddit}:
-         *   post:
-         *     security:
-         *       - basic: []
-         *     tags:
-         *       - biketag
-         *     description: Reads a given subreddit for BikeTag posts and creates images for the subdomain with that subreddit assigned
-         *     responses:
-         *       200:
-         *         description: reddit post information for generated posts
-         *       401:
-         *         $ref: '#/components/responses/UnauthorizedError'
-         * @summary Reads a given subreddit for BikeTag posts and creates images for the subdomain with that subreddit assigned
-         * @tags reddit
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute('/patch/reddit/:subreddit', this.updateBikeTagGameFromReddit)
-
-        /**
-         * @swagger
-         * /get/biketag/{tagnumber}:
-         *   post:
-         *     produces:
-         *       - application/json
-         *     parameters:
-         *       - in: formData
-         *         name: tagnumber
-         *         description: the tag number to retrieve
-         *         schema:
-         *           type: integer
-         *       - in: path
-         *         name: tagnumber
-         *         description: the tag number to retrieve
-         *         required: false
-         *         schema:
-         *           type: integer
-         *     description: Retrieves the current biketag information
-         *     tags:
-         *       - biketag
-         *     responses:
-         *       200:
-         *         description: biketag information including images
-         * @summary Posts the current biketag to the configured subreddit
-         * @tags biketag
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute('/get/biketag/:tagnumber?', this.getBikeTag, ['get', 'post'])
-
-        /**
-         * @swagger
-         * /get/biketag/{tagnumber}:
-         *   post:
-         *     produces:
-         *       - application/json
-         *     parameters:
-         *       - in: formData
-         *         name: tagnumber
-         *         description: the tag number to retrieve
-         *         schema:
-         *           type: integer
-         *       - in: path
-         *         name: tagnumber
-         *         description: the tag number to retrieve
-         *         required: false
-         *         schema:
-         *           type: integer
-         *     description: Retrieves the current biketag information
-         *     tags:
-         *       - biketag
-         *     responses:
-         *       200:
-         *         description: biketag information including images
-         * @summary Posts the current biketag to the configured subreddit
-         * @tags biketag
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute('/get/current', this.getBikeTag, ['get', 'post'])
-
-        /**
-         * @swagger
-         * /get/users:
-         *   post:
-         *     produces:
-         *       - application/json
-         *     description: Retrieves all users for a given BikeTag game
-         *     tags:
-         *       - biketag
-         *     responses:
-         *       200:
-         *         description: usernames and images
-         * @summary Retrieves all users for a given BikeTag game
-         * @tags biketag
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute('/get/users', this.getBikeTagsByUser, ['get', 'post'])
-
-        /**
-         * @swagger
-         * /t/{tagnumber}:
-         *   post:
-         *     produces:
-         *       - application/json
-         *     parameters:
-         *       - in: formData
-         *         name: tagnumber
-         *         description: the tag number image to retrieve
-         *         schema:
-         *           type: integer
-         *       - in: path
-         *         name: tagnumber
-         *         description: the tag number image to retrieve
-         *         required: false
-         *         schema:
-         *           type: integer
-         *     description: Retrieves the biketag image
-         *     tags:
-         *       - biketag
-         *     responses:
-         *       200:
-         *         description: biketag  image
-         * @summary Returns the mystery tag image from imgur for the given tagnumber directly from imgur
-         * @tags biketag
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute('/t/:tagnumber?', this.getBikeTagImage, ['get', 'post'])
-
-        /**
-         * @swagger
-         * /p/{tagnumber}:
-         *   post:
-         *     produces:
-         *       - application/json
-         *     parameters:
-         *       - in: formData
-         *         name: tagnumber
-         *         description: the proof tag number image to retrieve
-         *         schema:
-         *           type: integer
-         *       - in: path
-         *         name: tagnumber
-         *         description: the proof tag number image to retrieve
-         *         required: false
-         *         schema:
-         *           type: integer
-         *     description: Retrieves proof the biketag image
-         *     tags:
-         *       - biketag
-         *     responses:
-         *       200:
-         *         description: biketag  image
-         * @summary Returns the proof image from imgur for the given tagnumber directly from imgur
-         * @tags biketag
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute(
-            '/p/:tagnumber?',
-            (req, res) => {
-                return this.getBikeTagImage(req, res, true)
-            },
-            ['get', 'post'],
+        const tagCredits = creditText.filter((c) =>
+            typeof c === 'string' && c.indexOf(' ') === -1 ? c : undefined,
         )
 
-        /**
-         * @swagger
-         * /u/{username}:
-         *   post:
-         *     produces:
-         *       - application/json
-         *     parameters:
-         *       - in: formData
-         *         name: username
-         *         description: the tag number to retrieve
-         *         schema:
-         *           type: integer
-         *       - in: path
-         *         name: username
-         *         description: the tag number to retrieve
-         *         required: false
-         *         schema:
-         *           type: integer
-         *     description: Retrieves the current biketag information
-         *     tags:
-         *       - biketag
-         *     responses:
-         *       200:
-         *         description: biketag information including images
-         * @summary Posts the current biketag to the configured subreddit
-         * @tags biketag
-         * @return {object} 200 - success response - application/json
-         */
-        app.apiRoute(
-            '/u/:username?',
-            (req, res) => {
-                const username = util.getFromQueryOrPathOrBody(r, 'username')
-                return this.getBikeTagsByUser(req, res, username)
-            },
-            ['get', 'post'],
+        if (!tagCredits.length && fallback) return fallback
+
+        /// Return just one credit
+        /// There should only be one anyways
+        return tagCredits[0] || null
+    }
+
+    getFoundLocationFromText(inputText, fallback) {
+        /// TODO: build out testers for all current games of BikeTag on Reddit
+        const getFoundLocationRegex = new RegExp(/(?:found at \()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gi)
+        const foundLocationText = getFoundLocationRegex.exec(inputText)
+
+        if (!foundLocationText) return fallback
+        return (foundLocationText[1] || '').trim()
+    }
+
+    getHintFromText(inputText, fallback) {
+        /// TODO: build out testers for all current games of BikeTag on Reddit
+        const getTagNumbersRegex = new RegExp(/(?:hint:\s*)/gi)
+        const tagNumberText = inputText.match(getTagNumbersRegex)
+        if (!tagNumberText) return fallback
+
+        const tagNumbers = tagNumberText.reduce((numbers, text) => {
+            let tagNumber = text.match(/\d+/)
+            tagNumber = tagNumber && tagNumber.length ? tagNumber[0] : null
+
+            if (!tagNumber) return numbers
+
+            const number = Number.parseInt(tagNumber)
+            if (numbers.indexOf(number) == -1) numbers.push(number)
+
+            return numbers
+        }, [])
+
+        if (!tagNumbers.length && fallback) fallback
+
+        return tagNumbers
+    }
+
+    getGPSLocationFromText(inputText, fallback) {
+        /// TODO: build out testers for all current games of BikeTag on Reddit
+        const getGPSLocationRegex = new RegExp(
+            /(([0-9]{1,2})[:|°]([0-9]{1,2})[:|'|′]?([0-9]{1,2}(?:\.[0-9]+){0,1})?["|″]([N|S]),?\s*([0-9]{1,3})[:|°]([0-9]{1,2})[:|'|′]?([0-9]{1,2}(?:\.[0-9]+){0,1})?["|″]([E|W]))|((-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?))/g,
         )
+        /// Normalize the text (some posts found to have this escaped double quote placed in between GPS coordinates)
+        inputText = inputText.replace(/\\/g, '')
+        const gpsLocationText = getGPSLocationRegex.exec(inputText)
+
+        if (!gpsLocationText) return fallback
+
+        return gpsLocationText[0] || null
+    }
+
+    getImageURLsFromText(inputText, fallback) {
+        /// TODO: make this image validator more intelligent
+        const validImageURLs = ['imgur']
+
+        const selfTextURLs = inputText.match(/\b(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*\b)/gi) || []
+        const tagImageURLs = selfTextURLs.reduce((urls, url) => {
+            if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
+
+            urls.push(url)
+
+            return urls
+        }, [])
+
+        if (!tagImageURLs.length && fallback) fallback
+
+        return tagImageURLs
+    }
+
+    setCache(cache, cacheKeys) {
+        this.cache = cache
+        this.cacheKeys = !!cacheKeys ? cacheKeys : this.cacheKeys
+
+        // const setCache = this.cache.set
+        // this.cache.set = (key, val) => {
+        // 	console.log({key, setting: val})
+        // 	return setCache(key, val)
+        // }
+    }
+
+    setLogger(logger) {
+        this.log = logger
     }
 }
 
-module.exports = new bikeTagController()
+class BikeTagApiFactory {
+    constructor() {
+        /// If we already have an instance, return it
+        if (singleton) return singleton.instance
+
+        // create a unique, global symbol namespace
+        // -----------------------------------
+        const globalNamespace = Symbol.for(namespace)
+
+        // check if the global object has this symbol
+        // add it if it does not have the symbol, yet
+        // ------------------------------------------
+        var globalSymbols = Object.getOwnPropertySymbols(global)
+        var utilInitialized = globalSymbols.indexOf(globalNamespace) > -1
+
+        /// This should always be unitialized, probably
+        if (!utilInitialized) {
+            global[globalNamespace] = new BikeTagApi()
+
+            // define the singleton API
+            // ------------------------
+            singleton = {}
+
+            Object.defineProperty(singleton, 'instance', {
+                get: function () {
+                    return global[globalNamespace]
+                },
+            })
+
+            // ensure the API is never changed
+            // -------------------------------
+            Object.freeze(singleton)
+        }
+
+        // export the singleton API only
+        // -----------------------------
+        return singleton.instance
+    }
+}
+
+module.exports = new BikeTagApiFactory()
+module.exports.namespace = namespace
