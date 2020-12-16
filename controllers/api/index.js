@@ -237,37 +237,53 @@ class bikeTagController {
     readFromReddit(req, res) {
         const { host } = res.locals
         let subdomain = 'index'
-        const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-        const translateData = util.getFromQueryOrPathOrBody(req, 'translated') === 'true'
-
+		const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+		
+        const translateData = util.getFromQueryOrPathOrBody(req, 'translated', false)
+        const rawData = util.getFromQueryOrPathOrBody(req, 'raw', false)
+        const limit = util.getFromQueryOrPathOrBody(req, 'limit', 10, Number.parseInt)
+		const sort = util.getFromQueryOrPathOrBody(req, 'sort', 'new')
+		
         for (const [s, c] of Object.entries(this.app.config.subdomains)) {
             if (c.reddit && c.reddit.subreddit && c.reddit.subreddit === subreddit) {
                 subdomain = s
                 continue
             }
         }
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+		const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+		const redditOpts = {sort}
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
         subdomainConfig.auth = this.app.authTokens.default.redditBot
-        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+		subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, async (posts) => {
+		/// Max limit is 100
+		if (limit) redditOpts.limit = limit > 100 ? 100 : limit
+
+        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, redditOpts, async (posts) => {
             if (!posts || posts.error) {
                 return res.json({ error: posts.error })
             }
             const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
+			const out = {}
 
             if (translateData) {
                 const bikeTagImagesData = []
                 bikeTagPosts.forEach((post) => {
                     const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
                     bikeTagImagesData.push(bikeTagInformation)
-                })
+				})
+				out.bikeTagImagesData
                 return res.json({ bikeTagImagesData })
-            }
-            return res.json({ bikeTagPosts })
+            } else {
+				out.bikeTagPosts = bikeTagPosts
+			}
+
+			if (rawData) {
+				out.redditPosts = posts
+			}
+            return res.json(out)
         })
     }
 
@@ -296,6 +312,7 @@ class bikeTagController {
     updateBikeTagGameFromReddit(req, res) {
         const { host } = res.locals
         const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
+        const results = util.getFromQueryOrPathOrBody(req, 'results', false)
         let subdomain
 
         for (const [s, c] of Object.entries(this.app.config.subdomains)) {
