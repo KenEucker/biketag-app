@@ -312,7 +312,9 @@ class bikeTagController {
     updateBikeTagGameFromReddit(req, res) {
         const { host } = res.locals
         const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-		const returnResults = util.getFromQueryOrPathOrBody(req, 'results', false)
+        const rawData = util.getFromQueryOrPathOrBody(req, 'raw', false)
+        const limit = util.getFromQueryOrPathOrBody(req, 'limit', 10, Number.parseInt)
+		const sort = util.getFromQueryOrPathOrBody(req, 'sort', 'new')
 		
         let subdomain
 
@@ -333,9 +335,11 @@ class bikeTagController {
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
         subdomainConfig.auth = this.app.authTokens.default.redditBot
-        subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+		subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
+		
+		const redditOpts = {sort,limit}
 
-        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, async (posts) => {
+        return biketag.getBikeTagPostsFromSubreddit(subdomainConfig, subreddit, redditOpts, async (posts) => {
             if (!posts || posts.error) {
                 return res.json({ error: posts.error })
             }
@@ -360,7 +364,7 @@ class bikeTagController {
                 (results) => {
 					const out = {results}
 
-					if (returnResults) {
+					if (rawData) {
 						out.bikeTagImagesData = bikeTagImagesData
 					}
 					
