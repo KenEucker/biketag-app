@@ -312,7 +312,8 @@ class bikeTagController {
     updateBikeTagGameFromReddit(req, res) {
         const { host } = res.locals
         const subreddit = util.getFromQueryOrPathOrBody(req, 'subreddit')
-        const results = util.getFromQueryOrPathOrBody(req, 'results', false)
+		const returnResults = util.getFromQueryOrPathOrBody(req, 'results', false)
+		
         let subdomain
 
         for (const [s, c] of Object.entries(this.app.config.subdomains)) {
@@ -357,7 +358,13 @@ class bikeTagController {
                 subdomainConfig.imgur.albumHash,
                 'Url',
                 (results) => {
-                    return res.json({ results })
+					const out = {results}
+
+					if (returnResults) {
+						out.bikeTagImagesData = bikeTagImagesData
+					}
+					
+                    return res.json(out)
                 },
             )
         })
