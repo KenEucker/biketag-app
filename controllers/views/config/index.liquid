@@ -2,14 +2,14 @@
 {{ "js/jsoneditor.min.js" | asset_url | javascript_tag: nonce }}
 
 <!-- Grid -->
-<div class="row">
+<div class="container">
 
-<!-- Nav pills -->
-<ul class="nav md-pills nav-justified pills-rounded pills-purple-gradient row"></ul>
+	<!-- Nav pills -->
+	<ul class="nav nav-pills nav-justified row"></ul>
 
-<!-- Tab panels -->
-<div class="tab-content row"></div>
-
+	<!-- Tab panels -->
+	<div class="tab-content row"></div>
+	
 </div>
 <!-- /Grid -->
 
@@ -30,7 +30,7 @@
 			/// Create the nav link
 			const navPill = `
 			<li class="nav-item">
-				<a class="nav-link" data-toggle="tab" href="#${containerID}" role="tab">${name}</a>
+				<a class="nav-link ${firstClass}" data-bs-toggle="tab" href="#${containerID}" role="tab"><span class="rounded-pill">${name}</span></a>
 			</li>`
 			navContainer.insertAdjacentHTML( 'beforeend', navPill)
 

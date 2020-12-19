@@ -3,6 +3,24 @@
     width: 85vw;
 }
 
+.form-outline {
+	position: relative;
+
+	form-label {
+		position: absolute;
+		top: 0;
+		left: 0.75rem;
+		padding-top: 0.37rem;
+		pointer-events: none;
+		-webkit-transform-origin: 0 0;
+		transform-origin: 0 0;
+		-webkit-transition: all 0.2s ease-out;
+		transition: all 0.2s ease-out;
+		color: rgba(0, 0, 0, 0.6);
+		margin-bottom: 0;
+	}
+}
+
 .sso-buttons {
     img {
         max-width: 240px;
@@ -18,27 +36,33 @@
             font-size: 1.45em;
             color: white;
         }
-    }
+	}
 
-    .imgur {
-        a {
-            top: 10px;
-            span {
-                margin-left: -83px;
-            }
-        }
-    }
+	button {
+		
+		&.redditBot {
+			display: none;
+		}
 
-    .google {
-        a {
-            img {
-                border-radius: 14px;
-            }
-            span {
-                margin-left: -180px;
-                font-size: 1.25em;
-                top: 21px;
-            }
-        }
-    }
+		&.reddit {
+			i {
+				color: #FF4501;
+			}
+		}
+	
+		&.imgur {
+			background-image: url('/public/img/imgur-icon.svg');
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: cover;
+			background-color: #1CB76E;
+		}
+	
+		&.google {
+			background-color: #4284F7;
+			i {
+				filter: invert(1);
+			}
+		}
+	}
 }
