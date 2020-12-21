@@ -60,20 +60,23 @@ class bikeTagController {
                             if (!response.error && response.selfPostName) {
                                 this.app.log.status('posted to reddit', response)
                                 if (response.crossPostName) {
-                                    const mainRedditAccount =
+                                    const globalRedditAccount =
                                         this.app.config.authentication.reddit ||
                                         subdomainConfig.reddit
                                     const regionName = `${subdomain
                                         .charAt(0)
-                                        .toUpperCase()}${subdomain.slice(1)}`
-                                    subdomainConfig.auth.username = mainRedditAccount.username
-                                    subdomainConfig.auth.password = mainRedditAccount.password
+										.toUpperCase()}${subdomain.slice(1)}`
+									const postFlair = subdomainConfig.reddit.globalPostFlair ? subdomainConfig.reddit.globalPostFlair : regionName
+                                    subdomainConfig.auth.username = globalRedditAccount.username
+                                    subdomainConfig.auth.password = globalRedditAccount.password
 
+									/// TODO: unsticky previous BikeTag post
+									
                                     await biketag
                                         .setBikeTagPostFlair(
                                             subdomainConfig,
                                             { selfPostName: response.crossPostName },
-                                            regionName,
+                                            postFlair,
                                             (response) => {
                                                 this.app.log.status('setBikeTagPostFlair', response)
                                             },
