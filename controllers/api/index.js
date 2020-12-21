@@ -65,13 +65,15 @@ class bikeTagController {
                                         subdomainConfig.reddit
                                     const regionName = `${subdomain
                                         .charAt(0)
-										.toUpperCase()}${subdomain.slice(1)}`
-									const postFlair = subdomainConfig.reddit.globalPostFlair ? subdomainConfig.reddit.globalPostFlair : regionName
+                                        .toUpperCase()}${subdomain.slice(1)}`
+                                    const postFlair = subdomainConfig.reddit.globalPostFlair
+                                        ? subdomainConfig.reddit.globalPostFlair
+                                        : regionName
                                     subdomainConfig.auth.username = globalRedditAccount.username
                                     subdomainConfig.auth.password = globalRedditAccount.password
 
-									/// TODO: unsticky previous BikeTag post
-									
+                                    /// TODO: unsticky previous BikeTag post
+
                                     await biketag
                                         .setBikeTagPostFlair(
                                             subdomainConfig,
@@ -98,7 +100,7 @@ class bikeTagController {
 
                                 await biketag
                                     .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
-                                        console.log('updateImgurInfo', response, updatedImage)
+                                        this.log.status('updateImgurInfo', response, updatedImage)
                                     })
                                     .catch((error) => {
                                         this.app.log.error(`updateImgurInfo failed`, {
