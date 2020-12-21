@@ -281,7 +281,7 @@ class bikeTagController {
 					subdomainConfig.auth = this.app.authTokens[subdomain]
                     const bikeTagImagesData = []
 					for (let i = 0; i < bikeTagPosts.length; i++) {
-						const post = bikTagPosts[i]
+						const post = bikeTagPosts[i]
                         const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
                         bikeTagImagesData.push(bikeTagInformation)
                     }
@@ -364,7 +364,7 @@ class bikeTagController {
 				const bikeTagImagesData = []
 				subdomainConfig.auth = this.app.authTokens[subdomain]
 				for (let i = 0; i < bikeTagPosts.length; i++) {
-					const post = bikTagPosts[i]
+					const post = bikeTagPosts[i]
                     const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
                     bikeTagImagesData.push(bikeTagInformation)
                 }
