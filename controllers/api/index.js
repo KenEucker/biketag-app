@@ -278,11 +278,13 @@ class bikeTagController {
                 const out = {}
 
                 if (translateData) {
+					subdomainConfig.auth = this.app.authTokens[subdomain]
                     const bikeTagImagesData = []
-                    bikeTagPosts.forEach((post) => {
-                        const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
+					for (let i = 0; i < bikeTagPosts.length; i++) {
+						const post = bikTagPosts[i]
+                        const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
                         bikeTagImagesData.push(bikeTagInformation)
-                    })
+                    }
                     out.bikeTagImagesData
                     return res.json({ bikeTagImagesData })
                 } else {
@@ -359,11 +361,13 @@ class bikeTagController {
                 }
 
                 const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
-                const bikeTagImagesData = []
-                bikeTagPosts.forEach((post) => {
-                    const bikeTagInformation = biketag.getBikeTagInformationFromRedditData(post)
+				const bikeTagImagesData = []
+				subdomainConfig.auth = this.app.authTokens[subdomain]
+				for (let i = 0; i < bikeTagPosts.length; i++) {
+					const post = bikTagPosts[i]
+                    const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
                     bikeTagImagesData.push(bikeTagInformation)
-                })
+                }
 
                 const imgurOpts = this.app.middlewares.util.merge(
                     subdomainConfig.imgur,
