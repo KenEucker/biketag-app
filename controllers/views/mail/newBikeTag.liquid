@@ -104,20 +104,20 @@
 		<table border="0" cellpadding="10" cellspacing="0" width="600">
 			<tr>
 				<td align="center" width="50%" valign="top" class="middleColumnContent">
+					<p>
+						Is the new tag ready to be posted? Click below to automatigically create the post on behalf of user {{ currentTagInfo.credit }}.
+					</p>
+					<a class="postToRedditButton" href="https://{{ host }}/api/post/reddit/?expiry={{ expiryHash }}">Post to r/{{reddit}}</a>
 					<h1>Tag #{{ currentTagInfo.currentTagNumber }}</h1>
 					<span>New Mystery Tag</span>
-					<p>Keep the game up to date by posting this tag to Reddit manually, go to <a href="https://{{ host }}/get/reddit?flushcache=true">{{ host }}/get/reddit</a> to get the reddit post template.
-						The subreddit for this game is <a href="https://reddit.com/r/{{reddit}}">r/{{reddit}}</a>
-					</p>
 				</td>
 			</tr>
 			<tr>
 				<td align="center" width="50%" valign="bottom" class="middleColumnContent">
 					<img src="{{ currentTagInfo.currentTagURL | biketag_image: imageSize }}" width="280" style="max-width:280px;" class="columnImage" />
-					<p>
-						Is the new tag ready to be posted? Click below to automatigically create the post on behalf of user {{ currentTagInfo.credit }}.
+					<p>To post this tag to Reddit manually, go to <a href="https://{{ host }}/get/reddit?flushcache=true">{{ host }}/get/reddit</a> to get the reddit post template.
+						The subreddit for this game is <a href="https://reddit.com/r/{{reddit}}">r/{{reddit}}</a>
 					</p>
-					<a class="postToRedditButton" href="https://{{ host }}/api/post/reddit/?expiry={{ expiryHash }}">Post to r/{{reddit}}</a>
 				</td>
 			</tr>
 			<tr>
