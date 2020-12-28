@@ -36,7 +36,7 @@ class bikeTagController {
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
+        subdomainConfig.auth = {...this.app.authTokens[subdomain].redditBot}
             ? this.app.authTokens[subdomain].redditBot.opts
             : subdomainConfig.reddit
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
@@ -260,7 +260,7 @@ class bikeTagController {
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens.default.redditBot
+        subdomainConfig.auth = {...this.app.authTokens.default.redditBot}
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
         /// Max limit is 100
@@ -346,7 +346,7 @@ class bikeTagController {
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens.default.redditBot
+        subdomainConfig.auth = {...this.app.authTokens.default.redditBot}
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
         const redditOpts = { sort, limit }
