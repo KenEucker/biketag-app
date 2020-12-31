@@ -396,6 +396,12 @@ class bikeTagController {
     getBikeTag(req, res) {
         const { subdomain, host } = res.locals
         const tagnumber = biketag.getBikeTagNumberFromRequest(req)
+		const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
+
+		if (count > 1) {
+			return getBikeTags(req, res, true)
+		}
+		
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -413,6 +419,36 @@ class bikeTagController {
 
             return res.json(data)
         })
+    }
+
+    getBikeTags(req, res, fromCurrentTag = false) {
+        const { subdomain, host } = res.locals
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
+		const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
+
+		if (count === 1) {
+			return this.getBikeTag(req, res)
+		}
+
+        /// TODO: put this into sexpress
+        const subdomainIsApi = subdomain === 'api'
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
+
+        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
+        const { albumHash, imgurClientID } = subdomainConfig.imgur
+
+		this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
+		/// TODO: get all of the biketag images and return the amount requested
+
+		return biketag.getBikeTagImages(imgurClientID, albumHash, (bikeTags) => {
+			if (!fromCurrentTag) {
+				bikeTags = bikeTags.sort()
+			}
+
+			const bikeTagsToReturn = bikeTags.splice(0, count)
+		})
     }
 
     getBikeTagImage(req, res, getProof = false) {
@@ -714,6 +750,43 @@ class bikeTagController {
             (req, res) => {
                 const username = util.getFromQueryOrPathOrBody(r, 'username')
                 return this.getBikeTagsByUser(req, res, username)
+            },
+            ['get', 'post'],
+		)
+		
+        /**
+         * @swagger
+         * /all/{count}:
+         *   post:
+         *     produces:
+         *       - application/json
+         *     parameters:
+         *       - in: formData
+         *         name: count
+         *         description: the number of tags to retrieve
+         *         required: false
+         *         schema:
+         *           type: integer
+         *       - in: path
+         *         name: count
+         *         description: the number of tags to retrieve
+         *         required: false
+         *         schema:
+         *           type: integer
+         *     description: Retrieves biketags up to a given number starting with the current tag
+         *     tags:
+         *       - biketag
+         *     responses:
+         *       200:
+         *         description: biketag  image
+         * @summary Retrieves biketags up to a given number starting with the current tag
+         * @tags biketag
+         * @return {object} 200 - success response - application/json
+         */
+        app.apiRoute(
+            '/all',
+            (req, res) => {
+                return this.getBikeTags(req, res)
             },
             ['get', 'post'],
         )
