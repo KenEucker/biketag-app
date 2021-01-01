@@ -36,9 +36,9 @@ class bikeTagController {
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = {...this.app.authTokens[subdomain].redditBot}
-            ? this.app.authTokens[subdomain].redditBot.opts
-            : subdomainConfig.reddit
+        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
+            ? {...this.app.authTokens[subdomain].redditBot.opts}
+            : {...subdomainConfig.reddit}
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
         subdomainConfig.imgur = this.app.middlewares.util.merge(
             subdomainConfig.imgur,
@@ -278,7 +278,7 @@ class bikeTagController {
                 const out = {}
 
                 if (translateData) {
-					subdomainConfig.auth = this.app.authTokens[subdomain]
+					subdomainConfig.auth = {...this.app.authTokens[subdomain]}
                     const bikeTagImagesData = []
 					for (let i = 0; i < bikeTagPosts.length; i++) {
 						const post = bikeTagPosts[i]
@@ -362,7 +362,7 @@ class bikeTagController {
 
                 const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
 				const bikeTagImagesData = []
-				subdomainConfig.auth = this.app.authTokens[subdomain]
+				subdomainConfig.auth = {...this.app.authTokens[subdomain]}
 				for (let i = 0; i < bikeTagPosts.length; i++) {
 					const post = bikeTagPosts[i]
                     const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
