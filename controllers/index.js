@@ -19,7 +19,7 @@ class IndexController {
 
             /// Copy over the email information, if it's not set by the subdomain
             subdomainInformation.email =
-                subdomainInformation.email || this.app.config.authentication.email
+				subdomainInformation.email || this.app.config.authentication.email
 
             this.app.config.subdomains[subdomain] = subdomainInformation
         })
