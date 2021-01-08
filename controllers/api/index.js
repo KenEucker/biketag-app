@@ -133,7 +133,8 @@ class bikeTagController {
             const subdomainConfig = this.app.getSubdomainOpts(subdomain)
             const { albumHash, imgurClientID } = subdomainConfig.imgur
             const expiry = new Date(
-                new Date().getTime() + 60 * 60 * 1000 * (this.app.config.expiryDays || 2),
+				/// Expiry is now plus  Ms     s    h    days  x (default 2)
+                new Date().getTime() + (1000 * 60 * 60 * 24 * (this.app.config.expiryDays ? this.app.config.expiryDays : 2)),
             )
             const emailSecurityHashData = {
                 subdomain,
