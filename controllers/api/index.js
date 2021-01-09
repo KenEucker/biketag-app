@@ -255,7 +255,7 @@ class bikeTagController {
                         const renderOpts = {
                             region: subdomainConfig.region,
                             subdomainIcon: subdomainConfig.images.logo
-                                ? `public/img/${subdomainConfig.images.logo}${
+                                ? `/public/img/${subdomainConfig.images.logo}${
                                       subdomainConfig.images.logo.indexOf('.') === -1
                                           ? `-small.png`
                                           : ''
