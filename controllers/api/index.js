@@ -37,8 +37,8 @@ class bikeTagController {
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
         subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-            ? {...this.app.authTokens[subdomain].redditBot.opts}
-            : {...subdomainConfig.reddit}
+            ? { ...this.app.authTokens[subdomain].redditBot.opts }
+            : { ...subdomainConfig.reddit }
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
         subdomainConfig.imgur = this.app.middlewares.util.merge(
             subdomainConfig.imgur,
@@ -133,8 +133,13 @@ class bikeTagController {
             const subdomainConfig = this.app.getSubdomainOpts(subdomain)
             const { albumHash, imgurClientID } = subdomainConfig.imgur
             const expiry = new Date(
-				/// Expiry is now plus  Ms     s    h    days  x (default 2)
-                new Date().getTime() + (1000 * 60 * 60 * 24 * (this.app.config.expiryDays ? this.app.config.expiryDays : 2)),
+                /// Expiry is now plus  Ms     s    h    days  x (default 2)
+                new Date().getTime() +
+                    1000 *
+                        60 *
+                        60 *
+                        24 *
+                        (this.app.config.expiryDays ? this.app.config.expiryDays : 2),
             )
             const emailSecurityHashData = {
                 subdomain,
@@ -186,7 +191,13 @@ class bikeTagController {
                         })
                         const renderOpts = {
                             region: subdomainConfig.region,
-                            subdomainIcon: subdomainConfig.images.logo ? `public/img/${subdomainConfig.images.logo}${subdomainConfig.images.logo.indexOf('.') === -1 ? `-small.png` : ''}` : subdomainConfig.meta.image,
+                            subdomainIcon: subdomainConfig.images.logo
+                                ? `public/img/${subdomainConfig.images.logo}${
+                                      subdomainConfig.images.logo.indexOf('.') === -1
+                                          ? `-small.png`
+                                          : ''
+                                  }`
+                                : subdomainConfig.meta.image,
                             host: `${
                                 subdomainConfig.requestSubdomain
                                     ? `${subdomainConfig.requestSubdomain}.`
@@ -261,7 +272,7 @@ class bikeTagController {
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = {...this.app.authTokens.default.redditBot}
+        subdomainConfig.auth = { ...this.app.authTokens.default.redditBot }
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
         /// Max limit is 100
@@ -279,11 +290,14 @@ class bikeTagController {
                 const out = {}
 
                 if (translateData) {
-					subdomainConfig.auth = {...this.app.authTokens[subdomain]}
+                    subdomainConfig.auth = { ...this.app.authTokens[subdomain] }
                     const bikeTagImagesData = []
-					for (let i = 0; i < bikeTagPosts.length; i++) {
-						const post = bikeTagPosts[i]
-                        const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
+                    for (let i = 0; i < bikeTagPosts.length; i++) {
+                        const post = bikeTagPosts[i]
+                        const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(
+                            post,
+                            subdomainConfig,
+                        )
                         bikeTagImagesData.push(bikeTagInformation)
                     }
                     out.bikeTagImagesData
@@ -347,7 +361,7 @@ class bikeTagController {
 
         subdomainConfig.host = host
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = {...this.app.authTokens.default.redditBot}
+        subdomainConfig.auth = { ...this.app.authTokens.default.redditBot }
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
 
         const redditOpts = { sort, limit }
@@ -362,11 +376,14 @@ class bikeTagController {
                 }
 
                 const bikeTagPosts = await biketag.getBikeTagsFromRedditPosts(posts)
-				const bikeTagImagesData = []
-				subdomainConfig.auth = {...this.app.authTokens[subdomain]}
-				for (let i = 0; i < bikeTagPosts.length; i++) {
-					const post = bikeTagPosts[i]
-                    const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(post, subdomainConfig)
+                const bikeTagImagesData = []
+                subdomainConfig.auth = { ...this.app.authTokens[subdomain] }
+                for (let i = 0; i < bikeTagPosts.length; i++) {
+                    const post = bikeTagPosts[i]
+                    const bikeTagInformation = await biketag.getBikeTagInformationFromRedditData(
+                        post,
+                        subdomainConfig,
+                    )
                     bikeTagImagesData.push(bikeTagInformation)
                 }
 
@@ -397,12 +414,12 @@ class bikeTagController {
     getBikeTag(req, res) {
         const { subdomain, host } = res.locals
         const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-		const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
+        const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
 
-		if (count > 1) {
-			return getBikeTags(req, res, true)
-		}
-		
+        if (count > 1) {
+            return getBikeTags(req, res, true)
+        }
+
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
         const requestSubdomain = subdomainIsApi
@@ -425,11 +442,11 @@ class bikeTagController {
     getBikeTags(req, res, fromCurrentTag = false) {
         const { subdomain, host } = res.locals
         const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-		const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
+        const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
 
-		if (count === 1) {
-			return this.getBikeTag(req, res)
-		}
+        if (count === 1) {
+            return this.getBikeTag(req, res)
+        }
 
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
@@ -440,16 +457,16 @@ class bikeTagController {
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
 
-		this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
-		/// TODO: get all of the biketag images and return the amount requested
+        this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
+        /// TODO: get all of the biketag images and return the amount requested
 
-		return biketag.getBikeTagImages(imgurClientID, albumHash, (bikeTags) => {
-			if (!fromCurrentTag) {
-				bikeTags = bikeTags.sort()
-			}
+        return biketag.getBikeTagImages(imgurClientID, albumHash, (bikeTags) => {
+            if (!fromCurrentTag) {
+                bikeTags = bikeTags.sort()
+            }
 
-			const bikeTagsToReturn = bikeTags.splice(0, count)
-		})
+            const bikeTagsToReturn = bikeTags.splice(0, count)
+        })
     }
 
     getBikeTagImage(req, res, getProof = false) {
@@ -753,8 +770,8 @@ class bikeTagController {
                 return this.getBikeTagsByUser(req, res, username)
             },
             ['get', 'post'],
-		)
-		
+        )
+
         /**
          * @swagger
          * /all/{count}:
