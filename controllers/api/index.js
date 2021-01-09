@@ -149,15 +149,15 @@ class bikeTagController {
                         }
                     }
 
-                    let redditAutoPostMethod = biketag.postCurrentBikeTagToRedditSelfPost,
-                        redditAutoPostCallback = selfPostCallback
+                    let redditAutoPostMethod = biketag.postCurrentBikeTagToRedditSelfPost.bind(biketag),
+                        redditAutoPostCallback = selfPostCallback.bind(this)
                     if (subdomainConfig.reddit.disableSelfPost) {
                         redditAutoPostMethod = subdomainConfig.reddit.liveThread
-                            ? biketag.postCurrentBikeTagToRedditLiveThread
+                            ? biketag.postCurrentBikeTagToRedditLiveThread.bind(biketag)
                             : () => {
                                   res.json({ error: 'autoposting disabled' })
                               }
-                        redditAutoPostCallback = liveThreadCommentCallback
+                        redditAutoPostCallback = liveThreadCommentCallback.bind(this)
                     } else if (
                         subdomainConfig.reddit.liveThread &&
                         subdomainConfig.reddit.autoPostToliveThread
@@ -170,8 +170,8 @@ class bikeTagController {
                         )
 
                         subdomainConfig.redditSelfPostName = redditSelfPostName
-                        redditAutoPostMethod = biketag.postCurrentBikeTagToRedditLiveThread
-                        redditAutoPostCallback = liveThreadCommentCallback
+                        redditAutoPostMethod = biketag.postCurrentBikeTagToRedditLiveThread.bind(biketag)
+                        redditAutoPostCallback = liveThreadCommentCallback.bind(this)
                     }
 
                     return redditAutoPostMethod(
