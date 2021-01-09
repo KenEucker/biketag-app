@@ -45,6 +45,7 @@ class bikeTagController {
             this.app.authTokens[subdomain].imgur,
         )
 
+		let redditSelfPostName
         const { albumHash, imgurClientID, imgurAccessToken } = subdomainConfig.imgur
         return biketag
             .getBikeTagInformation(
@@ -52,68 +53,121 @@ class bikeTagController {
                 'current',
                 albumHash,
                 (currentTagInfo) => {
-                    subdomainConfig.currentTagInfo = currentTagInfo
+					subdomainConfig.currentTagInfo = currentTagInfo
 
-                    return biketag.postCurrentBikeTagToReddit(
+					const selfPostCallback = async (response) => {
+						if (!response.error && response.selfPostName) {
+							this.app.log.status('posted to reddit', response)
+							redditSelfPostName = response.selfPostName
+
+							if (response.crossPostName) {
+								const globalRedditAccount =
+									this.app.config.authentication.reddit ||
+									subdomainConfig.reddit
+								const regionName = `${subdomain
+									.charAt(0)
+									.toUpperCase()}${subdomain.slice(1)}`
+								const postFlair = subdomainConfig.reddit.globalPostFlair
+									? subdomainConfig.reddit.globalPostFlair
+									: regionName
+								subdomainConfig.auth.username = globalRedditAccount.username
+								subdomainConfig.auth.password = globalRedditAccount.password
+
+								/// TODO: unsticky previous BikeTag post
+
+								await biketag
+									.setBikeTagPostFlair(
+										subdomainConfig,
+										{ selfPostName: response.crossPostName },
+										postFlair,
+										(response) => {
+											this.app.log.status('setBikeTagPostFlair', response)
+										},
+									)
+									.catch((error) => {
+										this.app.log.error(`setBikeTagPostFlair failed`, error)
+									})
+							}
+
+							const discussionUrl = ` https://redd.it/${response.selfPostName.replace(
+								't3_',
+								'',
+							)}`
+							const updatedImage = {
+								id: subdomainConfig.currentTagInfo.image.id,
+								title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
+								description: subdomainConfig.currentTagInfo.image.description,
+							}
+
+							await biketag
+								.updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
+									this.log.status('updateImgurInfo', response, updatedImage)
+								})
+								.catch((error) => {
+									this.app.log.error(`updateImgurInfo failed`, {
+										error,
+										updatedImage,
+									})
+								})
+
+							return res.json({ success: response })
+						}
+
+						return res.json({ error: response })
+					}
+
+					const liveThreadCommentCallback = async (response) => {
+						if (!response.error && response.selfPostName) {
+							this.app.log.status('posted comment to reddit', response)
+							const redditT3ID = redditSelfPostName ? redditSelfPostName : response.id
+
+							if (redditT3ID && redditT3ID.length) {
+								const discussionUrl = redditT3ID ? ` https://redd.it/${redditT3ID.replace(
+								't3_',
+								'',
+								)}` : ''
+								const updatedImage = {
+									id: subdomainConfig.currentTagInfo.image.id,
+									title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
+									description: subdomainConfig.currentTagInfo.image.description,
+								}
+
+								await biketag
+									.updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
+										this.log.status('updateImgurInfo', response, updatedImage)
+									})
+									.catch((error) => {
+										this.app.log.error(`updateImgurInfo failed`, {
+											error,
+											updatedImage,
+										})
+									})
+							}
+
+							return res.json({ success: response })
+						}
+					}
+
+					let redditAutoPostMethod = biketag.postCurrentBikeTagToRedditSelfPost, redditAutoPostCallback = selfPostCallback
+					if (subdomainConfig.reddit.disableSelfPost) {
+						redditAutoPostMethod = subdomainConfig.reddit.liveThread ? biketag.postCurrentBikeTagToRedditLiveThread : () => { res.json({ error: 'autoposting disabled'}) }
+						redditAutoPostCallback = liveThreadCommentCallback
+					} else if (subdomainConfig.reddit.liveThread && subdomainConfig.reddit.autoPostToliveThread) {
+						/// Create the self post first
+						await redditAutoPostMethod(
+							subdomainConfig,
+							redditAutoPostCallback,
+                        	this.app.renderSync.bind(this.app),
+                    	)
+
+						subdomainConfig.redditSelfPostName = redditSelfPostName
+						redditAutoPostMethod = biketag.postCurrentBikeTagToRedditLiveThread
+						redditAutoPostCallback = liveThreadCommentCallback
+					}
+
+                    return redditAutoPostMethod(
                         subdomainConfig,
-                        async (response) => {
-                            if (!response.error && response.selfPostName) {
-                                this.app.log.status('posted to reddit', response)
-                                if (response.crossPostName) {
-                                    const globalRedditAccount =
-                                        this.app.config.authentication.reddit ||
-                                        subdomainConfig.reddit
-                                    const regionName = `${subdomain
-                                        .charAt(0)
-                                        .toUpperCase()}${subdomain.slice(1)}`
-                                    const postFlair = subdomainConfig.reddit.globalPostFlair
-                                        ? subdomainConfig.reddit.globalPostFlair
-                                        : regionName
-                                    subdomainConfig.auth.username = globalRedditAccount.username
-                                    subdomainConfig.auth.password = globalRedditAccount.password
-
-                                    /// TODO: unsticky previous BikeTag post
-
-                                    await biketag
-                                        .setBikeTagPostFlair(
-                                            subdomainConfig,
-                                            { selfPostName: response.crossPostName },
-                                            postFlair,
-                                            (response) => {
-                                                this.app.log.status('setBikeTagPostFlair', response)
-                                            },
-                                        )
-                                        .catch((error) => {
-                                            this.app.log.error(`setBikeTagPostFlair failed`, error)
-                                        })
-                                }
-
-                                const discussionUrl = ` https://redd.it/${response.selfPostName.replace(
-                                    't3_',
-                                    '',
-                                )}`
-                                const updatedImage = {
-                                    id: subdomainConfig.currentTagInfo.image.id,
-                                    title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
-                                    description: subdomainConfig.currentTagInfo.image.description,
-                                }
-
-                                await biketag
-                                    .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
-                                        this.log.status('updateImgurInfo', response, updatedImage)
-                                    })
-                                    .catch((error) => {
-                                        this.app.log.error(`updateImgurInfo failed`, {
-                                            error,
-                                            updatedImage,
-                                        })
-                                    })
-
-                                return res.json({ success: response })
-                            }
-
-                            return res.json({ error: response })
-                        },
+                        redditAutoPostCallback,
                         this.app.renderSync.bind(this.app),
                     )
                 },
