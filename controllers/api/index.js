@@ -10,7 +10,7 @@ class bikeTagController {
         const { subdomain, host } = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
-        const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
+		const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
 
         if (!subdomainConfig.reddit.autoPost) {
             return res.json({
@@ -100,7 +100,7 @@ class bikeTagController {
 
                             await biketag
                                 .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
-                                    this.log.status('updateImgurInfo', response, updatedImage)
+                                    this.app.log.status('updateImgurInfo', response, updatedImage)
                                 })
                                 .catch((error) => {
                                     this.app.log.error(`updateImgurInfo failed`, {
@@ -116,6 +116,7 @@ class bikeTagController {
                     }
 
                     const liveThreadCommentCallback = async (response) => {
+						console.log('liveThreadCommentCallback', {response})
                         if (!response.error && response.selfPostName) {
                             this.app.log.status('posted comment to reddit live thread', {
                                 liveThread: subdomainConfig.reddit.liveThread,
@@ -135,7 +136,7 @@ class bikeTagController {
 
                                 await biketag
                                     .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
-                                        this.log.status('updateImgurInfo', response, updatedImage)
+                                        this.app.log.status('updateImgurInfo', response, updatedImage)
                                     })
                                     .catch((error) => {
                                         this.app.log.error(`updateImgurInfo failed`, {
