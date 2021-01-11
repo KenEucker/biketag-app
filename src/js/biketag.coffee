@@ -3,7 +3,8 @@ class BikeTagApi
 
 	constructor: (opts = {}) ->
 		@specUrl = opts.specUrl ? '/api/swagger.json'
-		@init()
+		if !opts.wait
+			@init()
 
 	init: () ->
 		# this activates CORS, if necessary
@@ -14,6 +15,9 @@ class BikeTagApi
 			console.error 'failed to load the spec' + reason
 			return
 		)
+
+	getBikeTagInformation: ->
+		console.log "sure!"
 
 	yo: (yo) ->
 		console.log "#{yo} dawg."
