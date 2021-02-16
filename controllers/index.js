@@ -3,7 +3,6 @@
  */
 const biketag = require('../lib/biketag')
 const { getFromQueryOrPathOrBody } = require('../lib/util')
-const request = require('request')
 
 class IndexController {
     init(app) {

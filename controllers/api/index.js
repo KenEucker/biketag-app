@@ -2,7 +2,6 @@
  * Module dependencies.
  */
 const biketag = require('../../lib/biketag')
-const request = require('request')
 const util = require('../../lib/util')
 
 class bikeTagController {
@@ -398,7 +397,7 @@ class bikeTagController {
 
             return res.json(data)
         })
-    }
+	}
 
     updateBikeTagGameFromReddit(req, res) {
         const { host } = res.locals
