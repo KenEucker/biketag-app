@@ -3,7 +3,7 @@
  */
 const biketag = require('../lib/biketag')
 const { getFromQueryOrPathOrBody } = require('../lib/util')
-
+const got = require('got')
 class IndexController {
     init(app) {
         this.app = app
@@ -134,7 +134,7 @@ class IndexController {
             // data.region = subdomainConfig.region
             let imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
-            return req.pipe(request(imageUri)).pipe(res)
+			return got.stream(imageUri).pipe(res)
         })
     }
 

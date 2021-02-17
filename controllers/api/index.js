@@ -3,7 +3,7 @@
  */
 const biketag = require('../../lib/biketag')
 const util = require('../../lib/util')
-
+const got = require('got')
 class bikeTagController {
     postToReddit(req, res) {
         const { subdomain, host } = res.locals
@@ -547,7 +547,7 @@ class bikeTagController {
         return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             const imageUrl = getProof ? data.proofTag.link : data.previousMysteryTag.link
             this.app.log.status(`sending the reponse from imgur direct ${imageUrl}`, imageUrl)
-            return req.pipe(request(imageUrl)).pipe(res)
+            return got.stream(imageUrl).pipe(res)
         })
     }
 
