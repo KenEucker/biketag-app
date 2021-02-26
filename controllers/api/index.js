@@ -9,7 +9,7 @@ class bikeTagController {
         const { subdomain, host } = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
         const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
-		const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
+        const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
 
         if (!subdomainConfig.reddit.autoPost) {
             return res.json({
@@ -115,7 +115,7 @@ class bikeTagController {
                     }
 
                     const liveThreadCommentCallback = async (response) => {
-						console.log('liveThreadCommentCallback', {response})
+                        console.log('liveThreadCommentCallback', { response })
                         if (!response.error && response.selfPostName) {
                             this.app.log.status('posted comment to reddit live thread', {
                                 liveThread: subdomainConfig.reddit.liveThread,
@@ -135,7 +135,11 @@ class bikeTagController {
 
                                 await biketag
                                     .updateImgurInfo(imgurAccessToken, updatedImage, (response) => {
-                                        this.app.log.status('updateImgurInfo', response, updatedImage)
+                                        this.app.log.status(
+                                            'updateImgurInfo',
+                                            response,
+                                            updatedImage,
+                                        )
                                     })
                                     .catch((error) => {
                                         this.app.log.error(`updateImgurInfo failed`, {
@@ -149,7 +153,9 @@ class bikeTagController {
                         }
                     }
 
-                    let redditAutoPostMethod = biketag.postCurrentBikeTagToRedditSelfPost.bind(biketag),
+                    let redditAutoPostMethod = biketag.postCurrentBikeTagToRedditSelfPost.bind(
+                            biketag,
+                        ),
                         redditAutoPostCallback = selfPostCallback.bind(this)
                     if (subdomainConfig.reddit.disableSelfPost) {
                         redditAutoPostMethod = subdomainConfig.reddit.liveThread
@@ -170,7 +176,9 @@ class bikeTagController {
                         )
 
                         subdomainConfig.redditSelfPostName = redditSelfPostName
-                        redditAutoPostMethod = biketag.postCurrentBikeTagToRedditLiveThread.bind(biketag)
+                        redditAutoPostMethod = biketag.postCurrentBikeTagToRedditLiveThread.bind(
+                            biketag,
+                        )
                         redditAutoPostCallback = liveThreadCommentCallback.bind(this)
                     }
 
@@ -397,7 +405,7 @@ class bikeTagController {
 
             return res.json(data)
         })
-	}
+    }
 
     updateBikeTagGameFromReddit(req, res) {
         const { host } = res.locals
@@ -829,7 +837,7 @@ class bikeTagController {
         app.apiRoute(
             '/u/:username?',
             (req, res) => {
-                const username = util.getFromQueryOrPathOrBody(r, 'username')
+                const username = util.getFromQueryOrPathOrBody(req, 'username')
                 return this.getBikeTagsByUser(req, res, username)
             },
             ['get', 'post'],

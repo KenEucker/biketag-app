@@ -134,7 +134,7 @@ class IndexController {
             // data.region = subdomainConfig.region
             let imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
-			return got.stream(imageUri).pipe(res)
+            return got.stream(imageUri).pipe(res)
         })
     }
 
