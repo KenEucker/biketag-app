@@ -27,7 +27,7 @@ class bikeTagController {
                     `Link expired. Check r/${subdomainConfig.reddit.subreddit} to see if it's already been posted?`,
                 )
             }
-        } else {
+		} else {
             return res.json({ message: 'cannot validate link', expiry })
         }
 
@@ -49,9 +49,14 @@ class bikeTagController {
         return biketag
             .getBikeTagInformation(
                 imgurClientID,
-                'current',
+                expiryHash.tagnumber,
                 albumHash,
                 async (currentTagInfo) => {
+					// check to see if reddit link already exists, if so then skip posting it
+					if (currentTagInfo.discussionLink && currentTagInfo.discussionLink.indexOf('https://redd.it/') !== -1) {
+						return res.json({ message: 'tag has already been posted to Reddit', url: currentTagInfo.discussionLink })
+					}
+
                     subdomainConfig.currentTagInfo = currentTagInfo
 
                     const selfPostCallback = async (response) => {
