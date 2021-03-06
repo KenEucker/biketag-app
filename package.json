@@ -1,10 +1,9 @@
 {
     "name": "biketag-app",
-    "version": "0.2.37",
+    "version": "0.2.38",
     "description": "An application for biketag.org",
     "author": "Ken Eucker <keneucker@gmail.com>",
     "contributors": [],
-    "bin": {},
     "scripts": {
         "dev": "node app.js debug=true",
         "start": "node app.js",
