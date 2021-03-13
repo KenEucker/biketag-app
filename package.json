@@ -21,7 +21,7 @@
     "dependencies": {
         "@googlemaps/google-maps-services-js": "^3.1.16",
         "got": "^11.8.1",
-        "imgur": "git+https://github.com/KenEucker/node-imgur#keneucker/production",
+        "imgur": "^1.0.0",
         "node-cache": "^5.1.2",
         "path": "^0.12.7",
         "sexpress": "^0.7.74",
@@ -30,5 +30,5 @@
     "devDependencies": {
         "prettier": "^2.2.1"
     },
-    "license": "Unlicense"
+    "license": "CC-BY-SA-4.0"
 }
