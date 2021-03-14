@@ -551,6 +551,62 @@ class bikeTagController {
         })
     }
 
+	getBikeTagFromSanity(req, res) {
+        const { subdomain, host } = res.locals
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
+        const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
+
+        if (count > 1) {
+            return getBikeTagsFromSanity(req, res)
+        }
+
+        /// TODO: put this into sexpress
+        const subdomainIsApi = subdomain === 'api'
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
+
+        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
+
+        this.app.log.status(`biketag endpoint request for tag #${tagnumber}`)
+
+        return biketag.getBikeTagFromSanity(subdomainConfig.sanity, tagnumber, subdomainConfig.region).then(data => {
+            data.host = host
+            data.game = data.region = subdomainConfig.region
+
+            return res.json(data)
+        })
+	}
+
+	getBikeTagsFromSanity(req, res) {
+        const { subdomain, host } = res.locals
+        const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
+
+        if (count === 1) {
+            return this.getBikeTagFromSanity(req, res)
+        }
+
+        /// TODO: put this into sexpress
+        const subdomainIsApi = subdomain === 'api'
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
+
+        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
+
+        this.app.log.status(`biketag endpoint request for all tags`)
+        /// TODO: get all of the biketag images and return the amount requested
+
+        return biketag.getBikeTagsFromSanity(subdomainConfig.sanity, subdomainConfig.region).then(biketags => {
+			res.json({
+				biketags,
+				host,
+				subdomain,
+				game: subdomainConfig.region,
+			})
+        })
+	}
+
     getBikeTagImage(req, res, getProof = false) {
         const { subdomain } = res.locals
         const tagnumber = biketag.getBikeTagNumberFromRequest(req)
@@ -884,9 +940,9 @@ class bikeTagController {
          * @return {object} 200 - success response - application/json
          */
         app.apiRoute(
-            '/all',
+            '/all/:count?',
             (req, res) => {
-                return this.getBikeTags(req, res)
+                return this.getBikeTagsFromSanity(req, res)
             },
             ['get', 'post'],
         )
