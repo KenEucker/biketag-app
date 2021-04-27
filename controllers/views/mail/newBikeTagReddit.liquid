@@ -34,6 +34,15 @@
 				}
 			}
 
+			a.postToRedditButton {
+				background-color: rgb(27, 94, 32);
+				color: white;
+				padding: 1em;
+				border-radius: 3px;
+    			text-decoration: none;
+    			font-size: 1.1em;
+			}
+
 			.biketagIcon {
 				text-align:center;
 				max-width: 15em;
@@ -95,6 +104,9 @@
 		<table border="0" cellpadding="10" cellspacing="0" width="600">
 			<tr>
 				<td align="center" width="50%" valign="top" class="middleColumnContent">
+					<p>
+						Is the new tag ready to be posted? Click below to automatigically create the post on behalf of user {{ currentTagInfo.credit }}.
+					</p>
 					<a class="postToRedditButton" href="https://{{ host }}/api/post/reddit/?expiry={{ expiryHash }}">Post to r/{{reddit}}</a>
 					<h1>Tag #{{ currentTagInfo.currentTagNumber }}</h1>
 					<span>New Mystery Tag</span>

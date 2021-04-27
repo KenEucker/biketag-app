@@ -21,6 +21,7 @@
     "dependencies": {
         "@googlemaps/google-maps-services-js": "^3.1.16",
         "@sanity/client": "^2.2.6",
+        "biketag": "^1.2.1",
         "got": "^11.8.1",
         "imgur": "^1.0.0",
         "node-cache": "^5.1.2",

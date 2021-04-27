@@ -290,8 +290,9 @@ class bikeTagController {
                             reddit: subdomainConfig.reddit.subreddit,
                         }
 
+						const newBikeTagHtmlTemplate = subdomainConfig.reddit?.autoPost ? 'mail/newBikeTagReddit' : 'mail/newBikeTag'
                         const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
-                        const html = this.app.renderSync('mail/newBikeTag', renderOpts)
+                        const html = this.app.renderSync(newBikeTagHtmlTemplate, renderOpts)
 
                         const emailPromises = []
                         const emailResponses = []
