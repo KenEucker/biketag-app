@@ -2,8 +2,6 @@
 
 The app that drives one to many instances of a BikeTag game
 
-
-
 # Credits
 
 Thank you to HorribleLogos.com for whatever it is that you provided.

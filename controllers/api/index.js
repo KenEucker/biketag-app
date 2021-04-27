@@ -290,7 +290,9 @@ class bikeTagController {
                             reddit: subdomainConfig.reddit.subreddit,
                         }
 
-						const newBikeTagHtmlTemplate = subdomainConfig.reddit?.autoPost ? 'mail/newBikeTagReddit' : 'mail/newBikeTag'
+                        const newBikeTagHtmlTemplate = subdomainConfig.reddit?.autoPost
+                            ? 'mail/newBikeTagReddit'
+                            : 'mail/newBikeTag'
                         const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
                         const html = this.app.renderSync(newBikeTagHtmlTemplate, renderOpts)
 
@@ -552,7 +554,7 @@ class bikeTagController {
         })
     }
 
-	getBikeTagFromSanity(req, res) {
+    getBikeTagFromSanity(req, res) {
         const { subdomain, host } = res.locals
         const tagnumber = biketag.getBikeTagNumberFromRequest(req)
         const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
@@ -571,15 +573,17 @@ class bikeTagController {
 
         this.app.log.status(`biketag endpoint request for tag #${tagnumber}`)
 
-        return biketag.getBikeTagFromSanity(subdomainConfig.sanity, tagnumber, subdomainConfig.region).then(data => {
-            data.host = host
-            data.game = data.region = subdomainConfig.region
+        return biketag
+            .getBikeTagFromSanity(subdomainConfig.sanity, tagnumber, subdomainConfig.region)
+            .then((data) => {
+                data.host = host
+                data.game = data.region = subdomainConfig.region
 
-            return res.json(data)
-        })
-	}
+                return res.json(data)
+            })
+    }
 
-	getBikeTagsFromSanity(req, res) {
+    getBikeTagsFromSanity(req, res) {
         const { subdomain, host } = res.locals
         const count = lib.getFromQueryOrPathOrBody(req, 'count', 1)
 
@@ -598,15 +602,17 @@ class bikeTagController {
         this.app.log.status(`biketag endpoint request for all tags`)
         /// TODO: get all of the biketag images and return the amount requested
 
-        return biketag.getBikeTagsFromSanity(subdomainConfig.sanity, subdomainConfig.region).then(biketags => {
-			res.json({
-				biketags,
-				host,
-				subdomain,
-				game: subdomainConfig.region,
-			})
-        })
-	}
+        return biketag
+            .getBikeTagsFromSanity(subdomainConfig.sanity, subdomainConfig.region)
+            .then((biketags) => {
+                res.json({
+                    biketags,
+                    host,
+                    subdomain,
+                    game: subdomainConfig.region,
+                })
+            })
+    }
 
     getBikeTagImage(req, res, getProof = false) {
         const { subdomain } = res.locals

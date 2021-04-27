@@ -1,11 +1,11 @@
 {
-	"defaults": {
-		"sanity": {
-			"projectId": "x37ikhvs",
-			"dataset": "production",
-			"token": "skY0gJ7VDXft1Ilz3TQPdDWApYQMSvZRPztW0Le0X7i8f8L4cpalx7HkAV5hzyUw3PeDWIlu383Dm1IRB8DDm39wcjGg22h0lOOcTyGzqSKjevJpdmzujS1E9AmJYPsx7gU4lXFtiEpBB9rFWOneuseYN9wTG6w6ZODpKMidOWCulBBV0AJQ"
-		}
-	},
+    "defaults": {
+        "sanity": {
+            "projectId": "x37ikhvs",
+            "dataset": "production",
+            "token": "skY0gJ7VDXft1Ilz3TQPdDWApYQMSvZRPztW0Le0X7i8f8L4cpalx7HkAV5hzyUw3PeDWIlu383Dm1IRB8DDm39wcjGg22h0lOOcTyGzqSKjevJpdmzujS1E9AmJYPsx7gU4lXFtiEpBB9rFWOneuseYN9wTG6w6ZODpKMidOWCulBBV0AJQ"
+        }
+    },
     "authentication": {
         "enabled": true,
         "credentials": {
@@ -13,5 +13,5 @@
             "password": "!BikeDiscoverShare!"
         },
         "schemes": ["basic", "local"]
-	}
+    }
 }
