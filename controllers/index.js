@@ -33,6 +33,7 @@ class IndexController {
         if (subdomainConfig.imgur && subdomain !== 'index') {
             const { albumHash, imgurClientID } = subdomainConfig.imgur
             return biketag.getBikeTagInformation(imgurClientID, 'current', albumHash, (data) => {
+                // console.log({data})
                 const bikeTagPageData = { ...pageData, currentBikeTag: data || {} }
 
                 return this.app.renderTemplate(template, bikeTagPageData, res)
@@ -66,6 +67,23 @@ class IndexController {
 
             return this.app.renderTemplate(template, bikeTagUserPageData, res)
         })
+    }
+
+    getMap(req, res) {
+        const { subdomain, host } = res.locals
+        /// TODO: put this into sexpress
+        const subdomainIsApi = subdomain === 'api'
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
+
+        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
+
+        if (subdomainConfig.map && subdomainConfig.map.url) {
+            return res.redirect(subdomainConfig.map.url)
+        }
+
+        return res.json('there is no map currently configured for this game')
     }
 
     getLeaderboard(req, res) {
@@ -188,6 +206,8 @@ class IndexController {
         app.route('/leaderboard', this.getLeaderboard)
 
         app.route('/current', this.getCurrent)
+
+        app.route('/map', this.getMap)
 
         app.route('/:tagnumber?', this.indexHandler)
     }
