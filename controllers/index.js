@@ -179,10 +179,19 @@ class IndexController {
                 })
             }
 
+            data.region = subdomainConfig.region
             data.host = `${
                 subdomainConfig.requestSubdomain ? `${subdomainConfig.requestSubdomain}.` : ''
             }${subdomainConfig.requestHost || host}`
-            data.region = subdomainConfig.region
+            data.subdomainIcon = subdomainConfig.images.logo
+                ? `/public/img/${subdomainConfig.images.logo}${
+                      subdomainConfig.images.logo.indexOf('.') === -1 ? `-small.png` : ''
+                  }`
+                : subdomainConfig.meta.image
+            data.mapLink =
+                subdomainConfig.map && subdomainConfig.map.url
+                    ? `[Check out the map for ${subdomainConfig.region}!](${subdomainConfig.map.url})`
+                    : ''
 
             return res.render(redditTemplatePath, data)
         })

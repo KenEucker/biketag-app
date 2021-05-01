@@ -168,6 +168,7 @@ class bikeTagController {
                             biketag,
                         ),
                         redditAutoPostCallback = selfPostCallback.bind(this)
+
                     if (subdomainConfig.reddit.disableSelfPost) {
                         redditAutoPostMethod = subdomainConfig.reddit.liveThread
                             ? biketag.postCurrentBikeTagToRedditLiveThread.bind(biketag)
