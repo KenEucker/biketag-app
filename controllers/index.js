@@ -132,8 +132,9 @@ class IndexController {
     }
 
     getCurrent(req, res) {
-        const { subdomain } = res.locals
+        const { subdomain, host } = res.locals
         const size = getFromQueryOrPathOrBody(req, 's') || getFromQueryOrPathOrBody(req, 'size')
+        const asData = getFromQueryOrPathOrBody(req, 'd') || getFromQueryOrPathOrBody(req, 'data')
         const tagnumber = 'current'
 
         /// TODO: put this into sexpress
@@ -148,11 +149,16 @@ class IndexController {
         this.app.log.status(`reddit endpoint request for tag #${tagnumber}`)
 
         return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-            // data.host = host
-            // data.region = subdomainConfig.region
+            data.host = host
+            data.region = subdomainConfig.region
+
+			if (asData) {
+				return res.json(data)
+			} else {
             let imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
             return got.stream(imageUri).pipe(res)
+			}
         })
     }
 
