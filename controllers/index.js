@@ -151,13 +151,13 @@ class IndexController {
         return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
             data.host = host
             data.region = subdomainConfig.region
+            data.imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
 			if (asData) {
 				return res.json(data)
 			} else {
-            let imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
-            return got.stream(imageUri).pipe(res)
+            return got.stream(data.imageUri).pipe(res)
 			}
         })
     }
