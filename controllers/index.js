@@ -153,12 +153,11 @@ class IndexController {
             data.region = subdomainConfig.region
             data.imageUri = biketag.getBiketagImageUrl(data.currentTagURL, size)
 
-			if (asData) {
-				return res.json(data)
-			} else {
+            if (asData) {
+                return res.json(data)
+            }
 
             return got.stream(data.imageUri).pipe(res)
-			}
         })
     }
 
