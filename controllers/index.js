@@ -33,12 +33,17 @@ class IndexController {
         if (subdomainConfig.imgur && subdomain !== 'index') {
             const { albumHash, imgurClientID } = subdomainConfig.imgur
             if (albumHash && imgurClientID) {
-                return biketag.getBikeTagInformation(imgurClientID, 'current', albumHash, (data) => {
-                    // console.log({data})
-                    const bikeTagPageData = {...pageData, currentBikeTag: data || {} }
+                return biketag.getBikeTagInformation(
+                    imgurClientID,
+                    'current',
+                    albumHash,
+                    (data) => {
+                        // console.log({data})
+                        const bikeTagPageData = { ...pageData, currentBikeTag: data || {} }
 
-                    return this.app.renderTemplate(template, bikeTagPageData, res)
-                })
+                        return this.app.renderTemplate(template, bikeTagPageData, res)
+                    },
+                )
             }
         }
 
@@ -48,11 +53,11 @@ class IndexController {
     getUserTags(req, res) {
         const { subdomain, host } = res.locals
         const username = getFromQueryOrPathOrBody(req, 'username')
-            /// TODO: put this into sexpress
+        /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi ?
-            req.path.match(/^\/[^\/]+/)[0].substr(1) :
-            subdomain
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -60,7 +65,7 @@ class IndexController {
         return biketag.getBikeTagsByUser(imgurClientID, albumHash, username, (images) => {
             let template = 'users/user'
             const pageData = this.app.getPublicData(requestSubdomain, host, undefined, res)
-            const bikeTagUserPageData = {...pageData, images, username }
+            const bikeTagUserPageData = { ...pageData, images, username }
 
             if (!username) {
                 template = 'users'
@@ -73,11 +78,11 @@ class IndexController {
 
     getMap(req, res) {
         const { subdomain, host } = res.locals
-            /// TODO: put this into sexpress
+        /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi ?
-            req.path.match(/^\/[^\/]+/)[0].substr(1) :
-            subdomain
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
 
@@ -90,11 +95,11 @@ class IndexController {
 
     getLeaderboard(req, res) {
         const { subdomain, host } = res.locals
-            /// TODO: put this into sexpress
+        /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi ?
-            req.path.match(/^\/[^\/]+/)[0].substr(1) :
-            subdomain
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -141,9 +146,9 @@ class IndexController {
 
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi ?
-            req.path.match(/^\/[^\/]+/)[0].substr(1) :
-            subdomain
+        const requestSubdomain = subdomainIsApi
+            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
+            : subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -164,69 +169,69 @@ class IndexController {
     }
 
     getRedditPostTemplate(req, res) {
-            const { subdomain, host } = res.locals
-            const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-            const redditTemplatePath = 'reddit/post'
-            const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+        const { subdomain, host } = res.locals
+        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
+        const redditTemplatePath = 'reddit/post'
+        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
-            if (!subdomainConfig.imgur) {
-                this.app.log.status(`imgur not set for host on subdomain [${subdomain}]`, host)
-                return res.send('no image data set')
+        if (!subdomainConfig.imgur) {
+            this.app.log.status(`imgur not set for host on subdomain [${subdomain}]`, host)
+            return res.send('no image data set')
+        }
+
+        const { albumHash, imgurClientID } = subdomainConfig.imgur
+
+        this.app.log.status(`reddit endpoint request for tag #${tagnumber}`, { redditTemplatePath })
+
+        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+            if (!data) {
+                return res.json({
+                    tagNumberNotFound: tagnumber,
+                    albumHash,
+                })
             }
 
-            const { albumHash, imgurClientID } = subdomainConfig.imgur
+            data.region = subdomainConfig.region
+            data.host = `${
+                subdomainConfig.requestSubdomain ? `${subdomainConfig.requestSubdomain}.` : ''
+            }${subdomainConfig.requestHost || host}`
+            data.subdomainIcon = subdomainConfig.images.logo
+                ? `/public/img/${subdomainConfig.images.logo}${
+                      subdomainConfig.images.logo.indexOf('.') === -1 ? `-small.png` : ''
+                  }`
+                : subdomainConfig.meta.image
+            data.mapLink =
+                subdomainConfig.map && subdomainConfig.map.url
+                    ? `[Check out the map for ${subdomainConfig.region}!](${subdomainConfig.map.url})`
+                    : ''
 
-            this.app.log.status(`reddit endpoint request for tag #${tagnumber}`, { redditTemplatePath })
+            return res.render(redditTemplatePath, data)
+        })
+    }
 
-            return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-                        if (!data) {
-                            return res.json({
-                                tagNumberNotFound: tagnumber,
-                                albumHash,
-                            })
-                        }
+    routes(app) {
+        app.use((req, res, next) => {
+            const flushcache = getFromQueryOrPathOrBody(req, 'flushcache', false)
+            if (flushcache) {
+                this.app.log.status('flushing cache')
+                biketag.flushCache()
+            }
+            next()
+        })
 
-                        data.region = subdomainConfig.region
-                        data.host = `${
-				 subdomainConfig.requestSubdomain ? `${subdomainConfig.requestSubdomain}.` : ''
-			 }${subdomainConfig.requestHost || host}`
-			 data.subdomainIcon = subdomainConfig.images.logo
-				 ? `/public/img/${subdomainConfig.images.logo}${
-					   subdomainConfig.images.logo.indexOf('.') === -1 ? `-small.png` : ''
-				   }`
-				 : subdomainConfig.meta.image
-			 data.mapLink =
-				 subdomainConfig.map && subdomainConfig.map.url
-					 ? `[Check out the map for ${subdomainConfig.region}!](${subdomainConfig.map.url})`
-					 : ''
- 
-			 return res.render(redditTemplatePath, data)
-		 })
-	 }
- 
-	 routes(app) {
-		 app.use((req, res, next) => {
-			 const flushcache = getFromQueryOrPathOrBody(req, 'flushcache', false)
-			 if (flushcache) {
-				 this.app.log.status('flushing cache')
-				 biketag.flushCache()
-			 }
-			 next()
-		 })
- 
-		 app.route('/get/reddit/:tagnumber?', this.getRedditPostTemplate)
- 
-		 app.route('/user', this.getUserTags)
-		 app.route('/user/:username', this.getUserTags)
- 
-		 app.route('/leaderboard', this.getLeaderboard)
- 
-		 app.route('/current', this.getCurrent)
- 
-		 app.route('/map', this.getMap)
- 
-		 app.route('/:tagnumber?', this.indexHandler)
-	 }
- }
- 
- module.exports = new IndexController()
+        app.route('/get/reddit/:tagnumber?', this.getRedditPostTemplate)
+
+        app.route('/user', this.getUserTags)
+        app.route('/user/:username', this.getUserTags)
+
+        app.route('/leaderboard', this.getLeaderboard)
+
+        app.route('/current', this.getCurrent)
+
+        app.route('/map', this.getMap)
+
+        app.route('/:tagnumber?', this.indexHandler)
+    }
+}
+
+module.exports = new IndexController()
