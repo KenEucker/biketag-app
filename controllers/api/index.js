@@ -8,8 +8,6 @@ class bikeTagController {
     postToReddit(req, res) {
         const { subdomain, host } = res.locals
         const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-        const expiry = util.getFromQueryOrPathOrBody(req, 'expiry')
-        const expiryHash = expiry ? this.app.crypto().decrypt(expiry) : null
 
         if (!subdomainConfig.reddit.autoPost) {
             return res.json({
@@ -18,10 +16,12 @@ class bikeTagController {
             })
         }
 
+        const expiryHash = util.getFromQueryOrPathOrBody(req, 'expiry')
+        const expiry = this.getExpiryFromHash(expiryHash, subdomain)
+
         /// Check the expiry, if no match then don't allow this post
-        if (expiryHash) {
-            const expiryHashTime = new Date(expiryHash.expiry).getTime()
-            if (new Date().getTime() > expiryHashTime || subdomain !== expiryHash.subdomain) {
+        if (expiry !== null) {
+            if (!expiry) {
                 /// TODO: add the request nonce to this hash so that we can ensure this action is only run once
                 return res.json(
                     `Link expired. Check r/${subdomainConfig.reddit.subreddit} to see if it's already been posted?`,
@@ -35,9 +35,7 @@ class bikeTagController {
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
         subdomainConfig.version = this.app.config.version
-        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot
-            ? { ...this.app.authTokens[subdomain].redditBot.opts }
-            : { ...subdomainConfig.reddit }
+        subdomainConfig.auth = this.app.authTokens[subdomain].redditBot ? {...this.app.authTokens[subdomain].redditBot.opts } : {...subdomainConfig.reddit }
         subdomainConfig.auth.clientId = subdomainConfig.auth.clientID
         subdomainConfig.imgur = this.app.middlewares.util.merge(
             subdomainConfig.imgur,
@@ -49,9 +47,9 @@ class bikeTagController {
         return biketag
             .getBikeTagInformation(
                 imgurClientID,
-                expiryHash.tagnumber,
+                expiry.tagnumber,
                 albumHash,
-                async (currentTagInfo) => {
+                async(currentTagInfo) => {
                     // check to see if reddit link already exists, if so then skip posting it
                     if (
                         currentTagInfo.discussionLink &&
@@ -65,7 +63,7 @@ class bikeTagController {
 
                     subdomainConfig.currentTagInfo = currentTagInfo
 
-                    const selfPostCallback = async (response) => {
+                    const selfPostCallback = async(response) => {
                         if (!response.error && response.selfPostName) {
                             this.app.log.status('posted to reddit', response)
                             redditSelfPostName = response.selfPostName
@@ -76,9 +74,9 @@ class bikeTagController {
                                 const regionName = `${subdomain
                                     .charAt(0)
                                     .toUpperCase()}${subdomain.slice(1)}`
-                                const postFlair = subdomainConfig.reddit.globalPostFlair
-                                    ? subdomainConfig.reddit.globalPostFlair
-                                    : regionName
+                                const postFlair = subdomainConfig.reddit.globalPostFlair ?
+                                    subdomainConfig.reddit.globalPostFlair :
+                                    regionName
                                 subdomainConfig.auth.username = globalRedditAccount.username
                                 subdomainConfig.auth.password = globalRedditAccount.password
 
@@ -86,8 +84,7 @@ class bikeTagController {
 
                                 await biketag
                                     .setBikeTagPostFlair(
-                                        subdomainConfig,
-                                        { selfPostName: response.crossPostName },
+                                        subdomainConfig, { selfPostName: response.crossPostName },
                                         postFlair,
                                         (response) => {
                                             this.app.log.status('setBikeTagPostFlair', response)
@@ -125,7 +122,7 @@ class bikeTagController {
                         return res.json({ error: response })
                     }
 
-                    const liveThreadCommentCallback = async (response) => {
+                    const liveThreadCommentCallback = async(response) => {
                         console.log('liveThreadCommentCallback', { response })
                         if (!response.error && response.selfPostName) {
                             this.app.log.status('posted comment to reddit live thread', {
@@ -135,9 +132,9 @@ class bikeTagController {
                             const redditT3ID = redditSelfPostName ? redditSelfPostName : response.id
 
                             if (redditT3ID && redditT3ID.length) {
-                                const discussionUrl = redditT3ID
-                                    ? ` https://redd.it/${redditT3ID.replace('t3_', '')}`
-                                    : ''
+                                const discussionUrl = redditT3ID ?
+                                    ` https://redd.it/${redditT3ID.replace('t3_', '')}` :
+                                    ''
                                 const updatedImage = {
                                     id: subdomainConfig.currentTagInfo.image.id,
                                     title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
@@ -170,11 +167,11 @@ class bikeTagController {
                         redditAutoPostCallback = selfPostCallback.bind(this)
 
                     if (subdomainConfig.reddit.disableSelfPost) {
-                        redditAutoPostMethod = subdomainConfig.reddit.liveThread
-                            ? biketag.postCurrentBikeTagToRedditLiveThread.bind(biketag)
-                            : () => {
-                                  res.json({ error: 'autoposting disabled' })
-                              }
+                        redditAutoPostMethod = subdomainConfig.reddit.liveThread ?
+                            biketag.postCurrentBikeTagToRedditLiveThread.bind(biketag) :
+                            () => {
+                                res.json({ error: 'autoposting disabled' })
+                            }
                         redditAutoPostCallback = liveThreadCommentCallback.bind(this)
                     } else if (
                         subdomainConfig.reddit.liveThread &&
@@ -209,73 +206,91 @@ class bikeTagController {
             })
     }
 
+    getExpiryFromHash(expiryHash, subdomain) {
+        const expiry = expiryHash ? this.app.crypto().decrypt(expiryHash) : null
+        if (!expiry) {
+            return null
+        }
+
+        const expiryHashTime = new Date(expiry.expiry).getTime()
+        if (new Date().getTime() > expiryHashTime || subdomain !== expiry.subdomain) {
+            return false
+        }
+
+        return expiry
+    }
+
+    getNewExpiryHash(data) {
+        const expiry = new Date(
+            /// Expiry is now plus  Ms     s    h    days  x (default 2)
+            new Date().getTime() +
+            1000 * 60 * 60 * 24 * (this.app.config.expiryDays ? this.app.config.expiryDays : 2),
+        )
+        const emailSecurityHashData = {
+            ...data,
+            expiry,
+        }
+        return encodeURIComponent(this.app.crypto().encrypt(emailSecurityHashData))
+    }
+
     async sendEmailToAdministrators(req, res) {
-        try {
-            const { subdomain, host } = res.locals
-            const tagnumber = biketag.getBikeTagNumberFromRequest(req) || 'current'
-            const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-            const { albumHash, imgurClientID } = subdomainConfig.imgur
-            const expiry = new Date(
-                /// Expiry is now plus  Ms     s    h    days  x (default 2)
-                new Date().getTime() +
-                    1000 *
-                        60 *
-                        60 *
-                        24 *
-                        (this.app.config.expiryDays ? this.app.config.expiryDays : 2),
-            )
-            const emailSecurityHashData = {
-                subdomain,
-                tagnumber,
-                expiry,
-                emails: subdomainConfig.adminEmailAddresses,
-            }
-            const expiryHash = encodeURIComponent(this.app.crypto().encrypt(emailSecurityHashData))
-
-            /// Wait for the data to hit reddit
-            const getBikeTagInformationSleep = 10000
-            this.app.log.status(
-                `waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`,
-                { expiryHash },
-            )
-
-            res.json({ wait: getBikeTagInformationSleep })
-
-            const tryGettingLatest = async (attempt = 1) => {
-                await biketag.flushCache()
-                await util.sleep(getBikeTagInformationSleep)
-
-                return biketag.getBikeTagInformation(
-                    imgurClientID,
+            try {
+                const { subdomain, host } = res.locals
+                const tagnumber = biketag.getBikeTagNumberFromRequest(req) || 'current'
+                const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+                const { albumHash, imgurClientID } = subdomainConfig.imgur
+                const expiryData = {
+                    subdomain,
                     tagnumber,
-                    albumHash,
-                    (currentTagInfo) => {
-                        if (!currentTagInfo) {
-                            this.app.log.error('how did this happen??', {
-                                albumHash,
+                    emails: subdomainConfig.adminEmailAddresses,
+                }
+                const expiryHash = this.getNewExpiryHash(expiryData)
+
+                /// Wait for the data to hit reddit
+                const getBikeTagInformationSleep = 10000
+                this.app.log.status(
+                    `waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`, { expiryHash },
+                )
+
+                res.json({ wait: getBikeTagInformationSleep })
+
+                const tryGettingLatest = async(attempt = 1) => {
+                        await biketag.flushCache()
+                        await util.sleep(getBikeTagInformationSleep)
+
+                        return biketag.getBikeTagInformation(
+                                imgurClientID,
                                 tagnumber,
-                                currentTagInfo,
-                            })
+                                albumHash,
+                                (currentTagInfo) => {
+                                    if (!currentTagInfo) {
+                                        this.app.log.error('how did this happen??', {
+                                            albumHash,
+                                            tagnumber,
+                                            currentTagInfo,
+                                        })
 
-                            if (attempt <= 3) {
-                                this.app.log.status(
-                                    'making another attempt to get latest tag information',
-                                )
-                                tryGettingLatest(attempt++)
-                            }
+                                        if (attempt <= 3) {
+                                            this.app.log.status(
+                                                'making another attempt to get latest tag information',
+                                            )
+                                            tryGettingLatest(attempt++)
+                                        }
 
-                            return
-                        }
-                        const currentTagNumber = (subdomainConfig.currentTagNumber =
-                            currentTagInfo.currentTagNumber)
-                        const subject = this.app.renderSync('mail/newBikeTagSubject', {
-                            currentTagNumber,
-                            subdomain,
-                        })
-                        const renderOpts = {
-                            region: subdomainConfig.region,
-                            subdomainIcon: subdomainConfig.images.logo
-                                ? `/public/img/${subdomainConfig.images.logo}${
+                                        return
+                                    }
+                                    const currentTagNumber = (subdomainConfig.currentTagNumber =
+                                        currentTagInfo.currentTagNumber)
+                                    const subject = this.app.renderSync('mail/newBikeTagSubject', {
+                                        currentTagNumber,
+                                        subdomain,
+                                    })
+                                    const renderOpts = {
+                                            ambassadorsUrl: this.app.getBaseUrl(undefined, undefined, 'ambassadors'),
+                                            subdomain,
+                                            region: subdomainConfig.region,
+                                            subdomainIcon: subdomainConfig.images.logo ?
+                                                `/public/img/${subdomainConfig.images.logo}${
                                       subdomainConfig.images.logo.indexOf('.') === -1
                                           ? `-small.png`
                                           : ''
@@ -314,7 +329,6 @@ class bikeTagController {
                                 }),
                             )
                         })
-
                         // Promise.all(emailPromises).then(() => {
                         //     return res.json({
                         //         currentTagInfo,
