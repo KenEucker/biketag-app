@@ -39,7 +39,7 @@ class IndexController {
                     albumHash,
                     (data) => {
                         // console.log({data})
-                        const bikeTagPageData = { ...pageData, currentBikeTag: data || {} }
+                        const bikeTagPageData = {...pageData, currentBikeTag: data || {} }
 
                         return this.app.renderTemplate(template, bikeTagPageData, res)
                     },
@@ -53,11 +53,11 @@ class IndexController {
     getUserTags(req, res) {
         const { subdomain, host } = res.locals
         const username = getFromQueryOrPathOrBody(req, 'username')
-        /// TODO: put this into sexpress
+            /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
+        const requestSubdomain = subdomainIsApi ?
+            req.path.match(/^\/[^\/]+/)[0].substr(1) :
+            subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -65,7 +65,7 @@ class IndexController {
         return biketag.getBikeTagsByUser(imgurClientID, albumHash, username, (images) => {
             let template = 'users/user'
             const pageData = this.app.getPublicData(requestSubdomain, host, undefined, res)
-            const bikeTagUserPageData = { ...pageData, images, username }
+            const bikeTagUserPageData = {...pageData, images, username }
 
             if (!username) {
                 template = 'users'
@@ -78,11 +78,11 @@ class IndexController {
 
     getMap(req, res) {
         const { subdomain, host } = res.locals
-        /// TODO: put this into sexpress
+            /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
+        const requestSubdomain = subdomainIsApi ?
+            req.path.match(/^\/[^\/]+/)[0].substr(1) :
+            subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
 
@@ -93,13 +93,30 @@ class IndexController {
         return res.json('there is no map currently configured for this game')
     }
 
+    getBingo(req, res) {
+        const { subdomain, host } = res.locals
+            /// TODO: put this into sexpress
+        const subdomainIsApi = subdomain === 'api'
+        const requestSubdomain = subdomainIsApi ?
+            req.path.match(/^\/[^\/]+/)[0].substr(1) :
+            subdomain
+
+        const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
+
+        if (subdomainConfig.bingo && subdomainConfig.bingo.url) {
+            return res.redirect(subdomainConfig.bingo.url)
+        }
+
+        return res.json('there is no map currently configured for this game')
+    }
+
     getLeaderboard(req, res) {
         const { subdomain, host } = res.locals
-        /// TODO: put this into sexpress
+            /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
+        const requestSubdomain = subdomainIsApi ?
+            req.path.match(/^\/[^\/]+/)[0].substr(1) :
+            subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -146,9 +163,9 @@ class IndexController {
 
         /// TODO: put this into sexpress
         const subdomainIsApi = subdomain === 'api'
-        const requestSubdomain = subdomainIsApi
-            ? req.path.match(/^\/[^\/]+/)[0].substr(1)
-            : subdomain
+        const requestSubdomain = subdomainIsApi ?
+            req.path.match(/^\/[^\/]+/)[0].substr(1) :
+            subdomain
 
         const subdomainConfig = this.app.getSubdomainOpts(requestSubdomain)
         const { albumHash, imgurClientID } = subdomainConfig.imgur
@@ -169,30 +186,30 @@ class IndexController {
     }
 
     getRedditPostTemplate(req, res) {
-        const { subdomain, host } = res.locals
-        const tagnumber = biketag.getBikeTagNumberFromRequest(req)
-        const redditTemplatePath = 'reddit/post'
-        const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+            const { subdomain, host } = res.locals
+            const tagnumber = biketag.getBikeTagNumberFromRequest(req)
+            const redditTemplatePath = 'reddit/post'
+            const subdomainConfig = this.app.getSubdomainOpts(subdomain)
 
-        if (!subdomainConfig.imgur) {
-            this.app.log.status(`imgur not set for host on subdomain [${subdomain}]`, host)
-            return res.send('no image data set')
-        }
-
-        const { albumHash, imgurClientID } = subdomainConfig.imgur
-
-        this.app.log.status(`reddit endpoint request for tag #${tagnumber}`, { redditTemplatePath })
-
-        return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
-            if (!data) {
-                return res.json({
-                    tagNumberNotFound: tagnumber,
-                    albumHash,
-                })
+            if (!subdomainConfig.imgur) {
+                this.app.log.status(`imgur not set for host on subdomain [${subdomain}]`, host)
+                return res.send('no image data set')
             }
 
-            data.region = subdomainConfig.region
-            data.host = `${
+            const { albumHash, imgurClientID } = subdomainConfig.imgur
+
+            this.app.log.status(`reddit endpoint request for tag #${tagnumber}`, { redditTemplatePath })
+
+            return biketag.getBikeTagInformation(imgurClientID, tagnumber, albumHash, (data) => {
+                        if (!data) {
+                            return res.json({
+                                tagNumberNotFound: tagnumber,
+                                albumHash,
+                            })
+                        }
+
+                        data.region = subdomainConfig.region
+                        data.host = `${
                 subdomainConfig.requestSubdomain ? `${subdomainConfig.requestSubdomain}.` : ''
             }${subdomainConfig.requestHost || host}`
             data.subdomainIcon = subdomainConfig.images.logo
@@ -229,6 +246,7 @@ class IndexController {
         app.route('/current', this.getCurrent)
 
         app.route('/map', this.getMap)
+        app.route('/bingo', this.getBingo)
 
         app.route('/:tagnumber?', this.indexHandler)
     }
