@@ -126,7 +126,7 @@ class bikeTagController {
                                     })
                                 })
 
-                            return res.json({ success: response })
+                            return res.json({ success: response, url: discussionUrl })
                         }
 
                         return res.json({ error: response })
@@ -140,11 +140,10 @@ class bikeTagController {
                                 response,
                             })
                             const redditT3ID = redditSelfPostName ? redditSelfPostName : response.id
-
-                            if (redditT3ID && redditT3ID.length) {
-                                const discussionUrl = redditT3ID ?
-                                    ` https://redd.it/${redditT3ID.replace('t3_', '')}` :
-                                    ''
+							const discussionUrl = redditT3ID && redditT3ID.length ?
+							` https://redd.it/${redditT3ID.replace('t3_', '')}` : null
+                            
+							if (discussionUrl) {   
                                 const updatedImage = {
                                     id: subdomainConfig.currentTagInfo.image.id,
                                     title: `${subdomainConfig.currentTagInfo.image.title} {${discussionUrl}}`,
@@ -167,7 +166,7 @@ class bikeTagController {
                                     })
                             }
 
-                            return res.json({ success: response })
+                            return res.json({ success: response, url: discussionUrl })
                         }
                     }
 
