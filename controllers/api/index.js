@@ -736,7 +736,7 @@ class bikeTagController {
  
 		 /**
 		  * @swagger
-		  * /post/reddit/{subreddit}:
+		  * /read/reddit/{subreddit}:
 		  *   post:
 		  *     security:
 		  *       - basic: []
