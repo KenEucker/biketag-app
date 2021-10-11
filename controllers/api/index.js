@@ -242,137 +242,140 @@ class bikeTagController {
         return encodeURIComponent(this.app.crypto().encrypt(emailSecurityHashData))
     }
 
-    async sendEmailToAdministrators(req, res) {
-            try {
-                const { subdomain, host } = res.locals
-                const tagnumber = biketag.getBikeTagNumberFromRequest(req) || 'current'
-                const subdomainConfig = this.app.getSubdomainOpts(subdomain)
-                const { albumHash, imgurClientID } = subdomainConfig.imgur
-                const expiryData = {
-                    subdomain,
-                    tagnumber,
-                    emails: subdomainConfig.adminEmailAddresses,
-                    expiry: new Date(
-                        /// Expiry is now plus  Ms     s    h    days  x (default 2)
-                        new Date().getTime() +
-                        1000 *
-                        60 *
-                        60 *
-                        24 *
-                        (this.app.config.expiryDays ? this.app.config.expiryDays : 2),
-                    ),
-                }
-                const expiryHash = encodeURIComponent(this.app.crypto().encrypt(expiryData))
-                console.log({ expiryHash, expiryData })
+    async sendNewTagNotification(req, res) {
+		try {
+			const { subdomain, host } = res.locals
+			const tagnumber = biketag.getBikeTagNumberFromRequest(req) || 'current'
+			const subdomainConfig = this.app.getSubdomainOpts(subdomain)
+			const { albumHash, imgurClientID } = subdomainConfig.imgur
+			const expiryData = {
+				subdomain,
+				tagnumber,
+				emails: subdomainConfig.adminEmailAddresses,
+				expiry: new Date(
+					/// Expiry is now plus  Ms     s    h    days  x (default 2)
+					new Date().getTime() +
+					1000 *
+					60 *
+					60 *
+					24 *
+					(this.app.config.expiryDays ? this.app.config.expiryDays : 2),
+				),
+			}
+			const expiryHash = encodeURIComponent(this.app.crypto().encrypt(expiryData))
+			console.log({ expiryHash, expiryData })
 
-                /// Wait for the data to hit reddit
-                const getBikeTagInformationSleep = 10000
-                this.app.log.status(
-                    `waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`, { expiryHash },
-                )
+			/// Wait for the data to hit reddit
+			const getBikeTagInformationSleep = 10000
+			this.app.log.status(
+				`waiting for ${getBikeTagInformationSleep}ms until getting new tag information for recent post`, { expiryHash },
+			)
 
-                res.json({ wait: getBikeTagInformationSleep })
+			res.json({ wait: getBikeTagInformationSleep })
 
-                const tryGettingLatest = async(attempt = 1) => {
-                        await biketag.flushCache()
-                        await util.sleep(getBikeTagInformationSleep)
+			/// Send new tag email notification
+			const sendEmailOnceImagesLoad = async(attempt = 1) => {
+					await biketag.flushCache()
+					await util.sleep(getBikeTagInformationSleep)
 
-                        return biketag.getBikeTagInformation(
-                                imgurClientID,
-                                tagnumber,
-                                albumHash,
-                                (currentTagInfo) => {
-                                    if (!currentTagInfo) {
-                                        this.app.log.error('how did this happen??', {
-                                            albumHash,
-                                            tagnumber,
-                                            currentTagInfo,
-                                        })
+					return biketag.getBikeTagInformation(
+							imgurClientID,
+							tagnumber,
+							albumHash,
+							(currentTagInfo) => {
+								if (!currentTagInfo) {
+									this.app.log.error('how did this happen??', {
+										albumHash,
+										tagnumber,
+										currentTagInfo,
+									})
 
-                                        if (attempt <= 3) {
-                                            this.app.log.status(
-                                                'making another attempt to get latest tag information',
-                                            )
-                                            tryGettingLatest(attempt++)
-                                        }
+									if (attempt <= 3) {
+										this.app.log.status(
+											'making another attempt to get latest tag information',
+										)
+										sendEmailOnceImagesLoad(attempt++)
+									}
 
-                                        return
-                                    }
-                                    const currentTagNumber = (subdomainConfig.currentTagNumber =
-                                        currentTagInfo.currentTagNumber)
-                                    const subject = this.app.renderSync('mail/newBikeTagSubject', {
-                                        currentTagNumber,
-                                        subdomain,
-                                    })
-                                    const renderOpts = {
-                                            ambassadorsUrl: this.app.getBaseUrl(
-                                                undefined,
-                                                undefined,
-                                                'ambassadors',
-                                            ),
-                                            subdomain,
-                                            region: subdomainConfig.region,
-                                            subdomainIcon: subdomainConfig.images.logo ?
-                                                `/public/img/${subdomainConfig.images.logo}${
-									   subdomainConfig.images.logo.indexOf('.') === -1
-										   ? `-small.png`
-										   : ''
-								   }`
-								 : subdomainConfig.meta.image,
-							 host: `${
-								 subdomainConfig.requestSubdomain
-									 ? `${subdomainConfig.requestSubdomain}.`
-									 : ''
-							 }${subdomainConfig.requestHost || host}`,
-							 currentTagInfo,
-							 expiryHash,
-							 reddit: subdomainConfig.reddit.subreddit,
-						 }
- 
-						 const newBikeTagHtmlTemplate = subdomainConfig.reddit?.autoPost
-							 ? 'mail/newBikeTagReddit'
-							 : 'mail/newBikeTag'
-						 const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
-						 const html = this.app.renderSync(newBikeTagHtmlTemplate, renderOpts)
- 
-						 const emailPromises = []
-						 const emailResponses = []
- 
-						 subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
-							 emailPromises.push(
-								 this.app.sendEmail(subdomainConfig, {
-									 to: emailAddress,
-									 subject,
-									 text,
-									 callback: (info) => {
-										 this.app.log.status(`email sent to ${emailAddress}`, info)
-										 emailResponses.push(info.response)
-									 },
-									 html,
-								 }),
-							 )
-						 })
-						 // Promise.all(emailPromises).then(() => {
-						 //     return res.json({
-						 //         currentTagInfo,
-						 //         emailResponses,
-						 //     })
-						 // })
-					 },
-					 true,
-				 )
-			 }
- 
-			 return tryGettingLatest()
-		 } catch (error) {
-			 this.app.log.error('email api error', {
-				 error,
-			 })
-			 return res.json({
-				 error,
-			 })
-		 }
-	 }
+									return
+								}
+								const currentTagNumber = (subdomainConfig.currentTagNumber =
+									currentTagInfo.currentTagNumber)
+								const subject = this.app.renderSync('mail/newBikeTagSubject', {
+									currentTagNumber,
+									subdomain,
+								})
+								const renderOpts = {
+										ambassadorsUrl: this.app.getBaseUrl(
+											undefined,
+											undefined,
+											'ambassadors',
+										),
+										subdomain,
+										region: subdomainConfig.region,
+										subdomainIcon: subdomainConfig.images.logo ?
+											`/public/img/${subdomainConfig.images.logo}${
+									subdomainConfig.images.logo.indexOf('.') === -1
+										? `-small.png`
+										: ''
+								}`
+								: subdomainConfig.meta.image,
+							host: `${
+								subdomainConfig.requestSubdomain
+									? `${subdomainConfig.requestSubdomain}.`
+									: ''
+							}${subdomainConfig.requestHost || host}`,
+							currentTagInfo,
+							expiryHash,
+							reddit: subdomainConfig.reddit.subreddit,
+						}
+
+						const newBikeTagHtmlTemplate = subdomainConfig.reddit?.autoPost
+							? 'mail/newBikeTagReddit'
+							: 'mail/newBikeTag'
+						const text = this.app.renderSync('mail/newBikeTagText', renderOpts)
+						const html = this.app.renderSync(newBikeTagHtmlTemplate, renderOpts)
+
+						const emailPromises = []
+						const emailResponses = []
+
+						subdomainConfig.adminEmailAddresses.forEach((emailAddress) => {
+							emailPromises.push(
+								this.app.sendEmail(subdomainConfig, {
+									to: emailAddress,
+									subject,
+									text,
+									callback: (info) => {
+										this.app.log.status(`email sent to ${emailAddress}`, info)
+										emailResponses.push(info.response)
+									},
+									html,
+								}),
+							)
+						})
+						// Promise.all(emailPromises).then(() => {
+						//     return res.json({
+						//         currentTagInfo,
+						//         emailResponses,
+						//     })
+						// })
+					},
+					true,
+				)
+			}
+
+			/// Send new tag browser notification
+
+			return sendEmailOnceImagesLoad()
+		} catch (error) {
+			this.app.log.error('email api error', {
+				error,
+			})
+			return res.json({
+				error,
+			})
+		}
+	}
  
 	 readFromReddit(req, res) {
 		 const { host } = res.locals
@@ -711,7 +714,7 @@ class bikeTagController {
 		  * @tags email
 		  * @return {object} 200 - success response - application/json
 		  */
-		 app.route('/post/email/:tagnumber?', this.sendEmailToAdministrators, 'post', false)
+		 app.route('/post/newtag/:tagnumber?', this.sendNewTagNotification, 'post', false)
 		 /// How to create an insecure api route from the api controller {host}/api/post/email
  
 		 /**

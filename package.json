@@ -27,7 +27,8 @@
         "node-cache": "^5.1.2",
         "path": "^0.12.7",
         "sexpress": "^0.7.76",
-        "snoowrap": "^1.22.0"
+        "snoowrap": "^1.22.0",
+        "web-push": "^3.4.5"
     },
     "devDependencies": {
         "prettier": "^2.2.1"
