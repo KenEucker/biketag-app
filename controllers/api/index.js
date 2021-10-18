@@ -365,6 +365,7 @@ class bikeTagController {
 			}
 
 			/// Send new tag browser notification
+			this.app.hook('notifications:notify', {title: 'A new BikeTag has been posted!', message: {tagnumber, game: subdomain} })
 
 			return sendEmailOnceImagesLoad()
 		} catch (error) {
@@ -694,8 +695,6 @@ class bikeTagController {
 	 init(app) {
 		 this.app = app
 		 biketag.setLogger(app.log.debug)
- 
-		 // this.index = this.show = 'apidocs'
 	 }
  
 	 routes(app) {
