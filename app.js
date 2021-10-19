@@ -2,7 +2,7 @@ const sexpress = require('sexpress')
 const { createClient } = require('@supabase/supabase-js')
 
 /// BikeTag App specific configuration filters
-const publicFilter = function BikeTagPublicData(publicData, appConfig, subdomain) {
+const onPageDataRequest = function BikeTagPublicData(publicData, appConfig, subdomain) {
     const subdomains = Object.keys(appConfig.subdomains)
 
     publicData.supportedRegions = appConfig.supportedRegions
@@ -27,12 +27,15 @@ const publicFilter = function BikeTagPublicData(publicData, appConfig, subdomain
             }
 
             return out
-        },
-        {},
+        }, {},
     )
 
     return publicData
 }
+
+const appStarted = function BikeTagAppStarted() {}
+
+const onConfigurationLoad = function BikeTagConfigurationLoad(config) {}
 
 const onLoad = async function onLoad(config) {	
 	// Create a single supabase client for interacting with your database
@@ -67,8 +70,9 @@ const onLoad = async function onLoad(config) {
 }
 
 const app = sexpress({
-    publicFilter,
+    onPageDataRequest,
+    onConfigurationLoad,
 	onLoad,
 })
 
-app.run()
+app.run(appStarted)

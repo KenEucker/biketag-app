@@ -365,7 +365,7 @@ class bikeTagController {
 			}
 
 			/// Send new tag browser notification
-			this.app.hook('notifications:notify', {title: 'A new BikeTag has been posted!', message: {tagnumber, game: subdomain} })
+			this.app.hook('notifications:notify', {title: 'A new BikeTag has been posted!', message: `${subdomain} #${tagnumber}`, domain: subdomain })
 
 			return sendEmailOnceImagesLoad()
 		} catch (error) {
