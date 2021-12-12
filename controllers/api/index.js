@@ -37,8 +37,6 @@ class bikeTagController {
             /// It's a valid expiry
         }
 
-        console.log({ expiry, validExpiry })
-
         subdomainConfig.requestSubdomain = subdomain
         subdomainConfig.host = host
         subdomainConfig.viewsFolder = this.app.config.viewsFolder
