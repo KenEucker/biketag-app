@@ -27,7 +27,7 @@
         "imgur": "^1.0.0",
         "node-cache": "^5.1.2",
         "path": "^0.12.7",
-        "sexpress": "^0.7.99",
+        "sexpress": "^0.7.101",
         "snoowrap": "^1.22.0",
         "web-push": "^3.4.5"
     },
