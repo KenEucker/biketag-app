@@ -1,9 +1,8 @@
 import { builder, Handler } from '@netlify/functions'
 
-const myHandler: Handler = async (event) => {
-  /// Send new found image queued notification
-  /// Send new queued tag submitted notification
+const formHandler: Handler = async (event) => {
   console.log({ event })
+  /// TODO: route to correct form action
 
   return {
     data: JSON.stringify({ event }),
@@ -11,6 +10,6 @@ const myHandler: Handler = async (event) => {
   }
 }
 
-const handler = builder(myHandler)
+const handler = builder(formHandler)
 
 export { handler }

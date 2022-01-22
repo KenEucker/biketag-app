@@ -7,8 +7,6 @@ import { extname } from "path";
 import { Game, Tag } from "biketag/lib/common/schema";
 import { Payload } from "biketag/lib/common/types";
 
-dotenv.config();
-
 const importPlayerPrefix = process.env.IMPORT_PLAYER_PREFIX || "";
 const overWriteExistingTags = process.env.OVERWRITE === "true";
 const imgurImagePrefix =
@@ -100,7 +98,7 @@ const getImgurUploadPaylod = (image: string, album: string, existing: any) => {
   };
 };
 
-const importBikeTags = async (client: BikeTagClient) => {
+const importBikeTagsHandler = async (client: BikeTagClient, opts: any) => {
   /// Get game data from the API
   const game = (await client.game(opts.game, { source: "sanity" })) as Game;
   let config = opts;
@@ -273,4 +271,4 @@ const importBikeTags = async (client: BikeTagClient) => {
   });
 };
 
-importBikeTags(biketag);
+export default importBikeTagsHandler

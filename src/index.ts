@@ -1,3 +1,3 @@
-import { BikeTagApp } from './client'
+import { BikeTagApp } from './server'
 
 export default BikeTagApp

@@ -9,8 +9,6 @@ import { PlaceInputType } from "@googlemaps/google-maps-services-js/dist/common"
 import { Game, Tag } from "biketag/lib/common/schema";
 
 const googleMapsClient = new GoogleMapsClient({});
-
-dotenv.config();
 const startingNumber = parseInt(process.env.START ?? '0')
 const overWriteExistingTags = process.env.OVERWRITE
 
@@ -118,32 +116,7 @@ function downloadBikeTagImages(tag: Tag): Promise<string>[] {
   return uploadPromises;
 }
 
-const opts = {
-  game: process.env.BIKETAG_GAME ?? "test",
-  imgur: {
-    clientId: process.env.IMGUR_CLIENT_ID,
-    clientSecret: process.env.IMGUR_CLIENT_SECRET,
-    accessToken: process.env.IMGUR_ACCESS_TOKEN,
-  },
-  sanity: {
-    useCdn: false,
-    token: process.env.SANITY_ACCESS_TOKEN,
-    projectId: process.env.SANITY_PROJECT_ID,
-    dataset: process.env.SANITY_DATASET,
-  },
-  reddit: {
-    subreddit: process.env.REDDIT_SUBREDDIT ?? "cyclepdx",
-    clientId: process.env.REDDIT_CLIENT_ID,
-    clientSecret: process.env.REDDIT_CLIENT_SECRET,
-    username: process.env.REDDIT_USERNAME,
-    password: process.env.REDDIT_PASSWORD,
-  },
-  googleApiKey: process.env.GOOGLE_API_KEY,
-};
-
-const fromClass = new BikeTagClient(opts);
-
-const migrateBikeTag = async (client: BikeTagClient) => {
+const migrateBikeTagHandler = async (client: BikeTagClient, opts: any) => {
   /// Get game data from the API
   const game = await client.game(opts.game, { source: 'sanity' }) as Game;
 
@@ -280,4 +253,4 @@ const migrateBikeTag = async (client: BikeTagClient) => {
   });
 };
 
-migrateBikeTag(fromClass);
+export default migrateBikeTagHandler
