@@ -1,6 +1,6 @@
 import { BikeTagClient, BikeTagConfiguration, BikeTagCredentials } from 'biketag'
 import { EventEmitter } from 'events'
-import biketagApi from './api'
+import biketagApi from './functions'
 import { DomainInfo, getBikeTagClientOpts, getDomainInfo } from './common'
 import request from 'request'
 import { BikeTagServerConfiguration } from 'biketag/lib/common/types'
@@ -20,11 +20,11 @@ export class BikeTagApp extends EventEmitter {
   }
 
   protected getBikeTagClientOpts(req: request.Request): BikeTagServerConfiguration {
-    return getBikeTagClientOpts(req)
+    return getBikeTagClientOpts(req) as BikeTagServerConfiguration
   }
 
   protected getClient(req: request.Request): { client: BikeTagClient, opts: BikeTagServerConfiguration } {
-    const opts =  getBikeTagClientOpts(req)
+    const opts =  getBikeTagClientOpts(req) as BikeTagServerConfiguration
     const client = this.client ?? new BikeTagClient(opts)
 
     return {
@@ -39,23 +39,23 @@ export class BikeTagApp extends EventEmitter {
   /// ****************************  Handler Methods   ********************************* ///
   game(req: request.Request, payload?: getGamePayload) {
     const { client, opts } = this.getClient(req)
-    return biketagApi.Game(client, payload ?? (opts as getGamePayload))
+    return biketagApi.Game(client, payload ?? (opts as unknown as getGamePayload))
   }
   tags(req: request.Request, payload?: getTagsPayload) {
     const { client, opts } = this.getClient(req)
-    return biketagApi.Tags(client, payload ?? (opts as getTagsPayload))
+    return biketagApi.Tags(client, payload ?? (opts as unknown as getTagsPayload))
   }
   ambassadors(req: request.Request, payload?: getAmbassadorsPayload) {
     const { client, opts } = this.getClient(req)
-    return biketagApi.Ambassadors(client, payload ?? (opts as getAmbassadorsPayload))
+    return biketagApi.Ambassadors(client, payload ?? (opts as unknown as getAmbassadorsPayload))
   }
   players(req: request.Request, payload?: getPlayersPayload) {
     const { client, opts } = this.getClient(req)
-    return biketagApi.Players(client, payload ?? (opts as getPlayersPayload))
+    return biketagApi.Players(client, payload ?? (opts as unknown as getPlayersPayload))
   }
   settings(req: request.Request) {
     const { client, opts } = this.getClient(req)
-    return biketagApi.Settings(client, opts as getSettingsPayload)
+    return biketagApi.Settings(client, opts as unknown as getSettingsPayload)
   }
   current(req: request.Request) {
     const { client, opts } = this.getClient(req)

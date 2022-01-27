@@ -3,3 +3,4 @@ lib
 _site
 dist
 *.DS_Store
+.netlify

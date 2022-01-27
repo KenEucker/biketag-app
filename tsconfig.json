@@ -1,17 +1,23 @@
 {
-  "include": ["src"],
-  "exclude": ["src/coverage/", "test/"],
-
   "compilerOptions": {
-    "experimentalDecorators": true,
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
-    "module": "es2020",
-    "target": "es2020",
-    "typeRoots": ["@types", "./node_modules/@types"],
-    "rootDir": "./src",
-    "outDir": "lib",
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "strict": true,
+    "sourceMap": false,
     "esModuleInterop": true,
-    "declaration": true,
-    "strictBindCallApply": true
-  }
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "ScriptHost", "dom"],
+    "types": ["./src/vue-shim", "./src/vuex-shim", "vite/client", "cypress"],
+    "plugins": [{ "name": "@vuedx/typescript-plugin-vue" }],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist", "public", "tests", "src/coverage/"]
 }
