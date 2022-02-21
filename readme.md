@@ -68,7 +68,11 @@
 
 </div>
 
-Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city][biketag]!
+Many thanks to those who have donated to the BikeTag Project. Thank you to Prime Digital Academy for the opportunity to collaborate on vNext of this BikeTag App project for managing BikeTag Games.
+
+Thank you to [Netlify][netlify] for providing a [free open source plan][netlify-opensource] for hosting.
+
+Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://client.org)!
 
 [twitter]: https://developer.twitter.com/en/docs/twitter-api
 [github]: https://github.com/sponsors/KenEucker
@@ -78,6 +82,8 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 [imgur]: https://www.npmjs.com/package/imgur/v/next
 [reddit]: https://www.npmjs.com/package/snoowrap
 [biketag]: https://biketag.org
+[netlify]: https://www.netlify.com
+[netlify-opensource]: https://www.netlify.com/legal/open-source-policy
 
 
 <div align="center">
@@ -99,6 +105,12 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
   Mentions powered by twitter.com
 
   [![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
+
+  ## Deployed on Netlify servers
+
+  <a href="https://www.netlify.com">
+    <img src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg" alt="Deploys by Netlify" />
+  </a>
 
   [biketag-logo]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-app-logo.jpg
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
