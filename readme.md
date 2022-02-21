@@ -37,7 +37,7 @@
 
 ## Side Quests
 
-  [ ] Develop a frontend component for BikeTag Admins to be able to change game settings (using BikeTag API/Sanity)
+  [ ] Develop a frontend component for BikeTag Admins to be able to create new and change existing game settings (using BikeTag API/Sanity)
   
   [ ] Develop a frontend component for BikeTag Admins to be able to edit/delete/upload BikeTag posts for a given game (using BikeTag API/Imgur)
   
@@ -57,7 +57,7 @@
   
   [ ] Develop a frontend component for BikeTag Admins to be able see site analytices (visits, posts, etc) (Using Netlfy API)
   
-  [ ] Develop a frontend component for BikeTag Admins to be able to see all game data in a table and be able to export the data (to images + JSON file)
+  [ ] Develop a frontend component for BikeTag Admins to be able to see all game data in a table and be able to export the data (to images + JSON file]
 
 </div>
 
