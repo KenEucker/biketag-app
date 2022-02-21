@@ -33,7 +33,7 @@
 
 [ ] Develop the serverless functions to support the process by which BikeTag Administrators (godmode) can grant API access to third-party BikeTag developers. (as with previous endeavors, this does not require a fully functional FE component)
 
-[ ] Develop the subscribe and notify serverless functions with complementing restful API endpoints in order for the BikeTag App (Vue) to register players (using Redis) for notifications and to send push notifications to those registered players of the BikeTag App (Vue).
+[ ] Develop the subscribe and notify serverless functions with complementing restful API endpoints in order for the BikeTag App (Vue) to register players (using Croquet.io) for notifications and to send push notifications to those registered players of the BikeTag App (Vue).
 
 
 </div>
