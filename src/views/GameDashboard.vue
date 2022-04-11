@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Banner from '../components/Banner.vue'
-import Breadcrumb from '../components/Breadcrumb.vue'
 import { Tag } from 'biketag/lib/common/schema'
 import { IonModal } from '@ionic/vue'
 import TagForm from '../components/TagForm.vue'
