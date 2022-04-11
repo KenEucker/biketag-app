@@ -8,6 +8,14 @@ const routes: Array<RouteRecordRaw> = [
       title: 'The BikeTag Game',
     },
   },
+  {
+    path: '/games',
+    component: () => import('@/views/Dashboard.vue')
+  },
+  {
+    path: '/games/:name',
+    component: () => import('@/views/GameDashboard.vue')
+  }
 ]
 
 const protectedRoutes: Array<RouteRecordRaw> = []
