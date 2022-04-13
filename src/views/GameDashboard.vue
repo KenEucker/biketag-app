@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Tag } from 'biketag/lib/common/schema'
 import { IonModal } from '@ionic/vue'
+import { useBikeTagApiStore } from '@/store/biketag';
+import { useRouter } from 'vue-router';
 import TagForm from '../components/TagForm.vue'
 
 const modalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
+const biketag = useBikeTagApiStore()
+biketag.setTagsFromGame(useRouter().currentRoute.value.params.name as string)
 
 const showModal = (index: number) => {
   selectedGameIndex.value = index
@@ -16,24 +19,15 @@ const closeModal = () => {
   modalIsOpen.value = false
 }
 
-const getAllTags = () => {
-    const gameName = ref.prototype.$route.params.name
-    return ref<Tag[]>()
-}
-const getLocalDateTime = (timestamp : number) => new Date(timestamp * 1000).toLocaleTimeString() 
-
-const tags = getAllTags()
+const getLocalDateTime = (timestamp : number) => new Date(timestamp * 1000).toLocaleTimeString()
 </script>
 
 <template>
   <div>
     <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal()">
-      <tag-form :tag="tags[selectedGameIndex]" @on-close="closeModal" />
+      <tag-form :tag="biketag.tags($route.params.name)[selectedGameIndex]" @on-close="closeModal" />
     </ion-modal>
 
-    <Breadcrumb breadcrumb="" />
-    <!--Banner get you to github repo-->
-    <Banner />
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
@@ -69,14 +63,14 @@ const tags = getAllTags()
             </thead>
 
             <tbody class="bg-white">
-              <tr v-for="(tag, index) in tags" :key="index">
+              <tr v-for="(tag, index) in biketag.tags($route.params.name)" :key="index">
 
-                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                <td  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
-                      <img
+                      <img v-if="tag.foundImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="tag.foundImage"
+                        :src="tag.foundImageUrl"
                         alt="Found Image"
                       />
                     </div>
@@ -92,12 +86,12 @@ const tags = getAllTags()
                   </div>
                 </td>
 
-                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                <td v-if="tag.mysteryPlayer" class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         class="w-10 h-10 rounded-full"
-                        :src="tag.mysteryImage"
+                        :src="tag.mysteryImageUrl"
                         alt="Mystery Image"
                       />
                     </div>

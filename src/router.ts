@@ -1,20 +1,30 @@
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
+  // {
+  //   path: '/',
+  //   component: () => import('@/views/Index.vue'),
+  //   meta: {
+  //     title: 'The BikeTag Game',
+  //   },
+  // },
   {
     path: '/',
-    component: () => import('@/views/Index.vue'),
-    meta: {
-      title: 'The BikeTag Game',
-    },
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
+    meta: { layout: 'Empty' },
   },
   {
     path: '/games',
-    component: () => import('@/views/Dashboard.vue')
+    name: 'GamesDashboard',
+    component: () => import('@/views/Dashboard.vue'),
+    meta: { layout: 'Dashboard' }
   },
   {
     path: '/games/:name',
-    component: () => import('@/views/GameDashboard.vue')
+    name: 'TagsDashboard',
+    component: () => import('@/views/GameDashboard.vue'),
+    meta: { layout: 'Dashboard' }
   }
 ]
 

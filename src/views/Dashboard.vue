@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Game } from 'biketag/lib/common/schema';
-import { IonModal } from '@ionic/vue'
+import { IonModal, IonIcon } from '@ionic/vue'
+import { useBikeTagApiStore } from '@/store/biketag';
 import GameForm from '../components/TagForm.vue'
 
 const modalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
+const biketag = useBikeTagApiStore()
+biketag.setGames()
 
 const showModal = (index: number) => {
   selectedGameIndex.value = index
@@ -15,48 +17,14 @@ const showModal = (index: number) => {
 const closeModal = () => {
   modalIsOpen.value = false
 }
-
-const getLogoUrl = (
-  logo: string,
-  size = '',
-  sanityBaseCDNUrl = 'https://cdn.sanity.io/images/x37ikhvs/production/'
-) => {
-  switch (size) {
-    case 'l':
-      size = 'h=512'
-      break
-    case 'm':
-      size = 'h=256'
-      break
-    case 's':
-      size = 'h=192'
-      break
-    default:
-      size = 'h=45'
-      break
-  }
-  return `${sanityBaseCDNUrl}${logo
-    .replace('image-', '')
-    .replace('-png', '.png')
-    .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
-}
-
-const getAllGames = () => {
-    return ref<Game[]>()
-}
-
-const games = getAllGames()
 </script>
 
 <template>
   <div>
     <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal()">
-      <game-form :tag="games[selectedGameIndex]" @on-close="closeModal" />
+      <game-form :tag="biketag.allGames[selectedGameIndex]" @on-close="closeModal" />
     </ion-modal>
 
-    <Breadcrumb breadcrumb="" />
-    <!--Banner get you to github repo-->
-    <Banner />
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
@@ -87,13 +55,13 @@ const games = getAllGames()
             </thead>
 
             <tbody class="bg-white">
-              <tr v-for="(game, index) in games" :key="index">
+              <tr v-for="(game, index) in biketag.allGames" :key="index">
                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         class="w-10 h-10 rounded-full"
-                        :src="getLogoUrl(game.logo)"
+                        :src="biketag.getLogoUrl(game.logo)"
                         :alt="`${game.name} Logo`"
                       />
                     </div>
@@ -113,8 +81,8 @@ const games = getAllGames()
                   <div class="text-sm leading-5 text-gray-900">
                     {{ game.region }}
                   </div>
-                  <div class="text-sm leading-5 text-gray-500">
-                    Lat : {{ game.boundary.geo.lat }} Long : {{ game.boundary.geo.long }}
+                  <div v-if="Object.keys(game.boundary).length" class="text-sm leading-5 text-gray-500">
+                    Lat : {{ game.boundary.lat }} Long : {{ game.boundary.lng }}
                   </div>
                 </td>
 
@@ -130,7 +98,9 @@ const games = getAllGames()
                   <div class="flex justify-around">
                     <span class="flex justify-center text-yellow-500">
                       <a @click="() => showModal(index)" href="#" class="px-2 mx-2 rounded-md"
-                        ><svg
+                        >
+                        <!-- <ion-icon name="create"></ion-icon> -->
+                        <svg
                           xmlns="http://www.w3.org/2000/svg"
                           class="w-5 h-5 text-green-700"
                           viewBox="0 0 20 20"
@@ -146,7 +116,7 @@ const games = getAllGames()
                           />
                         </svg>
                       </a>
-                      <a @click="() => $router.push(`/game/${game.name}`)">
+                      <a @click="() => $router.push(`/games/${game.name}`)">
                         <svg  
                           xmlns="http://www.w3.org/2000/svg"
                           class="w-5 h-5 text-blue-700"
