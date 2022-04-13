@@ -1,5 +1,3 @@
-import { Source } from './../../node_modules/postcss-js/node_modules/postcss/lib/node.d';
-// @ts-check
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import BikeTagClient from 'biketag'
 import { Game, Tag } from 'biketag/lib/common/schema'
@@ -77,6 +75,19 @@ export const useBikeTagApiStore = defineStore({
       if (this.games.length == 0) {
         this.setGames().then(() => {
           const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
+          if (game) {
+            biketagClient.getTags(undefined, {
+              hash: game.mainhash,
+              source: 'imgur'
+            }).then((d) => {
+              console.log(d)
+              this.tagsFromGames[gameName] = d.data
+            }).catch((e) => console.log(e))
+          }
+        })
+      } else {
+        const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
+        if (game) {
           biketagClient.getTags(undefined, {
             hash: game.mainhash,
             source: 'imgur'
@@ -85,18 +96,7 @@ export const useBikeTagApiStore = defineStore({
             this.tagsFromGames[gameName] = d.data
           }).catch((e) => console.log(e))
         }
-        )
-      } else {
-        const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
-        biketagClient.getTags(undefined, {
-          hash: game.mainhash,
-          source: 'imgur'
-        }).then((d) => {
-          console.log(d)
-          this.tagsFromGames[gameName] = d.data
-        }).catch((e) => console.log(e))
       }
-
     },
     getLogoUrl(
       logo: string,

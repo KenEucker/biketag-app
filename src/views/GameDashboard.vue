@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IonModal } from '@ionic/vue'
+import { IonModal, IonIcon, IonButton } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag';
 import { useRouter } from 'vue-router';
 import TagForm from '../components/TagForm.vue'
+import { create } from 'ionicons/icons'
 
 const modalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
@@ -17,6 +18,11 @@ const showModal = (index: number) => {
 
 const closeModal = () => {
   modalIsOpen.value = false
+}
+
+const getThumbnail = (imgUrl : string) => {
+  const imgType = imgUrl.lastIndexOf('.')
+  return `${imgUrl.slice(0, imgType)}s${imgUrl.slice(imgType)}`  
 }
 
 const getLocalDateTime = (timestamp : number) => new Date(timestamp * 1000).toLocaleTimeString()
@@ -70,37 +76,37 @@ const getLocalDateTime = (timestamp : number) => new Date(timestamp * 1000).toLo
                     <div class="flex-shrink-0 w-10 h-10">
                       <img v-if="tag.foundImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="tag.foundImageUrl"
+                        :src="getThumbnail(tag.foundImageUrl)"
                         alt="Found Image"
                       />
                     </div>
 
                     <div class="ml-4">
-                      <div class="text-sm font-medium leading-5 text-gray-900">
+                      <div v-if="tag.foundPlayer" class="text-sm font-medium leading-5 text-gray-900">
                         {{ tag.foundPlayer }}
                       </div>
-                      <div class="text-sm leading-5 text-gray-500">
+                      <div v-if="tag.foundTime" class="text-sm leading-5 text-gray-500">
                         {{ getLocalDateTime(tag.foundTime) }}
                       </div>
                     </div>
                   </div>
                 </td>
 
-                <td v-if="tag.mysteryPlayer" class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
-                      <img
+                      <img v-if="tag.mysteryImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="tag.mysteryImageUrl"
+                        :src="getThumbnail(tag.mysteryImageUrl)"
                         alt="Mystery Image"
                       />
                     </div>
 
                     <div class="ml-4">
-                      <div class="text-sm font-medium leading-5 text-gray-900">
+                      <div v-if="tag.mysteryPlayer" class="text-sm font-medium leading-5 text-gray-900">
                         {{ tag.mysteryPlayer }}
                       </div>
-                      <div class="text-sm leading-5 text-gray-500">
+                      <div v-if="tag.mysteryTime" class="text-sm leading-5 text-gray-500">
                         {{ getLocalDateTime(tag.mysteryTime) }}
                       </div>
                     </div>
@@ -127,23 +133,9 @@ const getLocalDateTime = (timestamp : number) => new Date(timestamp * 1000).toLo
                 >
                   <div class="flex justify-around">
                     <span class="flex justify-center text-yellow-500">
-                      <a @click="() => showModal(index)" href="#" class="px-2 mx-2 rounded-md"
-                        ><svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="w-5 h-5 text-green-700"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
-                          />
-                          <path
-                            fill-rule="evenodd"
-                            d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </a>
+                      <ion-button fill="clear" @click="() => showModal(index)" class="px-2 mx-2 rounded-md">
+                        <ion-icon :icon="create"></ion-icon>
+                      </ion-button>
                     </span>
                   </div>
                 </td>

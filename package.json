@@ -30,7 +30,7 @@
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
     "convert": "tsoa spec-and-routes",
-    "dev": "netlify dev",
+    "dev": "netlify dev --port 8080",
     "build": "vite build",
     "preview": "vite build && vite preview",
     "serve": "vite",

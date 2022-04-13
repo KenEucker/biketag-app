@@ -4,11 +4,17 @@ import {
   IonContent,
   IonButton,
   IonButtons,
-  // IonBackButton,
   IonHeader,
   IonTitle,
   IonToolbar,
+  IonLabel,
+  IonIcon,
+  IonList,
+  IonListHeader,
+  IonItem,
+  IonInput,
 } from '@ionic/vue'
+import { closeCircleOutline } from 'ionicons/icons'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   tag: {
@@ -17,7 +23,9 @@ const props = defineProps({
   },
 })
 const tag = ref({...props.tag});
-const updateTag = () => {}
+const updateTag = () => {
+  console.log("update")
+}
 const capitalizeFirstLetter = (str : string) => str.charAt(0).toUpperCase() + str.slice(1);
 const typeEqualsTo = (value : any, type : string) => {
   return typeof(value) === type
@@ -27,19 +35,21 @@ const typeEqualsTo = (value : any, type : string) => {
 <template>
   <ion-header>
     <ion-toolbar>
-      <ion-buttons>
-        <ion-button @click="emit('onClose')">CLOSE</ion-button>
+      <ion-buttons slot="end">
+        <ion-button @click="emit('onClose')">
+          <ion-icon :icon="closeCircleOutline" />
+        </ion-button>
       </ion-buttons>
-      <ion-title>About Modal</ion-title>
+      <ion-title>Tag Form</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding">
-    <ion-list lines="full" class="ion-no-margin">
-      <form @submit.prevent="updateTag">
+  <ion-content class="modal-content">
+    <form @submit.prevent="updateTag">
+      <ion-list lines="full" class="ion-no-margin">
         <ion-list>
           <template v-for="key in Object.keys(tag)">
             <ion-item v-if="tag[key] && (typeEqualsTo(tag[key], 'string') || typeEqualsTo(tag[key], 'number'))" :key="key">
-              <ion-label> {{ capitalizeFirstLetter(key) }} </ion-label>
+              <ion-label> {{ capitalizeFirstLetter(key) }} : </ion-label>
               <ion-input v-if="typeEqualsTo(tag[key], 'number')" type="number" v-model="tag[key]" />
               <ion-input v-else v-model="tag[key]" />
             </ion-item>
@@ -50,20 +60,24 @@ const typeEqualsTo = (value : any, type : string) => {
           <ion-list-header lines="full">
             <ion-label> GPS </ion-label>
           </ion-list-header>
-          <ion-item>
-            <ion-label> Latitude  </ion-label>
-            <ion-input type="number" v-model="tag.gps.lat" />
+          <ion-item class="ion-margin-start">
+            <ion-label> Latitude : </ion-label>
+            <ion-input v-model="tag.gps.lat" />
           </ion-item>
-          <ion-item>
-            <ion-label> Longitude  </ion-label>
-            <ion-input type="number" v-model="tag.gps.long" />
+          <ion-item class="ion-margin-start">
+            <ion-label> Longitude : </ion-label>
+            <ion-input v-model="tag.gps.long" />
           </ion-item>
-          <ion-item>
-            <ion-label> Altitude  </ion-label>
-            <ion-input type="number" v-model="tag.gps.alt" />
+          <ion-item class="ion-margin-start">
+            <ion-label> Altitude : </ion-label>
+            <ion-input v-model="tag.gps.alt" />
           </ion-item>
         </ion-list>
-      </form>
-    </ion-list>
+      </ion-list>
+
+      <ion-item>
+        <ion-button slot="end" type="submit"> Update </ion-button>
+      </ion-item>
+    </form>
   </ion-content>
 </template>

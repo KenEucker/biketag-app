@@ -1,0 +1,9 @@
+@import './variables.scss';
+
+ion-icon {
+  font-size: 30px;
+}
+
+.modal-content {
+  height: calc(var(--width) - 56px) !important;
+}
