@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, defineProps } from 'vue'
+import { ref, inject, defineEmits, defineProps } from 'vue'
 import {
   IonContent,
   IonButton,
@@ -16,6 +16,7 @@ import {
 } from '@ionic/vue'
 import { closeCircleOutline } from 'ionicons/icons'
 import { useBikeTagApiStore } from '@/store/biketag'
+// import { Tag } from 'biketag/lib/common/schema';
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   tag: {
@@ -27,10 +28,33 @@ const props = defineProps({
     default: null
   }
 })
-const tag = ref({...props.tag});
+const tag = ref({...props.tag})// as Tag);
 const biketag = useBikeTagApiStore()
+const toast: any = inject('toast')
+console.log(toast)
+const readOnly = [
+  'tagnumber',
+  'name',
+  'slug',
+  'foundTime',
+  'mysteryTime',
+  'mysteryImageUrl',
+  'foundImageUrl',
+]
 const updateTag = () => {
-  biketag.updateTag(tag.value, props.gameName)
+  const res = biketag.updateTag(tag.value, props.gameName)
+  if (res) {
+    console.log(res)
+    res.then(() => toast.open({
+      message: `Tag #${tag.value.tagnumber} of BikeTag ${props.gameName} updated!`,
+      type: 'success',
+      position: 'top',
+    })).catch((e) => toast.open({
+      message: `Error #${tag.value.tagnumber} ${e}`,
+      type: 'error',
+      position: 'top',
+    }))
+  }
 }
 const capitalizeFirstLetter = (str : string) => str.charAt(0).toUpperCase() + str.slice(1);
 const typeEqualsTo = (value : any, type : string) => {
@@ -54,10 +78,10 @@ const typeEqualsTo = (value : any, type : string) => {
       <ion-list lines="full" class="ion-no-margin">
         <ion-list>
           <template v-for="key in Object.keys(tag)">
-            <ion-item v-if="tag[key] && (typeEqualsTo(tag[key], 'string') || typeEqualsTo(tag[key], 'number'))" :key="key">
-              <ion-label> {{ capitalizeFirstLetter(key) }} : </ion-label>
-              <ion-input v-if="typeEqualsTo(tag[key], 'number')" type="number" v-model="tag[key]" />
-              <ion-input v-else v-model="tag[key]" />
+            <ion-item v-if="tag[key] != undefined && (typeEqualsTo(tag[key], 'string') || typeEqualsTo(tag[key], 'number'))" :key="key">
+              <ion-label position="floating"> {{ capitalizeFirstLetter(key) }} </ion-label>
+              <ion-input :readonly="readOnly.includes(key)" v-if="typeEqualsTo(tag[key], 'number')" type="number" v-model="tag[key]" />
+              <ion-input :readonly="readOnly.includes(key)" v-else v-model="tag[key]" />
             </ion-item>
           </template>
         </ion-list>
@@ -67,15 +91,15 @@ const typeEqualsTo = (value : any, type : string) => {
             <ion-label> GPS </ion-label>
           </ion-list-header>
           <ion-item class="ion-margin-start">
-            <ion-label> Latitude : </ion-label>
+            <ion-label position="floating"> Latitude </ion-label>
             <ion-input v-model="tag.gps.lat" />
           </ion-item>
           <ion-item class="ion-margin-start">
-            <ion-label> Longitude : </ion-label>
+            <ion-label position="floating"> Longitude </ion-label>
             <ion-input v-model="tag.gps.long" />
           </ion-item>
           <ion-item class="ion-margin-start">
-            <ion-label> Altitude : </ion-label>
+            <ion-label position="floating"> Altitude </ion-label>
             <ion-input v-model="tag.gps.alt" />
           </ion-item>
         </ion-list>

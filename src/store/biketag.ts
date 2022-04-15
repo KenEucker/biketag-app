@@ -1,3 +1,4 @@
+import { inject } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import BikeTagClient from 'biketag'
 import { Game, Tag } from 'biketag/lib/common/schema'
@@ -10,7 +11,7 @@ interface BikeTagAppState {
   tagsFromGames: TagsFromGames
 }
 
-const getBikeTagAdminConfig = (admin: boolean = true
+const getBikeTagConfig = (admin: boolean = true
 ) => {
   const opts: any = {
     game: undefined,
@@ -35,8 +36,7 @@ const getBikeTagAdminConfig = (admin: boolean = true
 
   return opts
 }
-const biketagAdmin = new BikeTagClient(getBikeTagAdminConfig())
-const biketagClient = new BikeTagClient(getBikeTagAdminConfig(false))
+const biketagClient = new BikeTagClient(getBikeTagConfig(false))
 export const useBikeTagApiStore = defineStore({
   id: 'biketagAppState',
   state: (): BikeTagAppState => ({
@@ -65,8 +65,7 @@ export const useBikeTagApiStore = defineStore({
           const games = d.data as unknown as Game[]
           const supportedGames: Game[] = games.filter(
             (g: Game) =>
-              g.mainhash?.length && g.queuehash?.length && g.logo?.length
-            //g.mainhash?.length && g.archivehash?.length && g.queuehash?.length && g.logo?.length
+              g.mainhash?.length && g.archivehash?.length && g.queuehash?.length && g.logo?.length
           )
           this.games = supportedGames
         }
@@ -80,6 +79,7 @@ export const useBikeTagApiStore = defineStore({
           const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
           if (game) {
             biketagClient.getTags(undefined, {
+              game: game.name,
               hash: game.mainhash,
               source: 'imgur'
             }).then((d) => {
@@ -92,6 +92,7 @@ export const useBikeTagApiStore = defineStore({
         const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
         if (game) {
           biketagClient.getTags(undefined, {
+            game: game.name,
             hash: game.mainhash,
             source: 'imgur'
           }).then((d) => {
@@ -104,8 +105,11 @@ export const useBikeTagApiStore = defineStore({
     updateTag(tag: Tag, gameName: string) {
       const game = this.getGame(gameName)
       if (game) {
-        biketagAdmin.updateTag({ ...tag, hash: game.archivehash }).then((v) => console.log(v)).catch((e) => console.log(e))
-        biketagAdmin.updateTag({ ...tag, hash: game.mainhash }).then((v) => console.log(v)).catch((e) => console.log(e))
+        const adminConfig = getBikeTagConfig(true)
+        adminConfig.game = game?.name.toLowerCase()
+        adminConfig.imgur.hash = game.mainhash
+        const biketagAdmin = new BikeTagClient(adminConfig)
+        return biketagAdmin.updateTag(tag)
       }
     },
     getLogoUrl(

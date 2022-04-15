@@ -15,7 +15,6 @@ const { isOpen } = useSidebar()
 const notificationOpen = ref(false)
 const auth : any = inject('auth')
 const logout = () => {
-  console.log(window.location.origin)
   auth.logout({
     returnTo: window.location.origin,
   })

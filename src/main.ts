@@ -5,6 +5,7 @@ import { createHead } from '@vueuse/head'
 import { store } from './store'
 import { createPinia } from 'pinia'
 import { Auth0Plugin } from './auth'
+import VueToast from 'vue-toast-notification'
 import './assets/index.postcss'
 // import './index.css'
 
@@ -27,6 +28,7 @@ import '@ionic/vue/css/flex-utils.css'
 import '@ionic/vue/css/display.css'
 
 /* Theme */
+import 'vue-toast-notification/dist/theme-sugar.css'
 import './theme/main.scss'
 
 const head = createHead()
@@ -42,13 +44,14 @@ const auth0Opts = {
   },
 }
 
-
 app.use(IonicVue)
 app.use(store)
 app.use(router)
 app.use(head)
 app.use(createPinia())
 app.use(Auth0Plugin, auth0Opts)
+app.use(VueToast)
+app.provide('toast', app.config.globalProperties.$toast)
 app.provide('auth', app.config.globalProperties.$auth)
 
 app.mount('#app')

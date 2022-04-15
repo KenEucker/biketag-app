@@ -51,7 +51,8 @@
     "@ionic/vue": "^6.0.13",
     "pinia": "^2.0.12",
     "tailwindcss": "^3.0.23",
-    "@auth0/auth0-spa-js": "^1.19.4"
+    "@auth0/auth0-spa-js": "^1.19.4",
+    "vue-toast-notification": "^3.0.0"
   },
   "devDependencies": {
     "@cypress/vite-dev-server": "~2.2",

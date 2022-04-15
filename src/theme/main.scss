@@ -12,3 +12,10 @@ ion-icon {
   font-size: 20px;
   margin-right: 12px;
 }
+
+.center {
+  justify-content: end;
+  align-items: center;
+  display: flex;
+  padding: 0;
+}
