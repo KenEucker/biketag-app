@@ -4,6 +4,7 @@ import router from './router'
 import { createHead } from '@vueuse/head'
 import { store } from './store'
 import { createPinia } from 'pinia'
+import { Auth0Plugin } from './auth'
 import './assets/index.postcss'
 // import './index.css'
 
@@ -30,11 +31,24 @@ import './theme/main.scss'
 
 const head = createHead()
 const app = createApp(App)
+const auth0Opts = {
+  domain: process.env.A_DOMAIN,
+  client_id: process.env.A_CID,
+  audience: process.env.A_AUDIENCE,
+  onRedirectCallback: (appState: any) => {
+    router.push(
+      appState && appState.targetUrl ? appState.targetUrl : window.location.pathname
+    )
+  },
+}
+
 
 app.use(IonicVue)
 app.use(store)
 app.use(router)
 app.use(head)
 app.use(createPinia())
+app.use(Auth0Plugin, auth0Opts)
+app.provide('auth', app.config.globalProperties.$auth)
 
 app.mount('#app')

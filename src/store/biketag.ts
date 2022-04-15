@@ -47,6 +47,9 @@ export const useBikeTagApiStore = defineStore({
     allGames: (state: BikeTagAppState): Array<Game> => state.games,
     tags: (state: BikeTagAppState): Function => {
       return (gameName: string) => state.tagsFromGames[gameName]
+    },
+    getGame: (state: BikeTagAppState): Function => {
+      return (gameName: string) => state.games.filter((val) => val.name == gameName)[0]
     }
   },
   actions: {
@@ -96,6 +99,13 @@ export const useBikeTagApiStore = defineStore({
             this.tagsFromGames[gameName] = d.data
           }).catch((e) => console.log(e))
         }
+      }
+    },
+    updateTag(tag: Tag, gameName: string) {
+      const game = this.getGame(gameName)
+      if (game) {
+        biketagAdmin.updateTag({ ...tag, hash: game.archivehash }).then((v) => console.log(v)).catch((e) => console.log(e))
+        biketagAdmin.updateTag({ ...tag, hash: game.mainhash }).then((v) => console.log(v)).catch((e) => console.log(e))
       }
     },
     getLogoUrl(

@@ -15,16 +15,22 @@ import {
   IonInput,
 } from '@ionic/vue'
 import { closeCircleOutline } from 'ionicons/icons'
+import { useBikeTagApiStore } from '@/store/biketag'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   tag: {
     type: Object,
     default: null,
   },
+  gameName: {
+    type: String,
+    default: null
+  }
 })
 const tag = ref({...props.tag});
+const biketag = useBikeTagApiStore()
 const updateTag = () => {
-  console.log("update")
+  biketag.updateTag(tag.value, props.gameName)
 }
 const capitalizeFirstLetter = (str : string) => str.charAt(0).toUpperCase() + str.slice(1);
 const typeEqualsTo = (value : any, type : string) => {

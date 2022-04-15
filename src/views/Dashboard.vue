@@ -80,10 +80,10 @@ const closeModal = () => {
 
                 <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                   <div class="text-sm leading-5 text-gray-900">
-                    {{ game.region }}
+                    {{ game.region.description }}
                   </div>
                   <div v-if="Object.keys(game.boundary).length" class="text-sm leading-5 text-gray-500">
-                    Lat : {{ game.boundary.lat }} Long : {{ game.boundary.lng }}
+                    Lat : {{ game.boundary.lat }} Long : {{ game.boundary.long }}
                   </div>
                 </td>
 

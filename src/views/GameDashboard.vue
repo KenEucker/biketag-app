@@ -31,7 +31,7 @@ const getLocalDateTime = (timestamp : number) => new Date(timestamp * 1000).toLo
 <template>
   <div>
     <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal()">
-      <tag-form :tag="biketag.tags($route.params.name)[selectedGameIndex]" @on-close="closeModal" />
+      <tag-form :gameName="($route.params.name as string)" :tag="biketag.tags($route.params.name)[selectedGameIndex]" @on-close="closeModal" />
     </ion-modal>
 
     <div class="mt-8"></div>
