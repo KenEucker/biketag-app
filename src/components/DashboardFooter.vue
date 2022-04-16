@@ -6,7 +6,9 @@ const currentYear = ref<number>(new Date().getFullYear())
 </script>
 
 <template>
-  <ion-footer class="items-center justify-between w-full px-8 py-3 border-t-2 lg:flex">
+  <ion-footer
+    class="items-center justify-between w-full px-8 py-3 border-t-2 lg:flex"
+  >
     <p class="mb-2 lg:mb-0">© Copyright {{ currentYear }}</p>
 
     <div class="flex">

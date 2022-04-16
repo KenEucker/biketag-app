@@ -17,8 +17,8 @@ const routes: Array<RouteRecordRaw> = [
   // },
   {
     path: '/',
-    redirect: '/games'
-  }
+    redirect: '/games',
+  },
   // {
   //   path: '/games',
   //   name: 'GamesDashboard',
@@ -39,15 +39,15 @@ const protectedRoutes: Array<RouteRecordRaw> = [
     name: 'GamesDashboard',
     beforeEnter: authGuard,
     component: () => import('@/views/Dashboard.vue'),
-    meta: { layout: 'Dashboard' }
+    meta: { layout: 'Dashboard' },
   },
   {
     path: '/games/:name',
     name: 'TagsDashboard',
     beforeEnter: authGuard,
     component: () => import('@/views/GameDashboard.vue'),
-    meta: { layout: 'Dashboard' }
-  }
+    meta: { layout: 'Dashboard' },
+  },
 ]
 
 const router = createRouter({

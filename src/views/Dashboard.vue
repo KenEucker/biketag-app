@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { IonModal, IonIcon, IonButton } from '@ionic/vue'
-import { useBikeTagApiStore } from '@/store/biketag';
-import GameForm from '../components/GameForm.vue'
-import { create, linkOutline } from 'ionicons/icons'
+import { ref } from "vue";
+import { IonModal, IonIcon, IonButton } from "@ionic/vue";
+import { useBikeTagApiStore } from "@/store/biketag";
+import GameForm from "../components/GameForm.vue";
+import { create, linkOutline } from "ionicons/icons";
 
-const modalIsOpen = ref(false)
-const selectedGameIndex = ref(0)
-const biketag = useBikeTagApiStore()
-biketag.setGames()
+const modalIsOpen = ref(false);
+const selectedGameIndex = ref(0);
+const biketag = useBikeTagApiStore();
+biketag.setGames();
 
 const showModal = (index: number) => {
-  selectedGameIndex.value = index
-  modalIsOpen.value = true
-}
+  selectedGameIndex.value = index;
+  modalIsOpen.value = true;
+};
 
 const closeModal = () => {
-  modalIsOpen.value = false
-}
+  modalIsOpen.value = false;
+};
 </script>
 
 <template>
@@ -49,7 +49,7 @@ const closeModal = () => {
                 <th
                   class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
-                  Hashes
+                  Main Album Hash
                 </th>
                 <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
               </tr>
@@ -82,8 +82,11 @@ const closeModal = () => {
                   <div class="text-sm leading-5 text-gray-900">
                     {{ game.region.description }}
                   </div>
-                  <div v-if="Object.keys(game.boundary).length" class="text-sm leading-5 text-gray-500">
-                    Lat : {{ game.boundary.lat }} Long : {{ game.boundary.long }}
+                  <div
+                    v-if="Object.keys(game.boundary).length"
+                    class="text-sm leading-5 text-gray-500"
+                  >
+                    Lat : {{ game.boundary.lat }} Long : {{ game.boundary.lng }}
                   </div>
                 </td>
 
@@ -98,10 +101,17 @@ const closeModal = () => {
                 >
                   <div class="flex justify-around">
                     <span class="flex justify-center text-yellow-500">
-                      <ion-button fill="clear" @click.prevent="() => showModal(index)" class="px-2 mx-2 rounded-md">
+                      <ion-button
+                        fill="clear"
+                        @click.prevent="() => showModal(index)"
+                        class="px-2 mx-2 rounded-md"
+                      >
                         <ion-icon :icon="create"></ion-icon>
                       </ion-button>
-                      <ion-button fill="clear" @click.prevent="() => $router.push(`/games/${game.name}`)">
+                      <ion-button
+                        fill="clear"
+                        @click.prevent="() => $router.push(`/games/${game.name}`)"
+                      >
                         <ion-icon :icon="linkOutline"></ion-icon>
                       </ion-button>
                     </span>

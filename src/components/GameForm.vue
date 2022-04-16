@@ -16,7 +16,13 @@ import {
   IonCol,
   IonRow,
 } from '@ionic/vue'
-import { closeCircleOutline, trashOutline, personAddOutline, addCircleOutline, gameControllerSharp } from 'ionicons/icons'
+import {
+  closeCircleOutline,
+  trashOutline,
+  personAddOutline,
+  addCircleOutline,
+  gameControllerSharp,
+} from 'ionicons/icons'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
 const emit = defineEmits(['onClose'])
 const props = defineProps({
@@ -25,41 +31,42 @@ const props = defineProps({
     default: null,
   },
 })
-const game = ref({...props.game}); //as Game);
-(() => {
-  const sett = {}//: settingsArray = {}
+const game = ref({ ...props.game }) //as Game);
+;(() => {
+  const sett = {} //: settingsArray = {}
   Object.assign(sett, game.value.settings)
   game.value.settings = sett
 })()
 const settings = computed(() => Object.keys(game.value.settings))
-const newAmbassador = ref("")
+const newAmbassador = ref('')
 const addNewAmbassador = () => {
   if (newAmbassador.value) {
     game.value.ambassadors.push(newAmbassador.value)
-    newAmbassador.value = ""
+    newAmbassador.value = ''
   }
 }
 const removeAmbassador = (index: number) => {
   game.value.ambassadors.splice(index, 1)
 }
-const newSettingKey = ref("")
-const newSettingValue = ref("")
+const newSettingKey = ref('')
+const newSettingValue = ref('')
 const addNewSetting = () => {
   if (newSettingKey.value) {
     game.value.settings[newSettingKey.value] = newSettingValue.value
   }
-  newSettingKey.value = ""
-  newSettingValue.value = ""
+  newSettingKey.value = ''
+  newSettingValue.value = ''
 }
 const removeSetting = (name: string) => {
   delete game.value.settings[name]
 }
 const updateGame = () => {
-  console.log("update")
+  console.log('update')
 }
-const capitalizeFirstLetter = (str : string) => str.charAt(0).toUpperCase() + str.slice(1);
-const typeEqualsTo = (value : any, type : string) => {
-  return typeof(value) === type
+const capitalizeFirstLetter = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1)
+const typeEqualsTo = (value: any, type: string) => {
+  return typeof value === type
 }
 </script>
 
@@ -78,9 +85,22 @@ const typeEqualsTo = (value : any, type : string) => {
     <form @submit.prevent="updateGame">
       <ion-list>
         <template v-for="key in Object.keys(game)">
-          <ion-item v-if="game[key] != undefined && (typeEqualsTo(game[key], 'string') || typeEqualsTo(game[key], 'number'))" :key="key">
-            <ion-label position="floating"> {{ capitalizeFirstLetter(key) }} </ion-label>
-            <ion-input v-if="typeEqualsTo(game[key], 'number')" type="number" v-model="game[key]" />
+          <ion-item
+            v-if="
+              game[key] != undefined &&
+              (typeEqualsTo(game[key], 'string') ||
+                typeEqualsTo(game[key], 'number'))
+            "
+            :key="key"
+          >
+            <ion-label position="floating">
+              {{ capitalizeFirstLetter(key) }}
+            </ion-label>
+            <ion-input
+              v-if="typeEqualsTo(game[key], 'number')"
+              type="number"
+              v-model="game[key]"
+            />
             <ion-input v-else v-model="game[key]" />
           </ion-item>
         </template>
@@ -90,21 +110,25 @@ const typeEqualsTo = (value : any, type : string) => {
         <ion-list-header lines="full">
           <ion-label> Ambassadors </ion-label>
         </ion-list-header>
-        <ion-item class="ion-margin-start" v-for="(ambassador, index) in game.ambassadors" :key="`amb_${index}`">
+        <ion-item
+          class="ion-margin-start"
+          v-for="(ambassador, index) in game.ambassadors"
+          :key="`amb_${index}`"
+        >
           <ion-input v-model="game.ambassadors[index]" />
           <ion-button fill="clear" @click="() => removeAmbassador(index)">
             <ion-icon :icon="trashOutline" />
           </ion-button>
         </ion-item>
         <ion-item class="ion-margin-start">
-          <ion-row style="width: 100%;">
+          <ion-row style="width: 100%">
             <ion-col size="8">
               <ion-label position="floating"> Add an ambassador </ion-label>
               <ion-input v-model="newAmbassador" />
             </ion-col>
             <ion-col class="center" size="4">
               <ion-button fill="clear" @click="addNewAmbassador">
-                  <ion-icon :icon="personAddOutline" />
+                <ion-icon :icon="personAddOutline" />
               </ion-button>
             </ion-col>
           </ion-row>
@@ -116,10 +140,16 @@ const typeEqualsTo = (value : any, type : string) => {
           <ion-label> Settings </ion-label>
         </ion-list-header>
         <template v-if="settings.length">
-          <ion-item class="ion-margin-start" v-for="(key, index) in settings" :key="`${key}-${index}`">
-            <ion-row style="width: 100%;">
+          <ion-item
+            class="ion-margin-start"
+            v-for="(key, index) in settings"
+            :key="`${key}-${index}`"
+          >
+            <ion-row style="width: 100%">
               <ion-col size="8">
-                <ion-label position="floating"> {{ capitalizeFirstLetter(key) }} </ion-label>
+                <ion-label position="floating">
+                  {{ capitalizeFirstLetter(key) }}
+                </ion-label>
                 <ion-input v-model="game.settings[key]" />
               </ion-col>
               <ion-col class="center" size="4">
@@ -135,7 +165,7 @@ const typeEqualsTo = (value : any, type : string) => {
             <ion-label> Add new setting </ion-label>
           </ion-list-header>
           <ion-item class="ion-margin-start">
-            <ion-label position="floating"> Setting key  </ion-label>
+            <ion-label position="floating"> Setting key </ion-label>
             <ion-input v-model="newSettingKey" />
           </ion-item>
           <ion-item class="ion-margin-start">
@@ -143,7 +173,12 @@ const typeEqualsTo = (value : any, type : string) => {
             <ion-input v-model="newSettingValue" />
           </ion-item>
           <ion-item>
-            <ion-button style="margin: auto 2rem;" slot="end" fill="clear" @click="addNewSetting">
+            <ion-button
+              style="margin: auto 2rem"
+              slot="end"
+              fill="clear"
+              @click="addNewSetting"
+            >
               <ion-icon :icon="addCircleOutline" />
             </ion-button>
           </ion-item>
@@ -168,21 +203,21 @@ const typeEqualsTo = (value : any, type : string) => {
         </ion-item>
       </ion-list>
 
-      <ion-list v-if="typeof(game.region) != 'string'">
+      <ion-list v-if="typeof game.region != 'string'">
         <ion-list-header lines="full">
           <ion-label> Region </ion-label>
         </ion-list-header>
         <ion-item class="ion-margin-start">
           <ion-label position="floating"> Slug </ion-label>
-          <ion-input  v-model="game.region.slug" />
+          <ion-input v-model="game.region.slug" />
         </ion-item>
         <ion-item class="ion-margin-start">
           <ion-label position="floating"> Name </ion-label>
-          <ion-input  v-model="game.region.name" />
+          <ion-input v-model="game.region.name" />
         </ion-item>
         <ion-item class="ion-margin-start">
           <ion-label position="floating"> Description </ion-label>
-          <ion-input  v-model="game.region.description" />
+          <ion-input v-model="game.region.description" />
         </ion-item>
         <ion-item class="ion-margin-start">
           <ion-label position="floating"> ZipCode </ion-label>

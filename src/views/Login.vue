@@ -63,7 +63,9 @@ function login() {
           </div>
 
           <div>
-            <a class="block text-sm text-indigo-700 fontme hover:underline" href="#"
+            <a
+              class="block text-sm text-indigo-700 fontme hover:underline"
+              href="#"
               >Forgot your password?</a
             >
           </div>

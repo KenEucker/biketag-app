@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DashboardLayout from './layouts/DashboardLayout.vue';
+import DashboardLayout from './layouts/DashboardLayout.vue'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 
@@ -13,7 +13,7 @@ const layout = computed(() => {
 
 <template>
   <dashboard-layout v-if="layout == 'DashboardLayout'">
-    <router-view/>
+    <router-view />
   </dashboard-layout>
-  <router-view v-else/>
+  <router-view v-else />
 </template>

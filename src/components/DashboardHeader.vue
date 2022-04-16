@@ -2,18 +2,18 @@
 import { ref, inject } from 'vue'
 import { useSidebar } from '../hooks/useSidebar'
 import { IonHeader } from '@ionic/vue'
-import { 
-  notificationsOutline, 
-  personOutline, 
-  cogOutline, 
-  logOutOutline, 
-  searchOutline 
+import {
+  notificationsOutline,
+  personOutline,
+  cogOutline,
+  logOutOutline,
+  searchOutline,
 } from 'ionicons/icons'
 
 const dropdownOpen = ref(false)
 const { isOpen } = useSidebar()
 const notificationOpen = ref(false)
-const auth : any = inject('auth')
+const auth: any = inject('auth')
 const logout = () => {
   auth.logout({
     returnTo: window.location.origin,
@@ -26,8 +26,16 @@ const logout = () => {
     class="flex items-center justify-between px-6 py-2 bg-white border-b-4 border-indigo-600"
   >
     <div class="flex items-center">
-      <button class="text-gray-500 focus:outline-none lg:hidden" @click="isOpen = true">
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <button
+        class="text-gray-500 focus:outline-none lg:hidden"
+        @click="isOpen = true"
+      >
+        <svg
+          class="w-6 h-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M4 6H20M4 12H20M4 18H11"
             stroke="currentColor"
@@ -134,7 +142,9 @@ const logout = () => {
               <ion-icon class="tiny-icon" :icon="cogOutline"></ion-icon>
               Settings</a
             >
-            <a href="#" @click.prevent="logout"
+            <a
+              href="#"
+              @click.prevent="logout"
               class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
             >
               <ion-icon class="tiny-icon" :icon="logOutOutline"></ion-icon>

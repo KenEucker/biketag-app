@@ -39,7 +39,9 @@ const auth0Opts = {
   audience: process.env.A_AUDIENCE,
   onRedirectCallback: (appState: any) => {
     router.push(
-      appState && appState.targetUrl ? appState.targetUrl : window.location.pathname
+      appState && appState.targetUrl
+        ? appState.targetUrl
+        : window.location.pathname
     )
   },
 }

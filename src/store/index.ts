@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-extra-semi */
 import { InjectionKey } from 'vue'
-import { createStore, Store as VuexStore, CommitOptions, DispatchOptions } from 'vuex'
+import {
+  createStore,
+  Store as VuexStore,
+  CommitOptions,
+  DispatchOptions,
+} from 'vuex'
 
 import { mutations, Mutations, Mutation } from './mutations'
 import { actions, Actions, Action } from './actions'
@@ -17,7 +22,10 @@ export const store = createStore({
   actions,
 })
 
-export type Store = Omit<VuexStore<State>, 'getters' | 'commit' | 'dispatch'> & {
+export type Store = Omit<
+  VuexStore<State>,
+  'getters' | 'commit' | 'dispatch'
+> & {
   commit<K extends keyof Mutations, P extends Parameters<Mutations[K]>[1]>(
     key: K,
     payload: P,

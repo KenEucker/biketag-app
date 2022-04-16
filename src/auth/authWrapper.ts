@@ -35,7 +35,10 @@ export const useAuth0 = ({
       })
 
       try {
-        if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+        if (
+          window.location.search.includes('code=') &&
+          window.location.search.includes('state=')
+        ) {
           const { appState } = await this.auth0Client.handleRedirectCallback()
           this.error = null
           onRedirectCallback(appState)

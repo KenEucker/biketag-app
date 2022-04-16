@@ -1,4 +1,3 @@
-import { inject } from 'vue'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import BikeTagClient from 'biketag'
 import { Game, Tag } from 'biketag/lib/common/schema'
@@ -7,20 +6,23 @@ interface TagsFromGames {
   [key: string]: Tag[]
 }
 interface BikeTagAppState {
-  games: Game[],
+  games: Game[]
   tagsFromGames: TagsFromGames
 }
 
-const getBikeTagConfig = (admin: boolean = true
-) => {
+const getBikeTagConfig = (admin = true) => {
   const opts: any = {
     game: undefined,
     accessToken: process.env.ACCESS_TOKEN,
     imgur: {},
-    sanity: {}
+    sanity: {},
   }
-  opts.imgur.clientId = process.env.IA_CID?.length ? process.env.IA_CID : process.env.I_CID
-  opts.imgur.clientSecret = process.env.IA_CSECRET?.length ? process.env.IA_CSECRET : process.env.I_CSECRET
+  opts.imgur.clientId = process.env.IA_CID?.length
+    ? process.env.IA_CID
+    : process.env.I_CID
+  opts.imgur.clientSecret = process.env.IA_CSECRET?.length
+    ? process.env.IA_CSECRET
+    : process.env.I_CSECRET
   opts.imgur.accessToken = process.env.IA_TOKEN ?? ''
   opts.imgur.refreshToken = process.env.IA_RTOKEN ?? opts.imgur.refreshToken
 
@@ -45,60 +47,74 @@ export const useBikeTagApiStore = defineStore({
   }),
   getters: {
     allGames: (state: BikeTagAppState): Array<Game> => state.games,
-    tags: (state: BikeTagAppState): Function => {
+    tags: (state: BikeTagAppState): any => {
       return (gameName: string) => state.tagsFromGames[gameName]
     },
-    getGame: (state: BikeTagAppState): Function => {
-      return (gameName: string) => state.games.filter((val) => val.name == gameName)[0]
-    }
+    getGame: (state: BikeTagAppState): any => {
+      return (gameName: string) =>
+        state.games.filter((val) => val.name == gameName)[0]
+    },
   },
   actions: {
     async setGames() {
-      return biketagClient.getGame(
-        undefined,
-        {
+      return biketagClient
+        .getGame(undefined, {
           source: 'sanity',
-        }
-      ).then((d) => {
-        console.log(d)
-        if (d.success) {
-          const games = d.data as unknown as Game[]
-          const supportedGames: Game[] = games.filter(
-            (g: Game) =>
-              g.mainhash?.length && g.archivehash?.length && g.queuehash?.length && g.logo?.length
-          )
-          this.games = supportedGames
-        }
-      }).catch((e) => {
-        console.log(e)
-      })
+        })
+        .then((d) => {
+          console.log(d)
+          if (d.success) {
+            const games = d.data as unknown as Game[]
+            const supportedGames: Game[] = games.filter(
+              (g: Game) =>
+                g.mainhash?.length &&
+                g.archivehash?.length &&
+                g.queuehash?.length &&
+                g.logo?.length
+            )
+            this.games = supportedGames
+          }
+        })
+        .catch((e) => {
+          console.log(e)
+        })
     },
     setTagsFromGame(gameName: string) {
       if (this.games.length == 0) {
         this.setGames().then(() => {
-          const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
+          const game = this.games.filter(
+            (v) => v.name.toLowerCase() === gameName.toLowerCase()
+          )[0]
           if (game) {
-            biketagClient.getTags(undefined, {
-              game: game.name,
-              hash: game.mainhash,
-              source: 'imgur'
-            }).then((d) => {
-              console.log(d)
-              this.tagsFromGames[gameName] = d.data
-            }).catch((e) => console.log(e))
+            biketagClient
+              .getTags(undefined, {
+                game: game.name,
+                hash: game.mainhash,
+                source: 'imgur',
+              })
+              .then((d) => {
+                console.log(d)
+                this.tagsFromGames[gameName] = d.data
+              })
+              .catch((e) => console.log(e))
           }
         })
       } else {
-        const game = this.games.filter((v) => v.name.toLowerCase() === gameName.toLowerCase())[0]
+        const game = this.games.filter(
+          (v) => v.name.toLowerCase() === gameName.toLowerCase()
+        )[0]
         if (game) {
-          biketagClient.getTags(undefined, {
-            game: game.name,
-            hash: game.mainhash,
-            source: 'imgur'
-          }).then((d) => {
-            console.log(d)
-            this.tagsFromGames[gameName] = d.data
-          }).catch((e) => console.log(e))
+          biketagClient
+            .getTags(undefined, {
+              game: game.name,
+              hash: game.mainhash,
+              source: 'imgur',
+            })
+            .then((d) => {
+              console.log(d)
+              this.tagsFromGames[gameName] = d.data
+            })
+            .catch((e) => console.log(e))
         }
       }
     },
@@ -135,7 +151,7 @@ export const useBikeTagApiStore = defineStore({
         .replace('image-', '')
         .replace('-png', '.png')
         .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
-    }
+    },
   },
 })
 

@@ -52,7 +52,7 @@ $colors: (
     shade: #cf3c4f,
     tint: #ed576b,
   ),
-  dark:(
+  dark: (
     base: #222428,
     rgb: rgb(34 36 40),
     contrast: #ffffff,
@@ -157,7 +157,7 @@ $colors: (
         contrast-rgb: rgb(255 255 255),
         shade: #1e2023,
         tint: #383a3e,
-      )
+      ),
     );
   }
 
@@ -197,7 +197,6 @@ $colors: (
     --ion-item-background: #000000;
     --ion-card-background: #1c1c1d;
   }
-
 
   /*
    * Material Design Dark Theme

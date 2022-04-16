@@ -1,7 +1,6 @@
 import * as path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import pkg from './package.json'
 import EnvironmentPlugin from 'vite-plugin-environment'
 
 export default defineConfig({
@@ -10,7 +9,7 @@ export default defineConfig({
       {
         find: '@',
         replacement: path.resolve(__dirname, 'src'),
-      }
+      },
     ],
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
@@ -24,7 +23,8 @@ export default defineConfig({
     vue(),
     EnvironmentPlugin({
       /* Application Configuration */
-      ACCESS_TOKEN: process.env.ACCESS_TOKEN ?? '8b4e2b86a724bf3f39d6766de6e67212',
+      ACCESS_TOKEN:
+        process.env.ACCESS_TOKEN ?? '8b4e2b86a724bf3f39d6766de6e67212',
       CONTEXT: process.env.CONTEXT ?? null,
       APP_ID: process.env.APP_ID ?? 'com.app.biketag',
       ADMIN: process.env.ADMIN ?? 'biketag@biketag.org',
@@ -77,7 +77,7 @@ export default defineConfig({
     rollupOptions: {},
   },
   server: {
-    host: 'prime.localhost',
+    host: 'localhost',
     port: 8080,
   },
   preview: {

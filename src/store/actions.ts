@@ -1,7 +1,7 @@
 import { ActionTree, ActionContext } from 'vuex'
 
 import { State } from './state'
-import { Mutations, Mutation } from './mutations'
+import { Mutations } from './mutations'
 
 export enum Action {
   initApp = 'initApp',

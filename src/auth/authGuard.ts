@@ -1,6 +1,10 @@
 import { getInstance } from './authWrapper'
 
-export const authGuard = (to: { fullPath: any }, from: any, next: (arg0?: boolean) => any) => {
+export const authGuard = (
+  to: { fullPath: any },
+  from: any,
+  next: (arg0?: boolean) => any
+) => {
   const authService = getInstance()
 
   const fn = () => {
