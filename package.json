@@ -89,7 +89,6 @@
     "postcss-nesting": "~10",
     "prettier": "^2.5.1",
     "semantic-release": "^18.0.1",
-    "tailwindcss": "~3",
     "ts-jest": "^27.1.2",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0",

@@ -6,7 +6,7 @@ import { computed } from 'vue'
 const { currentRoute } = useRouter()
 const layout = computed(() => {
   const l = `${currentRoute.value.meta?.layout ?? 'Default'}Layout`
-  console.log({ l })
+  // console.log({ l })
   return l
 })
 </script>
