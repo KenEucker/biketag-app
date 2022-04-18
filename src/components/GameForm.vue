@@ -21,7 +21,6 @@ import {
   trashOutline,
   personAddOutline,
   addCircleOutline,
-  gameControllerSharp,
 } from 'ionicons/icons'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
 const emit = defineEmits(['onClose'])
@@ -126,7 +125,7 @@ const typeEqualsTo = (value: any, type: string) => {
               <ion-label position="floating"> Add an ambassador </ion-label>
               <ion-input v-model="newAmbassador" />
             </ion-col>
-            <ion-col class="center" size="4">
+            <ion-col class="center-end" size="4">
               <ion-button fill="clear" @click="addNewAmbassador">
                 <ion-icon :icon="personAddOutline" />
               </ion-button>
@@ -152,7 +151,7 @@ const typeEqualsTo = (value: any, type: string) => {
                 </ion-label>
                 <ion-input v-model="game.settings[key]" />
               </ion-col>
-              <ion-col class="center" size="4">
+              <ion-col class="center-end" size="4">
                 <ion-button fill="clear" @click="() => removeSetting(key)">
                   <ion-icon :icon="trashOutline" />
                 </ion-button>

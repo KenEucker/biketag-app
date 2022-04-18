@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { IonIcon } from '@ionic/vue'
 import { useSidebar } from '../hooks/useSidebar'
 import { homeOutline } from 'ionicons/icons'
 

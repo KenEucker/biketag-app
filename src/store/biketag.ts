@@ -48,7 +48,7 @@ export const useBikeTagApiStore = defineStore({
   getters: {
     allGames: (state: BikeTagAppState): Array<Game> => state.games,
     tags: (state: BikeTagAppState): any => {
-      return (gameName: string) => state.tagsFromGames[gameName]
+      return (gameName: string): Array<Tag> => state.tagsFromGames[gameName] ? state.tagsFromGames[gameName] : [] as Tag[]
     },
     getGame: (state: BikeTagAppState): any => {
       return (gameName: string) =>
@@ -79,32 +79,31 @@ export const useBikeTagApiStore = defineStore({
           console.log(e)
         })
     },
-    setTagsFromGame(gameName: string) {
+    async setTagsFromGame(gameName: string) {
       if (this.games.length == 0) {
-        this.setGames().then(() => {
-          const game = this.games.filter(
-            (v) => v.name.toLowerCase() === gameName.toLowerCase()
-          )[0]
-          if (game) {
-            biketagClient
-              .getTags(undefined, {
-                game: game.name,
-                hash: game.mainhash,
-                source: 'imgur',
-              })
-              .then((d) => {
-                console.log(d)
-                this.tagsFromGames[gameName] = d.data
-              })
-              .catch((e) => console.log(e))
-          }
-        })
+        await this.setGames()
+        const game = this.games.filter(
+          (v) => v.name.toLowerCase() === gameName.toLowerCase()
+        )[0]
+        if (game) {
+          return biketagClient
+            .getTags(undefined, {
+              game: game.name,
+              hash: game.mainhash,
+              source: 'imgur',
+            })
+            .then((d) => {
+              console.log(d)
+              this.tagsFromGames[gameName] = d.data
+            })
+            .catch((e) => console.log(e))
+        }
       } else {
         const game = this.games.filter(
           (v) => v.name.toLowerCase() === gameName.toLowerCase()
         )[0]
         if (game) {
-          biketagClient
+          return biketagClient
             .getTags(undefined, {
               game: game.name,
               hash: game.mainhash,
