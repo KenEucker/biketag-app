@@ -3,8 +3,9 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { IonModal, IonIcon, IonButton } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
-import TagForm from '../components/TagForm.vue'
+import TagForm from '@/components/TagForm.vue'
 import { create, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
+import ExportForm from '@/components/ExportForm.vue'
 
 const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
@@ -99,7 +100,7 @@ onBeforeUnmount(() => {
         @on-close="closeModal"
       />
     </ion-modal>
-
+    <export-form :info="`${($route.params.name as string).toLowerCase()}-tags`" :data="tags"/>
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
