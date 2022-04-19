@@ -9,16 +9,16 @@ const routes: Array<RouteRecordRaw> = [
   //     title: 'The BikeTag Game',
   //   },
   // },
-  // {
-  //   path: '/',
-  //   name: 'Login',
-  //   component: () => import('@/views/Login.vue'),
-  //   meta: { layout: 'Empty' },
-  // },
   {
     path: '/',
-    redirect: '/games',
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
+    meta: { layout: 'Empty' },
   },
+  // {
+  //   path: '/',
+  //   redirect: '/games',
+  // },
   // {
   //   path: '/games',
   //   name: 'GamesDashboard',

@@ -6,6 +6,7 @@ import { store } from './store'
 import { createPinia } from 'pinia'
 import { Auth0Plugin } from './auth'
 import VueToast from 'vue-toast-notification'
+import VueGoogleMaps from '@fawmi/vue-google-maps'
 import './assets/index.postcss'
 // import './index.css'
 
@@ -53,6 +54,11 @@ app.use(head)
 app.use(createPinia())
 app.use(Auth0Plugin, auth0Opts)
 app.use(VueToast)
+app.use(VueGoogleMaps, {
+  load: {
+    key: process.env.G_AKEY,
+  },
+})
 app.provide('toast', app.config.globalProperties.$toast)
 app.provide('auth', app.config.globalProperties.$auth)
 

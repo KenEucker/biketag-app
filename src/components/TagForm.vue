@@ -13,10 +13,12 @@ import {
   IonListHeader,
   IonItem,
   IonInput,
+  IonText,
 } from '@ionic/vue'
 import { closeCircleOutline } from 'ionicons/icons'
 import { useBikeTagApiStore } from '@/store/biketag'
 // import { Tag } from 'biketag/lib/common/schema';
+import Map from './Map.vue'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   tag: {
@@ -28,10 +30,14 @@ const props = defineProps({
     default: null,
   },
 })
-const tag = ref({ ...props.tag }) // as Tag);
+const tag = ref({ ...props.tag }); // as Tag);
+const gps = ref({
+  lat: tag.value.gps?.lat ?? 0,
+  lng: tag.value.gps?.long ?? 0
+})
+const center = ref({...gps.value})
 const biketag = useBikeTagApiStore()
 const toast: any = inject('toast')
-console.log(toast)
 const readOnly = [
   'tagnumber',
   'name',
@@ -42,6 +48,11 @@ const readOnly = [
   'foundImageUrl',
 ]
 const updateTag = () => {
+  tag.value.gps = {
+    lat: gps.value.lat, 
+    long: gps.value.lng, 
+    alt: tag.value.gps?.alt ?? 0
+  }
   const res = biketag.updateTag(tag.value, props.gameName)
   if (res) {
     console.log(res)
@@ -61,6 +72,9 @@ const updateTag = () => {
         })
       )
   }
+}
+const updateMarker = (e : any) => {
+  gps.value = {...e}
 }
 const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1)
@@ -116,13 +130,10 @@ const typeEqualsTo = (value: any, type: string) => {
             <ion-label> GPS </ion-label>
           </ion-list-header>
           <ion-item class="ion-margin-start">
-            <ion-label position="floating"> Latitude </ion-label>
-            <ion-input v-model="tag.gps.lat" />
+            <ion-text> Latitude : {{gps.lat}} </ion-text> 
+            <ion-text class="ion-margin-start"> Longitude : {{gps.lng}} </ion-text>
           </ion-item>
-          <ion-item class="ion-margin-start">
-            <ion-label position="floating"> Longitude </ion-label>
-            <ion-input v-model="tag.gps.long" />
-          </ion-item>
+          <Map :gps="gps" :center="center" @dragend="updateMarker"/>
           <ion-item class="ion-margin-start">
             <ion-label position="floating"> Altitude </ion-label>
             <ion-input v-model="tag.gps.alt" />
