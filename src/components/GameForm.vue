@@ -15,6 +15,7 @@ import {
   IonInput,
   IonCol,
   IonRow,
+  IonText,
 } from '@ionic/vue'
 import {
   closeCircleOutline,
@@ -23,6 +24,7 @@ import {
   addCircleOutline,
 } from 'ionicons/icons'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
+import Map from './Map.vue'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   game: {
@@ -30,12 +32,17 @@ const props = defineProps({
     default: null,
   },
 })
-const game = ref({ ...props.game }) //as Game);
-;(() => {
+const game = ref({ ...props.game }); //as Game);
+(() => {
   const sett = {} //: settingsArray = {}
   Object.assign(sett, game.value.settings)
   game.value.settings = sett
 })()
+const gps = ref({
+  lat: game.value.boundary?.lat ?? 0,
+  lng: game.value.boundary?.long ?? 0
+})
+const center = ref({...gps.value})
 const settings = computed(() => Object.keys(game.value.settings))
 const newAmbassador = ref('')
 const addNewAmbassador = () => {
@@ -60,12 +67,20 @@ const removeSetting = (name: string) => {
   delete game.value.settings[name]
 }
 const updateGame = () => {
-  console.log('update')
+  game.value.boundary.gps = {
+    lat: gps.value.lat, 
+    long: gps.value.lng, 
+    alt: game.value.boundary.gps?.alt ?? 0
+  }
+  console.log(game.value)
 }
 const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1)
 const typeEqualsTo = (value: any, type: string) => {
   return typeof value === type
+}
+const updateMarker = (e : any) => {
+  gps.value = {...e}
 }
 </script>
 
@@ -189,13 +204,10 @@ const typeEqualsTo = (value: any, type: string) => {
           <ion-label> Boundary </ion-label>
         </ion-list-header>
         <ion-item class="ion-margin-start">
-          <ion-label position="floating"> Latitude </ion-label>
-          <ion-input v-model="game.boundary.lat" />
+          <ion-text> Latitude : {{gps.lat}} </ion-text> 
+          <ion-text class="ion-margin-start"> Longitude : {{gps.lng}} </ion-text>
         </ion-item>
-        <ion-item class="ion-margin-start">
-          <ion-label position="floating"> Longitude </ion-label>
-          <ion-input v-model="game.boundary.long" />
-        </ion-item>
+        <Map :gps="gps" :center="center" @dragend="updateMarker"/>
         <ion-item class="ion-margin-start">
           <ion-label position="floating"> Altitude </ion-label>
           <ion-input v-model="game.boundary.alt" />

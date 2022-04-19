@@ -9,7 +9,7 @@ const modalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
 const biketag = useBikeTagApiStore()
 const query = ref("")
-const splitBy = ref(2)
+const splitBy = ref(20)
 const games = ref(biketag.allGames)
 const gamesFiltered = computed(() => games.value.filter(
   (val) => !query ? true : val.name.toLowerCase().indexOf(query.value) > -1

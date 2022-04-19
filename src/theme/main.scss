@@ -19,3 +19,12 @@ ion-icon {
   display: flex;
   padding: 0;
 }
+
+.vue-map-container {
+  margin: 1rem auto;
+  width: 90%;
+  height: 400px;
+  @media (min-width: $breakpoint-tablet) {
+    width: 550px;
+  }
+}

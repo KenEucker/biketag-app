@@ -71,6 +71,8 @@ export default defineConfig({
       RA_CSECRET: process.env.RA_CSECRET ?? null,
       RA_UNAME: process.env.RA_UNAME ?? null,
       RA_PASS: process.env.RA_PASS ?? null,
+      /* Google Configuration */
+      G_AKEY: process.env.G_AKEY ?? null,
     }),
   ],
   build: {
