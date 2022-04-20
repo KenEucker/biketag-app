@@ -74,6 +74,8 @@ const filter = (event : any) => {
 const clear = () => {
   query.value = ""
 }
+const fileSafeQuery = computed(() => 
+  query.value.replace(/[^a-z0-9]/gi, '_').toLowerCase())
 
 onMounted(() => {
   const searchBar = document.getElementById("search-bar")
@@ -100,7 +102,9 @@ onBeforeUnmount(() => {
         @on-close="closeModal"
       />
     </ion-modal>
-    <export-form :info="`${($route.params.name as string).toLowerCase()}-tags`" :data="tags"/>
+    <export-form 
+      :info="`${($route.params.name as string).toLowerCase()}-tags${'--' + fileSafeQuery}`" 
+      :data="tagsFiltered"/>
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
