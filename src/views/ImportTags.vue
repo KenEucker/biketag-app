@@ -1,33 +1,31 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { IonModal, IonIcon, IonButton, IonRow, IonCol } from '@ionic/vue'
+import { ref, computed, inject, onMounted, onBeforeUnmount } from 'vue'
+import { IonModal, IonIcon, IonButton, IonRow, IonCol, IonCheckbox } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
 import TagForm from '@/components/TagForm.vue'
-import { create, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
-import ExportForm from '@/components/ExportForm.vue'
+import { create, arrowBackOutline, arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons'
+import ImportForm from '@/components/ImportForm.vue'
+import { CHANGED_VALUES } from '@/common/types'
 
+const toast : any = inject('toast')
 const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
 const routeParam = useRouter().currentRoute.value.params.name
 const biketag = useBikeTagApiStore()
-const query = ref("")
 const splitBy = ref(20)
-const tags = ref(biketag.tags(routeParam))
-const tagsFiltered = computed(() => tags.value.filter(
-  (val : any) => !query ? true : (
-    val?.mysteryPlayer?.toLowerCase().indexOf(query.value) > -1 || 
-    val?.foundPlayer?.toLowerCase().indexOf(query.value) > -1)
-))
-const shownTags = computed(() => tagsFiltered.value.slice(
+const importAll = ref(false)
+const tags = ref([] as any[])
+const tagsInStore = ref(biketag.tags(routeParam))
+const shownTags = computed(() : any[] => tags.value.slice(
     paginationSelected.value * splitBy.value, 
     paginationSelected.value * splitBy.value + splitBy.value
   )
 )
 biketag.setTagsFromGame(routeParam as string).
-  then(() => tags.value = biketag.tags(routeParam))
+  then(() => tagsInStore.value = biketag.tags(routeParam))
 const paginationSelected = ref(0)
-const split = computed(() => Math.ceil(tagsFiltered.value.length / splitBy.value))
+const split = computed(() => Math.ceil(tags.value.length / splitBy.value))
 const getStartPos = () => Math.trunc(paginationSelected.value/4)*4
 const showRigthArrow = computed(() => {
   return paginationSelected.value + 4 < split.value
@@ -68,29 +66,69 @@ const getThumbnail = (imgUrl: string) => {
 const getLocalDateTime = (timestamp: number) =>
   new Date(timestamp * 1000).toLocaleTimeString()
 
-const filter = (event : any) => {
-  query.value = event.target.value.toLowerCase()
+const loadTags = (data : any) => {
+    //validation
+    tags.value = data
+    console.log(tags.value)
+    const tagNumbers = tagsInStore.value.map((val : any) => val.tagnumber)
+    for (const tag of tags.value) {
+      (tag as any).import = importAll.value;
+      (tag as any).changes = []
+      const tagnumber = Number(tag.tagnumber)
+      if (tagNumbers.includes(tagnumber)) {
+          const tagInStore = tagsInStore.value.find((tag : any) => tag.tagnumber == tagnumber)
+          if (tag.mysteryImageUrl != tagInStore.mysteryImageUrl || 
+              tag.mysteryPlayer != tagInStore.mysteryPlayer ||
+              tag.mysteryTime != tagInStore.mysteryTime ) {
+            (tag as any).changes.push(CHANGED_VALUES.MYSTERY)
+          }
+          if (tag.foundImageUrl != tagInStore.foundImageUrl || 
+              tag.foundPlayer != tagInStore.foundPlayer ||
+              tag.foundTime != tagInStore.foundTime ) {
+            (tag as any).changes.push(CHANGED_VALUES.FOUND)
+          }
+          if (tag.gps.lat != tagInStore.gps.lat ||
+              tag.gps.long != tagInStore.gps.long ||
+              tag.gps.alt != tagInStore.gps.alt ) {
+            (tag as any).changes.push(CHANGED_VALUES.GPS)
+          }
+      }
+    }
 }
-const clear = () => {
-  query.value = ""
-}
-const fileSafeQuery = computed(() => 
-  query.value.replace(/[^a-z0-9]/gi, '_').toLowerCase())
 
-onMounted(() => {
-  const searchBar = document.getElementById("search-bar")
-  if (searchBar) {
-    searchBar.addEventListener("ion-input", filter)
-    searchBar.addEventListener("ion-clear", clear) 
+const toggleAll = () => {
+  importAll.value = !importAll.value
+  tags.value.forEach((tag : any) => {
+    tag.import = importAll.value
+  });
+}
+
+const importTags = async () => {
+  const tagsToImport = [];
+  for (const tag of tags.value) {
+    if ((tag as any).import) {
+      const cleanTag = biketag.createTag(tag)
+      tagsToImport.push(cleanTag)
+    }
   }
-})
-onBeforeUnmount(() => {
-  const searchBar = document.getElementById("search-bar")
-  if (searchBar) {
-    searchBar.removeEventListener("ion-input", filter)
-    searchBar.removeEventListener("ion-clear", clear) 
+  console.log(tagsToImport)
+  try {
+    await biketag.importTags(tagsToImport, routeParam as string)
+    toast.open({
+      message: `BikeTags imported!!`,
+      type: 'success',
+      position: 'top',
+    })
+  } catch (e) {
+    console.log(e)
+    toast.open({
+      message: `Error importing the BikeTags`,
+      type: 'error',
+      position: 'top',
+    })
   }
-})
+}
+
 </script>
 
 <template>
@@ -104,12 +142,13 @@ onBeforeUnmount(() => {
     </ion-modal>
     <ion-row class="ion-justify-content-between">
       <ion-col>
-        <export-form 
-          :info="`${($route.params.name as string).toLowerCase()}-tags${query ? '--' + fileSafeQuery : ''}`" 
-          :data="tagsFiltered"/>
+        <import-form @dataImported="loadTags"/>
       </ion-col>
-      <ion-col style="display: flex" class="ion-align-items-center" offset-md="2" size-md="auto">
-        <ion-button @click="() => $router.push(`/games/${$route.params.name}/import`)"> Import </ion-button>
+      <ion-col style="display: flex" class="ion-align-items-center" offset-md="auto" size-md="2">
+        <ion-button @click="importTags" >
+          Import
+          <ion-icon :icon="checkmarkCircleOutline"/>
+        </ion-button>
       </ion-col>
     </ion-row>
     
@@ -123,6 +162,12 @@ onBeforeUnmount(() => {
           <table class="min-w-full">
             <thead>
               <tr>
+                <th
+                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                >
+                  
+                  <ion-icon @click="toggleAll" :icon="checkmarkCircleOutline"/>
+                </th>
                 <th
                   class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
@@ -152,6 +197,9 @@ onBeforeUnmount(() => {
                 v-for="(tag, index) in shownTags"
                 :key="index"
               >
+                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                  <ion-checkbox v-model="tag.import" color="primary" mode="ios" slot="start"></ion-checkbox>
+                </td>
 
                 <td
                   class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
@@ -162,9 +210,9 @@ onBeforeUnmount(() => {
                 </td>
                 
                 <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
                 >
-                  <div class="flex items-center">
+                  <div class="flex items-center" >
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         v-if="tag.mysteryImageUrl"
@@ -192,7 +240,7 @@ onBeforeUnmount(() => {
                 </td>
 
                 <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
                 >
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
@@ -222,7 +270,7 @@ onBeforeUnmount(() => {
                 </td>
 
                 <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
                 >
                   <div class="text-sm leading-5 text-gray-900">
                     Lat : {{ tag.gps.lat }}

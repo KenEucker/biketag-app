@@ -7,7 +7,6 @@ import {
   personOutline,
   cogOutline,
   logOutOutline,
-  searchOutline,
 } from 'ionicons/icons'
 
 const dropdownOpen = ref(false)
@@ -46,7 +45,7 @@ const logout = () => {
         </svg>
       </button>
 
-      <div class="relative mx-4 lg:mx-0">
+      <div v-if="$route.meta.showSearchBar" class="relative mx-4 lg:mx-0">
         <ion-searchbar id="search-bar"></ion-searchbar>
       </div>
     </div>
