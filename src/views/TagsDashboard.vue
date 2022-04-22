@@ -129,17 +129,17 @@ onBeforeUnmount(() => {
                   Number
                 </th>
                 <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="pl-2 lg:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Mystery Tag
                 </th>
                 <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="pl-2 lg:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Found Tag
                 </th>
                 <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   GPS Location
                 </th>
@@ -162,9 +162,9 @@ onBeforeUnmount(() => {
                 </td>
                 
                 <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  class="lg:px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
-                  <div class="flex items-center">
+                  <div class="flex items-center justify-center md:justify-start">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         v-if="tag.mysteryImageUrl"
@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
                       />
                     </div>
 
-                    <div class="ml-4">
+                    <div class="ml-4 hidden md:table-cell">
                       <div
                         v-if="tag.mysteryPlayer"
                         class="text-sm font-medium leading-5 text-gray-900"
@@ -192,9 +192,9 @@ onBeforeUnmount(() => {
                 </td>
 
                 <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  class="lg:px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
-                  <div class="flex items-center">
+                  <div class="flex items-center justify-center md:justify-start">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         v-if="tag.foundImageUrl"
@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
                       />
                     </div>
 
-                    <div class="ml-4">
+                    <div class="ml-4 hidden md:table-cell">
                       <div
                         v-if="tag.foundPlayer"
                         class="text-sm font-medium leading-5 text-gray-900"
@@ -222,7 +222,7 @@ onBeforeUnmount(() => {
                 </td>
 
                 <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  class="px-6 py-4 hidden lg:table-cell border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="text-sm leading-5 text-gray-900">
                     Lat : {{ tag.gps.lat }}
@@ -233,7 +233,7 @@ onBeforeUnmount(() => {
                 </td>
 
                 <td
-                  class="px-6 py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
+                  class="py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="flex justify-around">
                     <span class="flex justify-center text-yellow-500">
@@ -254,8 +254,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div class="sm:flex-1 sm:flex sm:items-center sm:justify-between ion-margin">
-      <div>
+    <div class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin">
+      <div class="mt-3 ms:mt-0">
         <p class="text-sm text-gray-700">
           Showing
           <span class="font-medium"> {{ paginationSelected * splitBy }} </span>
@@ -266,7 +266,7 @@ onBeforeUnmount(() => {
           results
         </p>
       </div>
-      <div v-if="paginationArray.length">
+      <div v-if="paginationArray.length" class="mt-3 ms:mt-0">
         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
           <button :disabled="!showLeftArrow"
             @click="changePagSelected(-4)" 
