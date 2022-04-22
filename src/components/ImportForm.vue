@@ -16,15 +16,20 @@ const props = defineProps({
 const emits = defineEmits(['dataImported'])
 const file = ref(null)
 const getDate = (date: string) => new Date(date).getTime() / 1000
+const isNumb = (n: number) => !isNaN(Number(n))
+//Missing check - imgur image url exist in album ?
+const validateTag = (tag : any) => (tag.foundImageUrl && tag.foundImageUrl.length) ||
+                                    (tag.mysteryImageUrl && tag.mysteryImageUrl.length)
 const transformTags = (val : any) => {
   const val_copy = {
     ...val,
-    mysteryTime: val.mysteryTime ? getDate(val.mysteryTime) : 0,
-    foundTime: val.foundTime ? getDate(val.foundTime) : 0,
+    tagnumber: isNumb(val.tagnumber) ? Number(val.tagnumber) : 0, 
+    mysteryTime: val.mysteryTime?.length ? getDate(val.mysteryTime) : undefined,
+    foundTime: val.foundTime?.length ? getDate(val.foundTime) : undefined,
     gps: {
-      lat : Number(val.latitude),
-      long : Number(val.longitude),
-      alt : Number(val.altitude),
+      lat : isNumb(val.latitude) ? Number(val.latitude) : 0,
+      long : isNumb(val.longitude) ? Number(val.longitude) : 0,
+      alt : isNumb(val.altitude) ? Number(val.altitude) : 0,
     }
   }
   delete val_copy.latitude
@@ -48,15 +53,26 @@ const convertData = (data : string, type : string) => {
             lineData[header[i]] = val.trimEnd()
           }
         })
-        dataCsv.push(lineData)
+        if (props.areTags && validateTag(lineData)) {
+          dataCsv.push(lineData)
+        }
       })
       emits('dataImported', props.areTags ? dataCsv.map((val) => transformTags(val)) : dataCsv)
       break
     case "application/json":
     default:
-      let dataJson = {}
+      let dataJson = []
       try {
         dataJson = JSON.parse(data)
+        if (props.areTags) {
+          const tags = []
+          for (const tag of dataJson) {
+            if (validateTag(tag)) {
+              tags.push(tag)
+            }
+          }
+          dataJson = tags
+        }
       } catch (e) {
         console.log(e)
       }

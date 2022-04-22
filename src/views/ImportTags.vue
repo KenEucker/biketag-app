@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, inject, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { IonModal, IonIcon, IonButton, IonRow, IonCol, IonCheckbox } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
@@ -11,12 +11,14 @@ import { CHANGED_VALUES } from '@/common/types'
 const toast : any = inject('toast')
 const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
-const routeParam = useRouter().currentRoute.value.params.name
+const router = useRouter()
+const routeParam = router.currentRoute.value.params.name
 const biketag = useBikeTagApiStore()
 const splitBy = ref(20)
 const importAll = ref(false)
 const tags = ref([] as any[])
 const tagsInStore = ref(biketag.tags(routeParam))
+const tagsInStoreNumbers = computed(() => tagsInStore.value.map((val : any) => val.tagnumber)) 
 const shownTags = computed(() : any[] => tags.value.slice(
     paginationSelected.value * splitBy.value, 
     paginationSelected.value * splitBy.value + splitBy.value
@@ -49,6 +51,30 @@ const changePagSelected = (i : number) => {
   }
 }
 
+const setTagUpdates = (tag : any) => {
+  tag.import = importAll.value
+  tag.changes = []
+  const isInStore = tagsInStoreNumbers.value.indexOf(tag.tagnumber)
+  if (isInStore > -1) {
+    const tagInStore = tagsInStore.value[isInStore]
+    if (tag.mysteryImageUrl != tagInStore.mysteryImageUrl || 
+        tag.mysteryPlayer != tagInStore.mysteryPlayer ||
+        tag.mysteryTime != tagInStore.mysteryTime ) {
+      tag.changes.push(CHANGED_VALUES.MYSTERY)
+    }
+    if (tag.foundImageUrl != tagInStore.foundImageUrl || 
+        tag.foundPlayer != tagInStore.foundPlayer ||
+        tag.foundTime != tagInStore.foundTime ) {
+      tag.changes.push(CHANGED_VALUES.FOUND)
+    }
+    if (tag?.gps?.lat != tagInStore.gps.lat ||
+        tag?.gps?.long != tagInStore.gps.long ||
+        tag?.gps?.alt != tagInStore.gps.alt ) {
+      tag.changes.push(CHANGED_VALUES.GPS)
+    }
+  }
+}
+
 const showModal = (index: number) => {
   selectedTagIndex.value = index
   modalIsOpen.value = true
@@ -56,6 +82,7 @@ const showModal = (index: number) => {
 
 const closeModal = () => {
   modalIsOpen.value = false
+  setTagUpdates(tags.value[selectedTagIndex.value])
 }
 
 const getThumbnail = (imgUrl: string) => {
@@ -67,33 +94,11 @@ const getLocalDateTime = (timestamp: number) =>
   new Date(timestamp * 1000).toLocaleTimeString()
 
 const loadTags = (data : any) => {
-    //validation
-    tags.value = data
-    console.log(tags.value)
-    const tagNumbers = tagsInStore.value.map((val : any) => val.tagnumber)
-    for (const tag of tags.value) {
-      (tag as any).import = importAll.value;
-      (tag as any).changes = []
-      const tagnumber = Number(tag.tagnumber)
-      if (tagNumbers.includes(tagnumber)) {
-          const tagInStore = tagsInStore.value.find((tag : any) => tag.tagnumber == tagnumber)
-          if (tag.mysteryImageUrl != tagInStore.mysteryImageUrl || 
-              tag.mysteryPlayer != tagInStore.mysteryPlayer ||
-              tag.mysteryTime != tagInStore.mysteryTime ) {
-            (tag as any).changes.push(CHANGED_VALUES.MYSTERY)
-          }
-          if (tag.foundImageUrl != tagInStore.foundImageUrl || 
-              tag.foundPlayer != tagInStore.foundPlayer ||
-              tag.foundTime != tagInStore.foundTime ) {
-            (tag as any).changes.push(CHANGED_VALUES.FOUND)
-          }
-          if (tag.gps.lat != tagInStore.gps.lat ||
-              tag.gps.long != tagInStore.gps.long ||
-              tag.gps.alt != tagInStore.gps.alt ) {
-            (tag as any).changes.push(CHANGED_VALUES.GPS)
-          }
-      }
-    }
+  tags.value = data
+  console.log(tags.value)
+  for (const tag of tags.value) {
+    setTagUpdates(tag)
+  }
 }
 
 const toggleAll = () => {
@@ -102,6 +107,8 @@ const toggleAll = () => {
     tag.import = importAll.value
   });
 }
+
+const pushBack = () => router.push(`/games/${routeParam}`)
 
 const importTags = async () => {
   const tagsToImport = [];
@@ -119,6 +126,7 @@ const importTags = async () => {
       type: 'success',
       position: 'top',
     })
+    pushBack()
   } catch (e) {
     console.log(e)
     toast.open({
@@ -137,6 +145,7 @@ const importTags = async () => {
       <tag-form
         :gameName="($route.params.name as string)"
         :tag="tags[selectedTagIndex]"
+        :commit="false"
         @on-close="closeModal"
       />
     </ion-modal>
@@ -205,7 +214,7 @@ const importTags = async () => {
                   class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="text-sm leading-5 text-gray-900">
-                    {{ tag.tagnumber }}
+                    {{ tag?.tagnumber }}
                   </div>
                 </td>
                 
@@ -215,68 +224,68 @@ const importTags = async () => {
                   <div class="flex items-center" >
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
-                        v-if="tag.mysteryImageUrl"
+                        v-if="tag?.mysteryImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="getThumbnail(tag.mysteryImageUrl)"
+                        :src="getThumbnail(tag?.mysteryImageUrl)"
                         alt="Mystery Image"
                       />
                     </div>
 
                     <div class="ml-4">
                       <div
-                        v-if="tag.mysteryPlayer"
+                        v-if="tag?.mysteryPlayer"
                         class="text-sm font-medium leading-5 text-gray-900"
                       >
-                        {{ tag.mysteryPlayer }}
+                        {{ tag?.mysteryPlayer }}
                       </div>
                       <div
-                        v-if="tag.mysteryTime"
+                        v-if="tag?.mysteryTime"
                         class="text-sm leading-5 text-gray-500"
                       >
-                        {{ getLocalDateTime(tag.mysteryTime) }}
+                        {{ getLocalDateTime(tag?.mysteryTime) }}
                       </div>
                     </div>
                   </div>
                 </td>
 
                 <td
-                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.FOUND) ? 'bg-rose-400' : ''}`"
                 >
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
-                        v-if="tag.foundImageUrl"
+                        v-if="tag?.foundImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="getThumbnail(tag.foundImageUrl)"
+                        :src="getThumbnail(tag?.foundImageUrl)"
                         alt="Found Image"
                       />
                     </div>
 
                     <div class="ml-4">
                       <div
-                        v-if="tag.foundPlayer"
+                        v-if="tag?.foundPlayer"
                         class="text-sm font-medium leading-5 text-gray-900"
                       >
-                        {{ tag.foundPlayer }}
+                        {{ tag?.foundPlayer }}
                       </div>
                       <div
-                        v-if="tag.foundTime"
+                        v-if="tag?.foundTime"
                         class="text-sm leading-5 text-gray-500"
                       >
-                        {{ getLocalDateTime(tag.foundTime) }}
+                        {{ getLocalDateTime(tag?.foundTime) }}
                       </div>
                     </div>
                   </div>
                 </td>
 
                 <td
-                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.GPS) ? 'bg-rose-400' : ''}`"
                 >
                   <div class="text-sm leading-5 text-gray-900">
-                    Lat : {{ tag.gps.lat }}
+                    Lat : {{ tag?.gps?.lat }}
                   </div>
                   <div class="text-sm leading-5 text-gray-500">
-                    Long : {{ tag.gps.long }}
+                    Long : {{ tag?.gps?.long }}
                   </div>
                 </td>
 

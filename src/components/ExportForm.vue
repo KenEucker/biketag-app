@@ -96,7 +96,7 @@ const exportToCsv = (data : any[]) => {
 
   // Convert users data to a csv
   let usersCsv = data.reduce((acc : Array<string>, datap : any) => {
-    acc.push(headers.map((val : string) => datap[val] ?? ' ').join(','))
+    acc.push(headers.map((val : string) => datap[val] ?? '').join(','))
     return acc
   }, [])
 
