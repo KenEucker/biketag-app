@@ -9,7 +9,7 @@ import {
   IonSegmentButton, 
   IonLabel,
 } from '@ionic/vue'
-import { download } from 'ionicons/icons'
+import { cloudDownloadOutline } from 'ionicons/icons'
 
 const props = defineProps({
   data: {
@@ -50,7 +50,6 @@ const tagKeys = [
   'altitude',
 ]
 const fileType = ref("csv")
-console.log(props)
 
 const downloadFile = (data : string, fileName : string, fileType: string ) => {
   const blob = new Blob([data], { type: fileType })
@@ -97,7 +96,7 @@ const exportToCsv = (data : any[]) => {
 
   // Convert users data to a csv
   let usersCsv = data.reduce((acc : Array<string>, datap : any) => {
-    acc.push(headers.map((val : string) => datap[val] ?? ' ').join(','))
+    acc.push(headers.map((val : string) => datap[val] ?? '').join(','))
     return acc
   }, [])
 
@@ -122,11 +121,11 @@ const downloadData = () => {
 </script>
 
 <template>
-  <form class="export-form">
+  <form class="export-form--fixed">
     <ion-row>
       <ion-col>
         <ion-button fill="clear" @click.prevent="downloadData">
-          <ion-icon :icon="download"/>
+          <ion-icon :icon="cloudDownloadOutline"/>
         </ion-button>
       </ion-col>
       <ion-col>

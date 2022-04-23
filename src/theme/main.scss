@@ -1,5 +1,11 @@
 @import './variables.scss';
 
+@mixin flx($j_c: center, $al_i: center) {
+  display: flex;
+  justify-content: $j_c;
+  align-items: $al_i;
+}
+
 ion-icon {
   font-size: 30px;
 }
@@ -14,9 +20,7 @@ ion-icon {
 }
 
 .center-end {
-  justify-content: end;
-  align-items: center;
-  display: flex;
+  @include flx($j_c: end);
   padding: 0;
 }
 
@@ -30,6 +34,24 @@ ion-icon {
 }
 
 .export-form {
-  background-color: var(--ion-background-color);
-  width: 270px;
+  &--fixed,
+  &--centered {
+    background-color: var(--ion-background-color);
+    width: 270px;
+    height: 58px;
+  }
+  &--centered {
+    @include flx();
+
+    &__cnt {
+      @include flx();
+      width: 100%;
+      cursor: pointer;
+    }
+
+    @media (min-width: 615px) {
+      height: 100%;
+      width: 100%;
+    }
+  }
 }

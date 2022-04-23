@@ -151,6 +151,19 @@ export const useBikeTagApiStore = defineStore({
         .replace('-png', '.png')
         .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
     },
+    createTag(tag: {}): Tag {
+      return BikeTagClient.createTagObject(tag)
+    },
+    async importTags(tags: Tag[], gameName: string) {
+      for (const tag of tags) {
+        try {
+          await this.updateTag(tag, gameName)
+        } catch (e) {
+          console.log(e)
+          throw e
+        }
+      }
+    }
   },
 })
 

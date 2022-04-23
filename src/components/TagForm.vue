@@ -29,8 +29,12 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  commit: {
+    type: Boolean,
+    default: false
+  }
 })
-const tag = ref({ ...props.tag }); // as Tag);
+const tag = ref(props.commit ? { ...props.tag } : props.tag); // as Tag);
 const gps = ref({
   lat: tag.value.gps?.lat ?? 0,
   lng: tag.value.gps?.long ?? 0
@@ -47,34 +51,41 @@ const readOnly = [
   'mysteryImageUrl',
   'foundImageUrl',
 ]
-const updateTag = () => {
+const updateTagGps = () => {
   tag.value.gps = {
     lat: gps.value.lat, 
     long: gps.value.lng, 
     alt: tag.value.gps?.alt ?? 0
   }
-  const res = biketag.updateTag(tag.value, props.gameName)
-  if (res) {
-    console.log(res)
-    res
-      .then(() =>
-        toast.open({
-          message: `Tag #${tag.value.tagnumber} of BikeTag ${props.gameName} updated!`,
-          type: 'success',
-          position: 'top',
-        })
-      )
-      .catch((e) =>
-        toast.open({
-          message: `Error #${tag.value.tagnumber} ${e}`,
-          type: 'error',
-          position: 'top',
-        })
-      )
+}
+const updateTag = () => {
+  updateTagGps()
+  if (props.commit) {
+    const res = biketag.updateTag(tag.value, props.gameName)
+    if (res) {
+      res
+        .then(() =>
+          toast.open({
+            message: `Tag #${tag.value.tagnumber} of BikeTag ${props.gameName} updated!`,
+            type: 'success',
+            position: 'top',
+          })
+        )
+        .catch((e) =>
+          toast.open({
+            message: `Error #${tag.value.tagnumber} ${e}`,
+            type: 'error',
+            position: 'top',
+          })
+        )
+    }
   }
 }
 const updateMarker = (e : any) => {
   gps.value = {...e}
+  if (!props.commit) {
+    updateTagGps()
+  }
 }
 const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1)
@@ -141,7 +152,7 @@ const typeEqualsTo = (value: any, type: string) => {
         </ion-list>
       </ion-list>
 
-      <ion-item>
+      <ion-item v-if="commit">
         <ion-button slot="end" type="submit"> Update </ion-button>
       </ion-item>
     </form>

@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { IonModal, IonIcon, IonButton, IonRow, IonCol } from '@ionic/vue'
+import { ref, computed, inject } from 'vue'
+import { IonModal, IonIcon, IonButton, IonRow, IonCol, IonCheckbox } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
 import TagForm from '@/components/TagForm.vue'
-import { create, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
-import ExportForm from '@/components/ExportForm.vue'
+import { create, arrowBackOutline, arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons'
+import ImportForm from '@/components/ImportForm.vue'
+import { CHANGED_VALUES } from '@/common/types'
 
+const toast : any = inject('toast')
 const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
-const routeParam = useRouter().currentRoute.value.params.name
+const router = useRouter()
+const routeParam = router.currentRoute.value.params.name
 const biketag = useBikeTagApiStore()
-const query = ref("")
 const splitBy = ref(20)
-const tags = ref(biketag.tags(routeParam))
-const tagsFiltered = computed(() => tags.value.filter(
-  (val : any) => !query ? true : (
-    val?.mysteryPlayer?.toLowerCase().indexOf(query.value) > -1 || 
-    val?.foundPlayer?.toLowerCase().indexOf(query.value) > -1)
-))
-const shownTags = computed(() => tagsFiltered.value.slice(
+const importAll = ref(false)
+const tags = ref([] as any[])
+const tagsInStore = ref(biketag.tags(routeParam))
+const tagsInStoreNumbers = computed(() => tagsInStore.value.map((val : any) => val.tagnumber)) 
+const shownTags = computed(() : any[] => tags.value.slice(
     paginationSelected.value * splitBy.value, 
     paginationSelected.value * splitBy.value + splitBy.value
   )
 )
 biketag.setTagsFromGame(routeParam as string).
-  then(() => tags.value = biketag.tags(routeParam))
+  then(() => tagsInStore.value = biketag.tags(routeParam))
 const paginationSelected = ref(0)
-const split = computed(() => Math.ceil(tagsFiltered.value.length / splitBy.value))
+const split = computed(() => Math.ceil(tags.value.length / splitBy.value))
 const getStartPos = () => Math.trunc(paginationSelected.value/4)*4
 const showRigthArrow = computed(() => {
   return paginationSelected.value + 4 < split.value
@@ -51,6 +51,30 @@ const changePagSelected = (i : number) => {
   }
 }
 
+const setTagUpdates = (tag : any) => {
+  tag.import = importAll.value
+  tag.changes = []
+  const isInStore = tagsInStoreNumbers.value.indexOf(tag.tagnumber)
+  if (isInStore > -1) {
+    const tagInStore = tagsInStore.value[isInStore]
+    if (tag.mysteryImageUrl != tagInStore.mysteryImageUrl || 
+        tag.mysteryPlayer != tagInStore.mysteryPlayer ||
+        tag.mysteryTime != tagInStore.mysteryTime ) {
+      tag.changes.push(CHANGED_VALUES.MYSTERY)
+    }
+    if (tag.foundImageUrl != tagInStore.foundImageUrl || 
+        tag.foundPlayer != tagInStore.foundPlayer ||
+        tag.foundTime != tagInStore.foundTime ) {
+      tag.changes.push(CHANGED_VALUES.FOUND)
+    }
+    if (tag?.gps?.lat != tagInStore.gps.lat ||
+        tag?.gps?.long != tagInStore.gps.long ||
+        tag?.gps?.alt != tagInStore.gps.alt ) {
+      tag.changes.push(CHANGED_VALUES.GPS)
+    }
+  }
+}
+
 const showModal = (index: number) => {
   selectedTagIndex.value = index
   modalIsOpen.value = true
@@ -58,6 +82,7 @@ const showModal = (index: number) => {
 
 const closeModal = () => {
   modalIsOpen.value = false
+  setTagUpdates(tags.value[selectedTagIndex.value])
 }
 
 const getThumbnail = (imgUrl: string) => {
@@ -68,29 +93,50 @@ const getThumbnail = (imgUrl: string) => {
 const getLocalDateTime = (timestamp: number) =>
   new Date(timestamp * 1000).toLocaleTimeString()
 
-const filter = (event : any) => {
-  query.value = event.target.value.toLowerCase()
+const loadTags = (data : any) => {
+  tags.value = data
+  console.log(tags.value)
+  for (const tag of tags.value) {
+    setTagUpdates(tag)
+  }
 }
-const clear = () => {
-  query.value = ""
-}
-const fileSafeQuery = computed(() => 
-  query.value.replace(/[^a-z0-9]/gi, '_').toLowerCase())
 
-onMounted(() => {
-  const searchBar = document.getElementById("search-bar")
-  if (searchBar) {
-    searchBar.addEventListener("ion-input", filter)
-    searchBar.addEventListener("ion-clear", clear) 
+const toggleAll = () => {
+  importAll.value = !importAll.value
+  tags.value.forEach((tag : any) => {
+    tag.import = importAll.value
+  });
+}
+
+const pushBack = () => router.push(`/games/${routeParam}`)
+
+const importTags = async () => {
+  const tagsToImport = [];
+  for (const tag of tags.value) {
+    if ((tag as any).import) {
+      const cleanTag = biketag.createTag(tag)
+      tagsToImport.push(cleanTag)
+    }
   }
-})
-onBeforeUnmount(() => {
-  const searchBar = document.getElementById("search-bar")
-  if (searchBar) {
-    searchBar.removeEventListener("ion-input", filter)
-    searchBar.removeEventListener("ion-clear", clear) 
+  console.log(tagsToImport)
+  try {
+    await biketag.importTags(tagsToImport, routeParam as string)
+    toast.open({
+      message: `BikeTags imported!!`,
+      type: 'success',
+      position: 'top',
+    })
+    pushBack()
+  } catch (e) {
+    console.log(e)
+    toast.open({
+      message: `Error importing the BikeTags`,
+      type: 'error',
+      position: 'top',
+    })
   }
-})
+}
+
 </script>
 
 <template>
@@ -99,17 +145,19 @@ onBeforeUnmount(() => {
       <tag-form
         :gameName="($route.params.name as string)"
         :tag="tags[selectedTagIndex]"
+        :commit="false"
         @on-close="closeModal"
       />
     </ion-modal>
     <ion-row class="ion-justify-content-between">
       <ion-col>
-        <export-form 
-          :info="`${($route.params.name as string).toLowerCase()}-tags${query ? '--' + fileSafeQuery : ''}`" 
-          :data="tagsFiltered"/>
+        <import-form @dataImported="loadTags"/>
       </ion-col>
-      <ion-col style="display: flex" class="ion-align-items-center" offset-md="2" size-md="auto">
-        <ion-button @click="() => $router.push(`/games/${$route.params.name}/import`)"> Import </ion-button>
+      <ion-col style="display: flex" class="ion-align-items-center" offset-md="auto" size-md="2">
+        <ion-button @click="importTags" >
+          Import
+          <ion-icon :icon="checkmarkCircleOutline"/>
+        </ion-button>
       </ion-col>
     </ion-row>
     
@@ -126,20 +174,26 @@ onBeforeUnmount(() => {
                 <th
                   class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
+                  
+                  <ion-icon @click="toggleAll" :icon="checkmarkCircleOutline"/>
+                </th>
+                <th
+                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                >
                   Number
                 </th>
                 <th
-                  class="pl-2 lg:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Mystery Tag
                 </th>
                 <th
-                  class="pl-2 lg:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Found Tag
                 </th>
                 <th
-                  class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   GPS Location
                 </th>
@@ -152,88 +206,91 @@ onBeforeUnmount(() => {
                 v-for="(tag, index) in shownTags"
                 :key="index"
               >
+                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                  <ion-checkbox v-model="tag.import" color="primary" mode="ios" slot="start"></ion-checkbox>
+                </td>
 
                 <td
                   class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="text-sm leading-5 text-gray-900">
-                    {{ tag.tagnumber }}
+                    {{ tag?.tagnumber }}
                   </div>
                 </td>
                 
                 <td
-                  class="lg:px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
                 >
-                  <div class="flex items-center justify-center md:justify-start">
+                  <div class="flex items-center" >
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
-                        v-if="tag.mysteryImageUrl"
+                        v-if="tag?.mysteryImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="getThumbnail(tag.mysteryImageUrl)"
+                        :src="getThumbnail(tag?.mysteryImageUrl)"
                         alt="Mystery Image"
                       />
                     </div>
 
-                    <div class="ml-4 hidden md:table-cell">
+                    <div class="ml-4">
                       <div
-                        v-if="tag.mysteryPlayer"
+                        v-if="tag?.mysteryPlayer"
                         class="text-sm font-medium leading-5 text-gray-900"
                       >
-                        {{ tag.mysteryPlayer }}
+                        {{ tag?.mysteryPlayer }}
                       </div>
                       <div
-                        v-if="tag.mysteryTime"
+                        v-if="tag?.mysteryTime"
                         class="text-sm leading-5 text-gray-500"
                       >
-                        {{ getLocalDateTime(tag.mysteryTime) }}
+                        {{ getLocalDateTime(tag?.mysteryTime) }}
                       </div>
                     </div>
                   </div>
                 </td>
 
                 <td
-                  class="lg:px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.FOUND) ? 'bg-rose-400' : ''}`"
                 >
-                  <div class="flex items-center justify-center md:justify-start">
+                  <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
-                        v-if="tag.foundImageUrl"
+                        v-if="tag?.foundImageUrl"
                         class="w-10 h-10 rounded-full"
-                        :src="getThumbnail(tag.foundImageUrl)"
+                        :src="getThumbnail(tag?.foundImageUrl)"
                         alt="Found Image"
                       />
                     </div>
 
-                    <div class="ml-4 hidden md:table-cell">
+                    <div class="ml-4">
                       <div
-                        v-if="tag.foundPlayer"
+                        v-if="tag?.foundPlayer"
                         class="text-sm font-medium leading-5 text-gray-900"
                       >
-                        {{ tag.foundPlayer }}
+                        {{ tag?.foundPlayer }}
                       </div>
                       <div
-                        v-if="tag.foundTime"
+                        v-if="tag?.foundTime"
                         class="text-sm leading-5 text-gray-500"
                       >
-                        {{ getLocalDateTime(tag.foundTime) }}
+                        {{ getLocalDateTime(tag?.foundTime) }}
                       </div>
                     </div>
                   </div>
                 </td>
 
                 <td
-                  class="px-6 py-4 hidden lg:table-cell border-b border-gray-200 whitespace-nowrap"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.GPS) ? 'bg-rose-400' : ''}`"
                 >
                   <div class="text-sm leading-5 text-gray-900">
-                    Lat : {{ tag.gps.lat }}
+                    Lat : {{ tag?.gps?.lat }}
                   </div>
                   <div class="text-sm leading-5 text-gray-500">
-                    Long : {{ tag.gps.long }}
+                    Long : {{ tag?.gps?.long }}
                   </div>
                 </td>
 
                 <td
-                  class="py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
+                  class="px-6 py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="flex justify-around">
                     <span class="flex justify-center text-yellow-500">
@@ -254,8 +311,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin">
-      <div class="mt-3 ms:mt-0">
+    <div class="sm:flex-1 sm:flex sm:items-center sm:justify-between ion-margin">
+      <div>
         <p class="text-sm text-gray-700">
           Showing
           <span class="font-medium"> {{ paginationSelected * splitBy }} </span>
@@ -266,7 +323,7 @@ onBeforeUnmount(() => {
           results
         </p>
       </div>
-      <div v-if="paginationArray.length" class="mt-3 ms:mt-0">
+      <div v-if="paginationArray.length">
         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
           <button :disabled="!showLeftArrow"
             @click="changePagSelected(-4)" 

@@ -100,12 +100,12 @@ onBeforeUnmount(() => {
                   Name
                 </th>
                 <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-6 py-3 hidden md:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Region
                 </th>
                 <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Main Album Hash
                 </th>
@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
 
             <tbody class="bg-white">
               <tr v-for="(game, index) in shownGames" :key="index">
-                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                <td class="pl-2 sm:px-6 py-4 border-b border-gray-200 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
                   </div>
                 </td>
 
-                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                <td class="px-6 py-4 hidden md:table-cell border-b border-gray-200 whitespace-nowrap">
                   <div class="text-sm leading-5 text-gray-900">
                     {{ game.region.description }}
                   </div>
@@ -148,27 +148,28 @@ onBeforeUnmount(() => {
                   </div>
                 </td>
 
-                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
+                <td class="px-6 py-4 hidden lg:table-cell border-b border-gray-200 whitespace-nowrap">
                   <div class="text-sm leading-5 text-gray-900">
                     {{ game.mainhash }}
                   </div>
                 </td>
 
                 <td
-                  class="px-6 py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
+                  class="py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="flex justify-around">
                     <span class="flex justify-center text-yellow-500">
                       <ion-button
                         fill="clear"
                         @click.prevent="() => showModal(index)"
-                        class="px-2 mx-2 rounded-md"
+                        class="rounded-md"
                       >
                         <ion-icon :icon="create"></ion-icon>
                       </ion-button>
                       <ion-button
                         fill="clear"
                         @click.prevent="() => $router.push(`/games/${game.name}`)"
+                        class="ml-2 rounded-md"
                       >
                         <ion-icon :icon="linkOutline"></ion-icon>
                       </ion-button>
@@ -182,8 +183,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
     
-    <div class="sm:flex-1 sm:flex sm:items-center sm:justify-between ion-margin">
-      <div>
+    <div class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin">
+      <div class="mt-3 ms:mt-0">
         <p class="text-sm text-gray-700">
           Showing
           <span class="font-medium"> {{ paginationSelected * splitBy }} </span>
@@ -194,7 +195,7 @@ onBeforeUnmount(() => {
           results
         </p>
       </div>
-      <div v-if="paginationArray.length">
+      <div v-if="paginationArray.length" class="mt-3 ms:mt-0">
         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
           <button :disabled="!showLeftArrow"
             @click="changePagSelected(-4)" 

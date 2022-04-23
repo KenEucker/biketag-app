@@ -39,14 +39,21 @@ const protectedRoutes: Array<RouteRecordRaw> = [
     name: 'GamesDashboard',
     beforeEnter: authGuard,
     component: () => import('@/views/GamesDashboard.vue'),
-    meta: { layout: 'Dashboard' },
+    meta: { layout: 'Dashboard', showSearchBar: true },
   },
   {
     path: '/games/:name',
     name: 'TagsDashboard',
     beforeEnter: authGuard,
     component: () => import('@/views/TagsDashboard.vue'),
-    meta: { layout: 'Dashboard' },
+    meta: { layout: 'Dashboard', showSearchBar: true },
+  },
+  {
+    path: '/games/:name/import',
+    name: 'ImportTags',
+    beforeEnter: authGuard,
+    component: () => import('@/views/ImportTags.vue'),
+    meta: { layout: 'Dashboard', showSearchBar: false },
   },
 ]
 
