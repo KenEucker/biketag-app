@@ -10,7 +10,7 @@ interface BikeTagAppState {
   tagsFromGames: TagsFromGames
 }
 
-const getBikeTagConfig = (admin = true) => {
+const getBikeTagConfig = (admin?: boolean, game?: Game) => {
   const opts: any = {
     game: undefined,
     accessToken: process.env.ACCESS_TOKEN,
@@ -36,6 +36,10 @@ const getBikeTagConfig = (admin = true) => {
     opts.sanity.token = process.env.S_TOKEN
   }
 
+  if (game) {
+    opts.game = game.slug
+  }
+
   return opts
 }
 const biketagClient = new BikeTagClient(getBikeTagConfig(false))
@@ -48,7 +52,10 @@ export const useBikeTagApiStore = defineStore({
   getters: {
     allGames: (state: BikeTagAppState): Array<Game> => state.games,
     tags: (state: BikeTagAppState): any => {
-      return (gameName: string): Array<Tag> => state.tagsFromGames[gameName] ? state.tagsFromGames[gameName] : [] as Tag[]
+      return (gameName: string): Array<Tag> =>
+        state.tagsFromGames[gameName]
+          ? state.tagsFromGames[gameName]
+          : ([] as Tag[])
     },
     getGame: (state: BikeTagAppState): any => {
       return (gameName: string) =>
@@ -69,8 +76,7 @@ export const useBikeTagApiStore = defineStore({
               (g: Game) =>
                 g.mainhash?.length &&
                 g.archivehash?.length &&
-                g.queuehash?.length &&
-                g.logo?.length
+                g.queuehash?.length
             )
             this.games = supportedGames
           }
@@ -78,6 +84,19 @@ export const useBikeTagApiStore = defineStore({
         .catch((e) => {
           console.log(e)
         })
+    },
+    updateGame(game: Game) {
+      if (game) {
+        const adminConfig = getBikeTagConfig(true, game)
+        const nonadminConfig = getBikeTagConfig(false, game)
+        const biketagAdmin = new BikeTagClient(adminConfig)
+        const biketag = new BikeTagClient(nonadminConfig)
+        /// Save to admin, only the values needed for admin
+        /// Save to non-admin, only the values needed for non-admin
+
+        return game
+      }
+      return false
     },
     async setTagsFromGame(gameName: string) {
       if (this.games.length == 0) {
@@ -120,8 +139,8 @@ export const useBikeTagApiStore = defineStore({
     updateTag(tag: Tag, gameName: string) {
       const game = this.getGame(gameName)
       if (game) {
-        const adminConfig = getBikeTagConfig(true)
-        adminConfig.game = game?.name.toLowerCase()
+        const adminConfig = getBikeTagConfig(true, game)
+        adminConfig.game = game?.slug
         adminConfig.imgur.hash = game.mainhash
         const biketagAdmin = new BikeTagClient(adminConfig)
         return biketagAdmin.updateTag(tag)
@@ -146,10 +165,12 @@ export const useBikeTagApiStore = defineStore({
           size = 'h=45'
           break
       }
-      return `${sanityBaseCDNUrl}${logo
-        .replace('image-', '')
-        .replace('-png', '.png')
-        .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
+      return logo?.length
+        ? `${sanityBaseCDNUrl}${logo
+            .replace('image-', '')
+            .replace('-png', '.png')
+            .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
+        : 'https://biketag.io/assets/biketag-logo.svg'
     },
     createTag(tag: {}): Tag {
       return BikeTagClient.createTagObject(tag)
@@ -163,7 +184,7 @@ export const useBikeTagApiStore = defineStore({
           throw e
         }
       }
-    }
+    },
   },
 })
 

@@ -31,15 +31,15 @@ const props = defineProps({
   },
   commit: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
-const tag = ref(props.commit ? { ...props.tag } : props.tag); // as Tag);
+const tag = ref(props.commit ? { ...props.tag } : props.tag) // as Tag);
 const gps = ref({
   lat: tag.value.gps?.lat ?? 0,
-  lng: tag.value.gps?.long ?? 0
+  lng: tag.value.gps?.long ?? 0,
 })
-const center = ref({...gps.value})
+const center = ref({ ...gps.value })
 const biketag = useBikeTagApiStore()
 const toast: any = inject('toast')
 const readOnly = [
@@ -53,9 +53,9 @@ const readOnly = [
 ]
 const updateTagGps = () => {
   tag.value.gps = {
-    lat: gps.value.lat, 
-    long: gps.value.lng, 
-    alt: tag.value.gps?.alt ?? 0
+    lat: gps.value.lat,
+    long: gps.value.lng,
+    alt: tag.value.gps?.alt ?? 0,
   }
 }
 const updateTag = () => {
@@ -81,8 +81,8 @@ const updateTag = () => {
     }
   }
 }
-const updateMarker = (e : any) => {
-  gps.value = {...e}
+const updateMarker = (e: any) => {
+  gps.value = { ...e }
   if (!props.commit) {
     updateTagGps()
   }
@@ -141,10 +141,12 @@ const typeEqualsTo = (value: any, type: string) => {
             <ion-label> GPS </ion-label>
           </ion-list-header>
           <ion-item class="ion-margin-start">
-            <ion-text> Latitude : {{gps.lat}} </ion-text> 
-            <ion-text class="ion-margin-start"> Longitude : {{gps.lng}} </ion-text>
+            <ion-text> Latitude : {{ gps.lat }} </ion-text>
+            <ion-text class="ion-margin-start">
+              Longitude : {{ gps.lng }}
+            </ion-text>
           </ion-item>
-          <Map :gps="gps" :center="center" @dragend="updateMarker"/>
+          <Map :gps="gps" :center="center" @dragend="updateMarker" />
           <ion-item class="ion-margin-start">
             <ion-label position="floating"> Altitude </ion-label>
             <ion-input v-model="tag.gps.alt" />

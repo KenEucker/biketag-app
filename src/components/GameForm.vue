@@ -24,6 +24,7 @@ import {
   addCircleOutline,
 } from 'ionicons/icons'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
+// import { useBikeTagApiStore } from '@/store/biketag'
 import Map from './Map.vue'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
@@ -32,17 +33,19 @@ const props = defineProps({
     default: null,
   },
 })
-const game = ref({ ...props.game }); //as Game);
-(() => {
+const game = ref({ ...props.game }) //as Game);
+;(() => {
   const sett = {} //: settingsArray = {}
   Object.assign(sett, game.value.settings)
   game.value.settings = sett
 })()
 const gps = ref({
   lat: game.value.boundary?.lat ?? 0,
-  lng: game.value.boundary?.long ?? 0
+  lng: game.value.boundary?.long ?? 0,
 })
-const center = ref({...gps.value})
+const center = ref({ ...gps.value })
+// const biketag = useBikeTagApiStore()
+// const toast: any = inject('toast')
 const settings = computed(() => Object.keys(game.value.settings))
 const newAmbassador = ref('')
 const addNewAmbassador = () => {
@@ -68,19 +71,37 @@ const removeSetting = (name: string) => {
 }
 const updateGame = () => {
   game.value.boundary.gps = {
-    lat: gps.value.lat, 
-    long: gps.value.lng, 
-    alt: game.value.boundary.gps?.alt ?? 0
+    lat: gps.value.lat,
+    long: gps.value.lng,
+    alt: game.value.boundary.gps?.alt ?? 0,
   }
   console.log(game.value)
+  // const res = biketag.updateGame(game.value as any)
+  // if (res) {
+  //   console.log(res)
+  //   res.then(() =>
+  //       toast.open({
+  //         message: `Game updated: ${game.value.name}`,
+  //         type: 'success',
+  //         position: 'top',
+  //       })
+  //     )
+  //     .catch((e) =>
+  //       toast.open({
+  //         message: `Error updating game: ${game.value.name}`,
+  //         type: 'error',
+  //         position: 'top',
+  //       })
+  //     )
+  // }
 }
 const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1)
 const typeEqualsTo = (value: any, type: string) => {
   return typeof value === type
 }
-const updateMarker = (e : any) => {
-  gps.value = {...e}
+const updateMarker = (e: any) => {
+  gps.value = { ...e }
 }
 </script>
 
@@ -204,10 +225,12 @@ const updateMarker = (e : any) => {
           <ion-label> Boundary </ion-label>
         </ion-list-header>
         <ion-item class="ion-margin-start">
-          <ion-text> Latitude : {{gps.lat}} </ion-text> 
-          <ion-text class="ion-margin-start"> Longitude : {{gps.lng}} </ion-text>
+          <ion-text> Latitude : {{ gps.lat }} </ion-text>
+          <ion-text class="ion-margin-start">
+            Longitude : {{ gps.lng }}
+          </ion-text>
         </ion-item>
-        <Map :gps="gps" :center="center" @dragend="updateMarker"/>
+        <Map :gps="gps" :center="center" @dragend="updateMarker" />
         <ion-item class="ion-margin-start">
           <ion-label position="floating"> Altitude </ion-label>
           <ion-input v-model="game.boundary.alt" />

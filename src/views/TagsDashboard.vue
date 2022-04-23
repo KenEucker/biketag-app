@@ -11,24 +11,31 @@ const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
 const routeParam = useRouter().currentRoute.value.params.name
 const biketag = useBikeTagApiStore()
-const query = ref("")
+const query = ref('')
 const splitBy = ref(20)
 const tags = ref(biketag.tags(routeParam))
-const tagsFiltered = computed(() => tags.value.filter(
-  (val : any) => !query ? true : (
-    val?.mysteryPlayer?.toLowerCase().indexOf(query.value) > -1 || 
-    val?.foundPlayer?.toLowerCase().indexOf(query.value) > -1)
-))
-const shownTags = computed(() => tagsFiltered.value.slice(
-    paginationSelected.value * splitBy.value, 
+const tagsFiltered = computed(() =>
+  tags.value.filter((val: any) =>
+    !query
+      ? true
+      : val?.mysteryPlayer?.toLowerCase().indexOf(query.value) > -1 ||
+        val?.foundPlayer?.toLowerCase().indexOf(query.value) > -1
+  )
+)
+const shownTags = computed(() =>
+  tagsFiltered.value.slice(
+    paginationSelected.value * splitBy.value,
     paginationSelected.value * splitBy.value + splitBy.value
   )
 )
-biketag.setTagsFromGame(routeParam as string).
-  then(() => tags.value = biketag.tags(routeParam))
+biketag
+  .setTagsFromGame(routeParam as string)
+  .then(() => (tags.value = biketag.tags(routeParam)))
 const paginationSelected = ref(0)
-const split = computed(() => Math.ceil(tagsFiltered.value.length / splitBy.value))
-const getStartPos = () => Math.trunc(paginationSelected.value/4)*4
+const split = computed(() =>
+  Math.ceil(tagsFiltered.value.length / splitBy.value)
+)
+const getStartPos = () => Math.trunc(paginationSelected.value / 4) * 4
 const showRigthArrow = computed(() => {
   return paginationSelected.value + 4 < split.value
 })
@@ -36,18 +43,18 @@ const showLeftArrow = computed(() => {
   return paginationSelected.value - 4 >= 0
 })
 const paginationArray = computed(() => {
-  const pagination = Array.from(Array(split.value).keys()).map(x => x + 1)
+  const pagination = Array.from(Array(split.value).keys()).map((x) => x + 1)
   const start_p = getStartPos()
-  return pagination.slice(start_p, start_p+4)
+  return pagination.slice(start_p, start_p + 4)
 })
-const setPagSelected = (i : number) => {
+const setPagSelected = (i: number) => {
   paginationSelected.value = i
 }
-const changePagSelected = (i : number) => {
+const changePagSelected = (i: number) => {
   if (i > 0 && showRigthArrow.value) {
-    paginationSelected.value = getStartPos() + i;
+    paginationSelected.value = getStartPos() + i
   } else if (i < 0 && showLeftArrow.value) {
-    paginationSelected.value = getStartPos() + i;
+    paginationSelected.value = getStartPos() + i
   }
 }
 
@@ -68,27 +75,28 @@ const getThumbnail = (imgUrl: string) => {
 const getLocalDateTime = (timestamp: number) =>
   new Date(timestamp * 1000).toLocaleTimeString()
 
-const filter = (event : any) => {
+const filter = (event: any) => {
   query.value = event.target.value.toLowerCase()
 }
 const clear = () => {
-  query.value = ""
+  query.value = ''
 }
-const fileSafeQuery = computed(() => 
-  query.value.replace(/[^a-z0-9]/gi, '_').toLowerCase())
+const fileSafeQuery = computed(() =>
+  query.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+)
 
 onMounted(() => {
-  const searchBar = document.getElementById("search-bar")
+  const searchBar = document.getElementById('search-bar')
   if (searchBar) {
-    searchBar.addEventListener("ion-input", filter)
-    searchBar.addEventListener("ion-clear", clear) 
+    searchBar.addEventListener('ion-input', filter)
+    searchBar.addEventListener('ion-clear', clear)
   }
 })
 onBeforeUnmount(() => {
-  const searchBar = document.getElementById("search-bar")
+  const searchBar = document.getElementById('search-bar')
   if (searchBar) {
-    searchBar.removeEventListener("ion-input", filter)
-    searchBar.removeEventListener("ion-clear", clear) 
+    searchBar.removeEventListener('ion-input', filter)
+    searchBar.removeEventListener('ion-clear', clear)
   }
 })
 </script>
@@ -104,15 +112,25 @@ onBeforeUnmount(() => {
     </ion-modal>
     <ion-row class="ion-justify-content-between">
       <ion-col>
-        <export-form 
-          :info="`${($route.params.name as string).toLowerCase()}-tags${query ? '--' + fileSafeQuery : ''}`" 
-          :data="tagsFiltered"/>
+        <export-form
+          :info="`${($route.params.name as string).toLowerCase()}-tags${query ? '--' + fileSafeQuery : ''}`"
+          :data="tagsFiltered"
+        />
       </ion-col>
-      <ion-col style="display: flex" class="ion-align-items-center" offset-md="2" size-md="auto">
-        <ion-button @click="() => $router.push(`/games/${$route.params.name}/import`)"> Import </ion-button>
+      <ion-col
+        style="display: flex"
+        class="ion-align-items-center"
+        offset-md="2"
+        size-md="auto"
+      >
+        <ion-button
+          @click="() => $router.push(`/games/${$route.params.name}/import`)"
+        >
+          Import
+        </ion-button>
       </ion-col>
     </ion-row>
-    
+
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
@@ -148,11 +166,7 @@ onBeforeUnmount(() => {
             </thead>
 
             <tbody class="bg-white">
-              <tr
-                v-for="(tag, index) in shownTags"
-                :key="index"
-              >
-
+              <tr v-for="(tag, index) in shownTags" :key="index">
                 <td
                   class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
@@ -160,11 +174,13 @@ onBeforeUnmount(() => {
                     {{ tag.tagnumber }}
                   </div>
                 </td>
-                
+
                 <td
                   class="lg:px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
-                  <div class="flex items-center justify-center md:justify-start">
+                  <div
+                    class="flex items-center justify-center md:justify-start"
+                  >
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         v-if="tag.mysteryImageUrl"
@@ -194,7 +210,9 @@ onBeforeUnmount(() => {
                 <td
                   class="lg:px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                 >
-                  <div class="flex items-center justify-center md:justify-start">
+                  <div
+                    class="flex items-center justify-center md:justify-start"
+                  >
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         v-if="tag.foundImageUrl"
@@ -254,34 +272,53 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin">
+    <div
+      class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin"
+    >
       <div class="mt-3 ms:mt-0">
         <p class="text-sm text-gray-700">
           Showing
           <span class="font-medium"> {{ paginationSelected * splitBy }} </span>
           to
-          <span class="font-medium"> {{ Math.min(paginationSelected * splitBy + splitBy, tags.length) }} </span>
+          <span class="font-medium">
+            {{ Math.min(paginationSelected * splitBy + splitBy, tags.length) }}
+          </span>
           of
           <span class="font-medium"> {{ tags.length }} </span>
           results
         </p>
       </div>
       <div v-if="paginationArray.length" class="mt-3 ms:mt-0">
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-          <button :disabled="!showLeftArrow"
-            @click="changePagSelected(-4)" 
-            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+        <nav
+          class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+          aria-label="Pagination"
+        >
+          <button
+            :disabled="!showLeftArrow"
+            @click="changePagSelected(-4)"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+          >
             <span class="sr-only">Previous</span>
             <ion-icon :icon="arrowBackOutline" />
           </button>
           <template v-for="(val, index) in paginationArray" :key="val">
             <button
-              :class="(val - 1 === paginationSelected ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50') + 'relative inline-flex items-center px-4 py-2 border text-sm font-medium'"
-              @click="() => setPagSelected(val - 1)" > {{ val }} </button>
+              :class="
+                (val - 1 === paginationSelected
+                  ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50') +
+                'relative inline-flex items-center px-4 py-2 border text-sm font-medium'
+              "
+              @click="() => setPagSelected(val - 1)"
+            >
+              {{ val }}
+            </button>
           </template>
-          <button :disabled="!showRigthArrow" 
-            @click="changePagSelected(4)" 
-            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+          <button
+            :disabled="!showRigthArrow"
+            @click="changePagSelected(4)"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+          >
             <span class="sr-only">Next</span>
             <ion-icon :icon="arrowForwardOutline" />
           </button>

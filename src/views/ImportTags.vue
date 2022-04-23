@@ -1,14 +1,26 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
-import { IonModal, IonIcon, IonButton, IonRow, IonCol, IonCheckbox } from '@ionic/vue'
+import {
+  IonModal,
+  IonIcon,
+  IonButton,
+  IonRow,
+  IonCol,
+  IonCheckbox,
+} from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
 import TagForm from '@/components/TagForm.vue'
-import { create, arrowBackOutline, arrowForwardOutline, checkmarkCircleOutline } from 'ionicons/icons'
+import {
+  create,
+  arrowBackOutline,
+  arrowForwardOutline,
+  checkmarkCircleOutline,
+} from 'ionicons/icons'
 import ImportForm from '@/components/ImportForm.vue'
 import { CHANGED_VALUES } from '@/common/types'
 
-const toast : any = inject('toast')
+const toast: any = inject('toast')
 const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
 const router = useRouter()
@@ -18,17 +30,21 @@ const splitBy = ref(20)
 const importAll = ref(false)
 const tags = ref([] as any[])
 const tagsInStore = ref(biketag.tags(routeParam))
-const tagsInStoreNumbers = computed(() => tagsInStore.value.map((val : any) => val.tagnumber)) 
-const shownTags = computed(() : any[] => tags.value.slice(
-    paginationSelected.value * splitBy.value, 
+const tagsInStoreNumbers = computed(() =>
+  tagsInStore.value.map((val: any) => val.tagnumber)
+)
+const shownTags = computed((): any[] =>
+  tags.value.slice(
+    paginationSelected.value * splitBy.value,
     paginationSelected.value * splitBy.value + splitBy.value
   )
 )
-biketag.setTagsFromGame(routeParam as string).
-  then(() => tagsInStore.value = biketag.tags(routeParam))
+biketag
+  .setTagsFromGame(routeParam as string)
+  .then(() => (tagsInStore.value = biketag.tags(routeParam)))
 const paginationSelected = ref(0)
 const split = computed(() => Math.ceil(tags.value.length / splitBy.value))
-const getStartPos = () => Math.trunc(paginationSelected.value/4)*4
+const getStartPos = () => Math.trunc(paginationSelected.value / 4) * 4
 const showRigthArrow = computed(() => {
   return paginationSelected.value + 4 < split.value
 })
@@ -36,40 +52,46 @@ const showLeftArrow = computed(() => {
   return paginationSelected.value - 4 >= 0
 })
 const paginationArray = computed(() => {
-  const pagination = Array.from(Array(split.value).keys()).map(x => x + 1)
+  const pagination = Array.from(Array(split.value).keys()).map((x) => x + 1)
   const start_p = getStartPos()
-  return pagination.slice(start_p, start_p+4)
+  return pagination.slice(start_p, start_p + 4)
 })
-const setPagSelected = (i : number) => {
+const setPagSelected = (i: number) => {
   paginationSelected.value = i
 }
-const changePagSelected = (i : number) => {
+const changePagSelected = (i: number) => {
   if (i > 0 && showRigthArrow.value) {
-    paginationSelected.value = getStartPos() + i;
+    paginationSelected.value = getStartPos() + i
   } else if (i < 0 && showLeftArrow.value) {
-    paginationSelected.value = getStartPos() + i;
+    paginationSelected.value = getStartPos() + i
   }
 }
 
-const setTagUpdates = (tag : any) => {
+const setTagUpdates = (tag: any) => {
   tag.import = importAll.value
   tag.changes = []
   const isInStore = tagsInStoreNumbers.value.indexOf(tag.tagnumber)
   if (isInStore > -1) {
     const tagInStore = tagsInStore.value[isInStore]
-    if (tag.mysteryImageUrl != tagInStore.mysteryImageUrl || 
-        tag.mysteryPlayer != tagInStore.mysteryPlayer ||
-        tag.mysteryTime != tagInStore.mysteryTime ) {
+    if (
+      tag.mysteryImageUrl != tagInStore.mysteryImageUrl ||
+      tag.mysteryPlayer != tagInStore.mysteryPlayer ||
+      tag.mysteryTime != tagInStore.mysteryTime
+    ) {
       tag.changes.push(CHANGED_VALUES.MYSTERY)
     }
-    if (tag.foundImageUrl != tagInStore.foundImageUrl || 
-        tag.foundPlayer != tagInStore.foundPlayer ||
-        tag.foundTime != tagInStore.foundTime ) {
+    if (
+      tag.foundImageUrl != tagInStore.foundImageUrl ||
+      tag.foundPlayer != tagInStore.foundPlayer ||
+      tag.foundTime != tagInStore.foundTime
+    ) {
       tag.changes.push(CHANGED_VALUES.FOUND)
     }
-    if (tag?.gps?.lat != tagInStore.gps.lat ||
-        tag?.gps?.long != tagInStore.gps.long ||
-        tag?.gps?.alt != tagInStore.gps.alt ) {
+    if (
+      tag?.gps?.lat != tagInStore.gps.lat ||
+      tag?.gps?.long != tagInStore.gps.long ||
+      tag?.gps?.alt != tagInStore.gps.alt
+    ) {
       tag.changes.push(CHANGED_VALUES.GPS)
     }
   }
@@ -93,7 +115,7 @@ const getThumbnail = (imgUrl: string) => {
 const getLocalDateTime = (timestamp: number) =>
   new Date(timestamp * 1000).toLocaleTimeString()
 
-const loadTags = (data : any) => {
+const loadTags = (data: any) => {
   tags.value = data
   console.log(tags.value)
   for (const tag of tags.value) {
@@ -103,15 +125,15 @@ const loadTags = (data : any) => {
 
 const toggleAll = () => {
   importAll.value = !importAll.value
-  tags.value.forEach((tag : any) => {
+  tags.value.forEach((tag: any) => {
     tag.import = importAll.value
-  });
+  })
 }
 
 const pushBack = () => router.push(`/games/${routeParam}`)
 
 const importTags = async () => {
-  const tagsToImport = [];
+  const tagsToImport = []
   for (const tag of tags.value) {
     if ((tag as any).import) {
       const cleanTag = biketag.createTag(tag)
@@ -136,7 +158,6 @@ const importTags = async () => {
     })
   }
 }
-
 </script>
 
 <template>
@@ -151,16 +172,21 @@ const importTags = async () => {
     </ion-modal>
     <ion-row class="ion-justify-content-between">
       <ion-col>
-        <import-form @dataImported="loadTags"/>
+        <import-form @dataImported="loadTags" />
       </ion-col>
-      <ion-col style="display: flex" class="ion-align-items-center" offset-md="auto" size-md="2">
-        <ion-button @click="importTags" >
+      <ion-col
+        style="display: flex"
+        class="ion-align-items-center"
+        offset-md="auto"
+        size-md="2"
+      >
+        <ion-button @click="importTags">
           Import
-          <ion-icon :icon="checkmarkCircleOutline"/>
+          <ion-icon :icon="checkmarkCircleOutline" />
         </ion-button>
       </ion-col>
     </ion-row>
-    
+
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
@@ -174,8 +200,7 @@ const importTags = async () => {
                 <th
                   class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
-                  
-                  <ion-icon @click="toggleAll" :icon="checkmarkCircleOutline"/>
+                  <ion-icon @click="toggleAll" :icon="checkmarkCircleOutline" />
                 </th>
                 <th
                   class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
@@ -202,12 +227,16 @@ const importTags = async () => {
             </thead>
 
             <tbody class="bg-white">
-              <tr
-                v-for="(tag, index) in shownTags"
-                :key="index"
-              >
-                <td class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                  <ion-checkbox v-model="tag.import" color="primary" mode="ios" slot="start"></ion-checkbox>
+              <tr v-for="(tag, index) in shownTags" :key="index">
+                <td
+                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                >
+                  <ion-checkbox
+                    v-model="tag.import"
+                    color="primary"
+                    mode="ios"
+                    slot="start"
+                  ></ion-checkbox>
                 </td>
 
                 <td
@@ -217,11 +246,15 @@ const importTags = async () => {
                     {{ tag?.tagnumber }}
                   </div>
                 </td>
-                
+
                 <td
-                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.MYSTERY) ? 'bg-rose-400' : ''}`"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${
+                    tag.changes?.includes(CHANGED_VALUES.MYSTERY)
+                      ? 'bg-rose-400'
+                      : ''
+                  }`"
                 >
-                  <div class="flex items-center" >
+                  <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
                       <img
                         v-if="tag?.mysteryImageUrl"
@@ -249,7 +282,11 @@ const importTags = async () => {
                 </td>
 
                 <td
-                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.FOUND) ? 'bg-rose-400' : ''}`"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${
+                    tag.changes?.includes(CHANGED_VALUES.FOUND)
+                      ? 'bg-rose-400'
+                      : ''
+                  }`"
                 >
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-10 h-10">
@@ -279,7 +316,11 @@ const importTags = async () => {
                 </td>
 
                 <td
-                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${tag.changes?.includes(CHANGED_VALUES.GPS) ? 'bg-rose-400' : ''}`"
+                  :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${
+                    tag.changes?.includes(CHANGED_VALUES.GPS)
+                      ? 'bg-rose-400'
+                      : ''
+                  }`"
                 >
                   <div class="text-sm leading-5 text-gray-900">
                     Lat : {{ tag?.gps?.lat }}
@@ -311,34 +352,53 @@ const importTags = async () => {
       </div>
     </div>
 
-    <div class="sm:flex-1 sm:flex sm:items-center sm:justify-between ion-margin">
+    <div
+      class="sm:flex-1 sm:flex sm:items-center sm:justify-between ion-margin"
+    >
       <div>
         <p class="text-sm text-gray-700">
           Showing
           <span class="font-medium"> {{ paginationSelected * splitBy }} </span>
           to
-          <span class="font-medium"> {{ Math.min(paginationSelected * splitBy + splitBy, tags.length) }} </span>
+          <span class="font-medium">
+            {{ Math.min(paginationSelected * splitBy + splitBy, tags.length) }}
+          </span>
           of
           <span class="font-medium"> {{ tags.length }} </span>
           results
         </p>
       </div>
       <div v-if="paginationArray.length">
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-          <button :disabled="!showLeftArrow"
-            @click="changePagSelected(-4)" 
-            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+        <nav
+          class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+          aria-label="Pagination"
+        >
+          <button
+            :disabled="!showLeftArrow"
+            @click="changePagSelected(-4)"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+          >
             <span class="sr-only">Previous</span>
             <ion-icon :icon="arrowBackOutline" />
           </button>
           <template v-for="(val, index) in paginationArray" :key="val">
             <button
-              :class="(val - 1 === paginationSelected ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50') + 'relative inline-flex items-center px-4 py-2 border text-sm font-medium'"
-              @click="() => setPagSelected(val - 1)" > {{ val }} </button>
+              :class="
+                (val - 1 === paginationSelected
+                  ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50') +
+                'relative inline-flex items-center px-4 py-2 border text-sm font-medium'
+              "
+              @click="() => setPagSelected(val - 1)"
+            >
+              {{ val }}
+            </button>
           </template>
-          <button :disabled="!showRigthArrow" 
-            @click="changePagSelected(4)" 
-            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+          <button
+            :disabled="!showRigthArrow"
+            @click="changePagSelected(4)"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+          >
             <span class="sr-only">Next</span>
             <ion-icon :icon="arrowForwardOutline" />
           </button>
