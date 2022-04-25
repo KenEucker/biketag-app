@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 import { Auth0Plugin } from './auth'
 import VueToast from 'vue-toast-notification'
 import VueGoogleMaps from '@fawmi/vue-google-maps'
+import Markdown from 'vue3-markdown-it'
 import './assets/index.postcss'
 // import './index.css'
 
@@ -32,6 +33,9 @@ import '@ionic/vue/css/display.css'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import './theme/main.scss'
 
+
+
+
 const head = createHead()
 const app = createApp(App)
 const auth0Opts = {
@@ -54,6 +58,7 @@ app.use(head)
 app.use(createPinia())
 app.use(Auth0Plugin, auth0Opts)
 app.use(VueToast)
+app.use(Markdown)
 app.use(VueGoogleMaps, {
   load: {
     key: process.env.G_AKEY,

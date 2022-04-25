@@ -4,8 +4,8 @@ import { IonModal, IonIcon, IonButton, IonSearchbar } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import GameForm from '../components/GameForm.vue'
 import {
-  create,
-  linkOutline,
+  settingsOutline,
+  pricetagsOutline,
   arrowBackOutline,
   arrowForwardOutline,
 } from 'ionicons/icons'
@@ -72,6 +72,8 @@ const clear = () => {
   // games.value = biketag.allGames
 }
 
+const getGameUrl = (game: any) => `https://${ game.slug }.biketag.${'io'}`
+
 onMounted(() => {
   const searchBar = document.getElementById('search-bar')
   if (searchBar) {
@@ -117,8 +119,13 @@ onBeforeUnmount(() => {
                 <th
                   class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
-                  Main Album Hash
+                  Site
                 </th>
+                <!-- <th
+                  class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                >
+                  Edit
+                </th> -->
                 <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
               </tr>
             </thead>
@@ -167,7 +174,7 @@ onBeforeUnmount(() => {
                   class="px-6 py-4 hidden lg:table-cell border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="text-sm leading-5 text-gray-900">
-                    {{ game.mainhash }}
+                    <a :href="getGameUrl(game)">{{ getGameUrl(game) }}</a>
                   </div>
                 </td>
 
@@ -181,7 +188,7 @@ onBeforeUnmount(() => {
                         @click.prevent="() => showModal(index)"
                         class="rounded-md"
                       >
-                        <ion-icon :icon="create"></ion-icon>
+                        <ion-icon :icon="settingsOutline"></ion-icon>
                       </ion-button>
                       <ion-button
                         fill="clear"
@@ -190,7 +197,7 @@ onBeforeUnmount(() => {
                         "
                         class="ml-2 rounded-md"
                       >
-                        <ion-icon :icon="linkOutline"></ion-icon>
+                        <ion-icon :icon="pricetagsOutline"></ion-icon>
                       </ion-button>
                     </span>
                   </div>

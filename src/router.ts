@@ -8,6 +8,42 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Login.vue'),
     meta: { layout: 'Empty' },
   },
+  {
+    path: '/privacy',
+    name: 'Privacy Policy',
+    component: () => import('@/views/Wiki.vue'),
+    meta: { layout: 'Empty' },
+  },
+  {
+    path: '/conduct',
+    name: 'Code Of Conduct',
+    component: () => import('@/views/Wiki.vue'),
+    meta: { layout: 'Empty' },
+  },
+  {
+    path: '/terms',
+    name: 'Terms Of Service',
+    component: () => import('@/views/Wiki.vue'),
+    meta: { layout: 'Empty' },
+  },
+  {
+    path: '/configuration',
+    name: 'Configuration For Self Hosting',
+    component: () => import('@/views/Wiki.vue'),
+    meta: { layout: 'Empty' },
+  },
+  {
+    path: '/contributing',
+    name: 'Contributing To Projects',
+    component: () => import('@/views/Wiki.vue'),
+    meta: { layout: 'Empty' },
+  },
+  {
+    path: '/developers',
+    name: 'Developers Portal',
+    component: () => import('@/views/Wiki.vue'),
+    meta: { layout: 'Empty' },
+  },
 ]
 
 const protectedRoutes: Array<RouteRecordRaw> = [
