@@ -1,4 +1,5 @@
 <script setup lang="ts">
+<<<<<<< HEAD
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { IonModal, IonIcon, IonButton } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
@@ -9,6 +10,13 @@ import {
   arrowBackOutline,
   arrowForwardOutline,
 } from 'ionicons/icons'
+=======
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { IonModal, IonIcon, IonButton } from "@ionic/vue";
+import { useBikeTagApiStore } from "@/store/biketag";
+import GameForm from "../components/GameForm.vue";
+import { create, linkOutline, arrowBackOutline, arrowForwardOutline } from "ionicons/icons";
+>>>>>>> 66b8727702d7332f294ff8400e8aa7b8290fda01
 
 const modalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
