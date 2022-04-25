@@ -104,7 +104,7 @@ const getFile = () => {
       />
       <ion-button class="ion-justify-content-between" fill="clear" @click.prevent="getFile">
         <ion-icon :icon="cloudUploadOutline"/>
-        <ion-label class="ion-margin-start"> Import Tags </ion-label>
+        <ion-label class="ion-margin-start"> Upload Tags </ion-label>
       </ion-button>
     </div>
   </form>

@@ -30,7 +30,7 @@
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
     "convert": "tsoa spec-and-routes",
-    "dev": "netlify dev --port 8080",
+    "dev": "netlify dev --port 8080 --functionsPort 7200",
     "build": "vite build",
     "preview": "vite build && vite preview",
     "serve": "vite",
@@ -53,7 +53,12 @@
     "pinia": "^2.0.12",
     "tailwindcss": "^3.0.23",
     "@auth0/auth0-spa-js": "^1.19.4",
-    "vue-toast-notification": "^3.0.0"
+    "vue-toast-notification": "^3.0.0",
+    "jose": "^4.6.0",
+    "ajv": "^8.10.0",
+    "crypto-js": "^4.1.1",
+    "lzutf8": "^0.6.1",
+    "@serverless-jwt/jwt-verifier": "^0.2.1"
   },
   "devDependencies": {
     "@cypress/vite-dev-server": "~2.2",

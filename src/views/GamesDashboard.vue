@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { IonModal, IonIcon, IonButton, IonSearchbar } from "@ionic/vue";
+import { IonModal, IonIcon, IonButton } from "@ionic/vue";
 import { useBikeTagApiStore } from "@/store/biketag";
 import GameForm from "../components/GameForm.vue";
 import { create, linkOutline, arrowBackOutline, arrowForwardOutline } from "ionicons/icons";
