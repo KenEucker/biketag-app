@@ -23,3 +23,12 @@ export const getPayloadOpts = (event: any, base = {}): any => {
     ...parsedBody,
   }
 }
+
+export const getApiUrl = (path = '') => {
+  const url =
+    process.env.CONTEXT === 'dev'
+      ? `${window.location.protocol}//${window.location.hostname}:7200/.netlify/functions/${path}`
+      : `/api/${path}`
+
+  return url
+}

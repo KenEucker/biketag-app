@@ -68,6 +68,13 @@ const protectedRoutes: Array<RouteRecordRaw> = [
     component: () => import('@/views/ImportTags.vue'),
     meta: { layout: 'Dashboard', showSearchBar: false },
   },
+  {
+    path: '/profile',
+    name: 'Profile',
+    beforeEnter: authGuard,
+    component: () => import('@/views/Profile.vue'),
+    meta: { layout: 'Dashboard', showSearchBar: false },
+  },
 ]
 
 const router = createRouter({
