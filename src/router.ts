@@ -8,7 +8,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Login.vue'),
     meta: { layout: 'Empty' },
   },
-<<<<<<< HEAD
   {
     path: '/privacy',
     name: 'Privacy Policy',
@@ -45,8 +44,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Wiki.vue'),
     meta: { layout: 'Empty' },
   },
-=======
->>>>>>> 66b8727702d7332f294ff8400e8aa7b8290fda01
 ]
 
 const protectedRoutes: Array<RouteRecordRaw> = [
