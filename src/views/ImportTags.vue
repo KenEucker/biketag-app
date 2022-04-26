@@ -39,9 +39,9 @@ const shownTags = computed((): any[] =>
     paginationSelected.value * splitBy.value + splitBy.value
   )
 )
-biketag
-  .setTagsFromGame(routeParam as string)
-  .then(() => (tagsInStore.value = biketag.tags(routeParam)))
+const selectedTags = computed(() => tags.value.find((tag : any) => tag.import))
+biketag.setTagsFromGame(routeParam as string).
+  then(() => tagsInStore.value = biketag.tags(routeParam))
 const paginationSelected = ref(0)
 const split = computed(() => Math.ceil(tags.value.length / splitBy.value))
 const getStartPos = () => Math.trunc(paginationSelected.value / 4) * 4
@@ -174,13 +174,8 @@ const importTags = async () => {
       <ion-col>
         <import-form @dataImported="loadTags" />
       </ion-col>
-      <ion-col
-        style="display: flex"
-        class="ion-align-items-center"
-        offset-md="auto"
-        size-md="2"
-      >
-        <ion-button @click="importTags">
+      <ion-col style="display: flex" class="ion-align-items-center" offset-md="auto" size-md="2">
+        <ion-button @click="importTags" :disabled="!selectedTags">
           Import
           <ion-icon :icon="checkmarkCircleOutline" />
         </ion-button>

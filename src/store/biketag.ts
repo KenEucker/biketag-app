@@ -1,13 +1,16 @@
+import { AmbassadorProfile } from '../common/types';
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import BikeTagClient from 'biketag'
 import { Game, Tag } from 'biketag/lib/common/schema'
+import { getApiUrl } from '@/common/utils';
 
 interface TagsFromGames {
   [key: string]: Tag[]
 }
 interface BikeTagAppState {
   games: Game[]
-  tagsFromGames: TagsFromGames
+  tagsFromGames: TagsFromGames,
+  profile: AmbassadorProfile
 }
 
 const getBikeTagConfig = (admin?: boolean, game?: Game) => {
@@ -48,6 +51,7 @@ export const useBikeTagApiStore = defineStore({
   state: (): BikeTagAppState => ({
     games: [] as Game[],
     tagsFromGames: {} as TagsFromGames,
+    profile: {} as AmbassadorProfile
   }),
   getters: {
     allGames: (state: BikeTagAppState): Array<Game> => state.games,
@@ -61,6 +65,7 @@ export const useBikeTagApiStore = defineStore({
       return (gameName: string) =>
         state.games.filter((val) => val.name == gameName)[0]
     },
+    getProfile: (state: BikeTagAppState): any => state.profile
   },
   actions: {
     async setGames() {
@@ -167,9 +172,9 @@ export const useBikeTagApiStore = defineStore({
       }
       return logo?.length
         ? `${sanityBaseCDNUrl}${logo
-            .replace('image-', '')
-            .replace('-png', '.png')
-            .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
+          .replace('image-', '')
+          .replace('-png', '.png')
+          .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
         : 'https://biketag.io/assets/biketag-logo.svg'
     },
     createTag(tag: {}): Tag {
@@ -183,6 +188,31 @@ export const useBikeTagApiStore = defineStore({
           console.log(e)
           throw e
         }
+      }
+    },
+    async updateProfile(profile: AmbassadorProfile, token: string) {
+      const user_metadata = profile.user_metadata;
+      const updatedProfileResponse = await biketagClient.plainRequest({
+        method: 'PATCH',
+        url: getApiUrl('profile'),
+        headers: {
+          authorization: `Bearer ${token}`,
+          'content-type': 'application/json',
+        },
+        data: { user_metadata },
+      })
+      this.profile = updatedProfileResponse.data;
+    },
+    async setProfile(token: string) {
+      const response = await biketagClient.plainRequest({
+        method: 'GET',
+        url: getApiUrl('profile'),
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      if (response.status == 200) {
+        this.profile = response.data
       }
     },
   },

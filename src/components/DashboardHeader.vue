@@ -119,13 +119,13 @@ const logout = () => {
             v-show="dropdownOpen"
             class="absolute right-0 z-20 w-48 py-1 mt-2 bg-white rounded-lg shadow-xl"
           >
-            <a
-              href="#"
+            <router-link
+              to="/profile"
               class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
             >
               <ion-icon class="tiny-icon" :icon="personOutline"></ion-icon>
-              Profile</a
-            >
+              Profile
+            </router-link>
             <a
               href="#"
               class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
