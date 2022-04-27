@@ -9,9 +9,16 @@ import {
   IonSegmentButton,
   IonLabel,
 } from '@ionic/vue'
-import { cloudDownloadOutline } from 'ionicons/icons'
+import { cloudDownloadOutline, imageOutline } from 'ionicons/icons'
+import JSZip from 'jszip';
+import { execPath } from 'process';
 
+const zip = new JSZip();
 const props = defineProps({
+  variant: {
+    type: String,
+    default: 'data'
+  },
   data: {
     type: Array,
     default: [],
@@ -50,13 +57,11 @@ const tagKeys = [
   'altitude',
 ]
 const fileType = ref('csv')
-
-const downloadFile = (data: string, fileName: string, fileType: string) => {
-  const blob = new Blob([data], { type: fileType })
-
+const packing = ref(false)
+const download = (data: Blob, fileName: string) => {
   const a = document.createElement('a')
   a.download = fileName
-  a.href = window.URL.createObjectURL(blob)
+  a.href = window.URL.createObjectURL(data)
   const clickEvt = new MouseEvent('click', {
     view: window,
     bubbles: true,
@@ -64,6 +69,28 @@ const downloadFile = (data: string, fileName: string, fileType: string) => {
   })
   a.dispatchEvent(clickEvt)
   a.remove()
+}
+/**
+ * Creates and downloads a zip file containing pictures.
+ * @param data matrix Nx2 [[img-url, img-name]]
+ */
+const downloadPictures = async () => {
+  packing.value = true
+  for (const img of props.data) {
+    const image = await fetch((img as string[])[0])
+    const imageBlog = await image.blob()
+    zip.file((img as string[])[1], imageBlog)
+  }
+  zip.generateAsync({ type: 'blob' }).then((content) => {
+    download(content, 'tags-pictures.zip')
+    packing.value = false
+    console.log(packing.value)
+  });
+}
+
+const downloadFile = (data: string, fileName: string, fileType: string) => {
+  const blob = new Blob([data], { type: fileType })
+  download(blob, fileName)
 }
 
 const exportToJson = () => {
@@ -118,7 +145,7 @@ const downloadData = () => {
 </script>
 
 <template>
-  <form class="export-form--fixed">
+  <form v-if="variant == 'data'" class="export-form--fixed">
     <ion-row>
       <ion-col>
         <ion-button fill="clear" @click.prevent="downloadData">
@@ -137,4 +164,14 @@ const downloadData = () => {
       </ion-col>
     </ion-row>
   </form>
+  <ion-button 
+    v-if="variant == 'inline-imgs'" class="mx-0 px-0 md:mx-2 md:px-2" 
+    fill="clear" @click="downloadPictures" :disabled="packing"
+  >
+    <ion-icon :icon="imageOutline"></ion-icon>
+  </ion-button>
+  <ion-button v-if="variant == 'imgs'" @click="downloadPictures" :disabled="packing">
+    <slot />
+    <ion-icon class="ml-2" :icon="imageOutline"></ion-icon>
+  </ion-button>
 </template>
