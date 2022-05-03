@@ -85,6 +85,25 @@ const fileSafeQuery = computed(() =>
   query.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()
 )
 
+const getImgUrls = (tag: any) => {
+  const data : any[] = [];
+  const pushImg = (prop: string, name: string) => {
+    data.push([
+      tag[prop],
+      `tag-${tag.tagnumber}-${name}${tag[prop].slice(tag[prop].lastIndexOf('.'))}`
+    ])
+  }
+  if (tag.foundImageUrl) {
+    pushImg('foundImageUrl', 'found-image')
+  }
+  if (tag.mysteryImageUrl) {
+    pushImg('mysteryImageUrl', 'mystery-image')
+  }
+  return data
+}
+
+const tagsImgsUrls = computed(() => shownTags.value.reduce((acc: any[], tag: any) => acc.concat(getImgUrls(tag)), []))
+
 onMounted(() => {
   const searchBar = document.getElementById('search-bar')
   if (searchBar) {
@@ -129,6 +148,15 @@ onBeforeUnmount(() => {
           Import
         </ion-button>
       </ion-col>
+      <ion-col
+        style="display: flex"
+        class="ion-align-items-center"
+        size-md="auto"
+      >
+        <export-form variant="imgs" :data="tagsImgsUrls">
+          Download all
+        </export-form>
+      </ion-col>
     </ion-row>
 
     <div class="mt-8"></div>
@@ -142,12 +170,12 @@ onBeforeUnmount(() => {
             <thead>
               <tr>
                 <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="px-3 md:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Number
                 </th>
                 <th
-                  class="pl-2 lg:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                  class="pl-0 md:pl-2 lg:px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
                   Mystery Tag
                 </th>
@@ -254,14 +282,17 @@ onBeforeUnmount(() => {
                   class="py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
                 >
                   <div class="flex justify-around">
-                    <span class="flex justify-center text-yellow-500">
+                    <span class="flex justify-center">
                       <ion-button
                         fill="clear"
                         @click="() => showModal(index)"
-                        class="px-2 mx-2 rounded-md"
+                        class="mx-0 px-0 md:mx-2 md:px-2 rounded-md"
                       >
                         <ion-icon :icon="create"></ion-icon>
                       </ion-button>
+                    </span>
+                    <span class="flex justify-center">
+                      <export-form :data="getImgUrls(tag)" variant="inline-imgs"></export-form>
                     </span>
                   </div>
                 </td>
