@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, defineEmits, defineProps } from 'vue'
+import { ref, computed, defineEmits, defineProps, inject } from 'vue'
 import {
   IonContent,
   IonButton,
@@ -24,7 +24,7 @@ import {
   addCircleOutline,
 } from 'ionicons/icons'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
-// import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagApiStore } from '@/store/biketag'
 import Map from './Map.vue'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
@@ -33,8 +33,8 @@ const props = defineProps({
     default: null,
   },
 })
-const game = ref({ ...props.game }) //as Game);
-;(() => {
+const game = ref({ ...props.game }); //as Game);
+(() => {
   const sett = {} //: settingsArray = {}
   Object.assign(sett, game.value.settings)
   game.value.settings = sett
@@ -44,8 +44,8 @@ const gps = ref({
   lng: game.value.boundary?.long ?? 0,
 })
 const center = ref({ ...gps.value })
-// const biketag = useBikeTagApiStore()
-// const toast: any = inject('toast')
+const biketag = useBikeTagApiStore()
+const toast: any = inject('toast')
 const settings = computed(() => Object.keys(game.value.settings))
 const newAmbassador = ref('')
 const addNewAmbassador = () => {
@@ -69,31 +69,36 @@ const addNewSetting = () => {
 const removeSetting = (name: string) => {
   delete game.value.settings[name]
 }
-const updateGame = () => {
+const updateGame = async () => {
   game.value.boundary.gps = {
     lat: gps.value.lat,
     long: gps.value.lng,
     alt: game.value.boundary.gps?.alt ?? 0,
   }
-  console.log(game.value)
-  // const res = biketag.updateGame(game.value as any)
-  // if (res) {
-  //   console.log(res)
-  //   res.then(() =>
-  //       toast.open({
-  //         message: `Game updated: ${game.value.name}`,
-  //         type: 'success',
-  //         position: 'top',
-  //       })
-  //     )
-  //     .catch((e) =>
-  //       toast.open({
-  //         message: `Error updating game: ${game.value.name}`,
-  //         type: 'error',
-  //         position: 'top',
-  //       })
-  //     )
-  // }
+  try {
+    const res : any = await biketag.updateGame(props.game as any, game.value as any)
+    console.log(res)
+    if (res.success) {
+      toast.open({
+        message: `Game updated: ${game.value.name}`,
+        type: 'success',
+        position: 'top',
+      })
+    } else {
+      toast.open({
+        message: `Error updating game: ${game.value.name}`,
+        type: 'error',
+        position: 'top',
+      })
+    }
+  } catch (e) {
+    console.log(e)
+    toast.open({
+      message: `Error updating game: ${game.value.name}`,
+      type: 'error',
+      position: 'top',
+    })
+  }
 }
 const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1)
@@ -113,7 +118,7 @@ const updateMarker = (e: any) => {
           <ion-icon :icon="closeCircleOutline" />
         </ion-button>
       </ion-buttons>
-      <ion-title>Game Form</ion-title>
+      <ion-title> {{ props.game.name }} </ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content class="modal-content">

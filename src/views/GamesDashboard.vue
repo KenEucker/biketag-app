@@ -3,14 +3,17 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { IonModal, IonIcon, IonButton } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import GameForm from '../components/GameForm.vue'
+import GameCreationForm from '../components/GameCreationForm.vue'
 import {
   settingsOutline,
   pricetagsOutline,
   arrowBackOutline,
   arrowForwardOutline,
+  addCircleOutline
 } from 'ionicons/icons'
 
 const modalIsOpen = ref(false)
+const creationModalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
 const biketag = useBikeTagApiStore()
 const query = ref('')
@@ -62,6 +65,12 @@ const showModal = (index: number) => {
 const closeModal = () => {
   modalIsOpen.value = false
 }
+const showCreationModal = () => {
+  creationModalIsOpen.value = true
+}
+const closeCreationModal = () => {
+  creationModalIsOpen.value = false
+}
 
 const filter = (event: any) => {
   query.value = event.target.value.toLowerCase()
@@ -92,8 +101,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal()">
+    <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal">
       <game-form :game="games[selectedGameIndex]" @on-close="closeModal" />
+    </ion-modal>
+    <ion-modal :is-open="creationModalIsOpen" @did-dismiss="closeCreationModal">
+      <game-creation-form @on-close="closeCreationModal"/>
     </ion-modal>
 
     <div class="mt-8"></div>
@@ -121,12 +133,11 @@ onBeforeUnmount(() => {
                 >
                   Site
                 </th>
-                <!-- <th
-                  class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
-                >
-                  Edit
-                </th> -->
-                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
+                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
+                  <ion-button fill="clear" @click="showCreationModal">
+                    <ion-icon :icon="addCircleOutline"></ion-icon>
+                  </ion-button>
+                </th>
               </tr>
             </thead>
 

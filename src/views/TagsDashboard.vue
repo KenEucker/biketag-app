@@ -4,7 +4,7 @@ import { IonModal, IonIcon, IonButton, IonRow, IonCol } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
 import TagForm from '@/components/TagForm.vue'
-import { create, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
+import { settingsOutline, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
 import ExportForm from '@/components/ExportForm.vue'
 
 const modalIsOpen = ref(false)
@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
                         @click="() => showModal(index)"
                         class="mx-0 px-0 md:mx-2 md:px-2 rounded-md"
                       >
-                        <ion-icon :icon="create"></ion-icon>
+                        <ion-icon :icon="settingsOutline"></ion-icon>
                       </ion-button>
                     </span>
                     <span class="flex justify-center">

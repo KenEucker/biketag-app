@@ -8,6 +8,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  text: {
+    type: String,
+    default: 'Upload Tags',
+  }
 })
 const emits = defineEmits(['dataImported'])
 const file = ref(null)
@@ -104,7 +108,7 @@ const getFile = () => {
       />
       <ion-button class="ion-justify-content-between" fill="clear" @click.prevent="getFile">
         <ion-icon :icon="cloudUploadOutline"/>
-        <ion-label class="ion-margin-start"> Upload Tags </ion-label>
+        <ion-label class="ion-margin-start"> {{ props.text }} </ion-label>
       </ion-button>
     </div>
   </form>

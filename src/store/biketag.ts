@@ -90,18 +90,36 @@ export const useBikeTagApiStore = defineStore({
           console.log(e)
         })
     },
-    updateGame(game: Game) {
+    async updateGame(game: Game, updatedGame: Game) {
       if (game) {
+        const stateGame = this.getGame()
         const adminConfig = getBikeTagConfig(true, game)
         const nonadminConfig = getBikeTagConfig(false, game)
         const biketagAdmin = new BikeTagClient(adminConfig)
         const biketag = new BikeTagClient(nonadminConfig)
         /// Save to admin, only the values needed for admin
         /// Save to non-admin, only the values needed for non-admin
-
-        return game
+        if (game.logo != updatedGame.logo || game.subreddit != updatedGame.subreddit) {
+          await biketag.updateGame({
+            ...game,
+            logo: updatedGame.logo,
+            subreddit: updatedGame.subreddit
+          }, { source: 'sanity' })
+        }
+        return await biketagAdmin.updateGame(updatedGame, { source: 'sanity' })
       }
       return false
+    },
+    async launchGame(game: Game, tag: Tag) {
+      const adminConfig = getBikeTagConfig(true, game)
+      adminConfig.game = game?.slug
+      adminConfig.imgur.hash = game.mainhash
+      const biketagAdmin = new BikeTagClient(adminConfig)
+      const launchGameResult = await biketagAdmin.updateGame(game, { source: 'sanity' })
+      return [
+        launchGameResult,
+        await biketagAdmin.updateTag(tag)
+      ]
     },
     async setTagsFromGame(gameName: string) {
       if (this.games.length == 0) {
