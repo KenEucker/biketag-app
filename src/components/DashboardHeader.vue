@@ -7,6 +7,7 @@ import {
   personOutline,
   cogOutline,
   logOutOutline,
+  logInOutline
 } from 'ionicons/icons'
 
 const dropdownOpen = ref(false)
@@ -14,9 +15,10 @@ const { isOpen } = useSidebar()
 const notificationOpen = ref(false)
 const auth: any = inject('auth')
 const logout = () => {
-  auth.logout({
-    returnTo: window.location.origin,
-  })
+  auth.logout(window.location.origin)
+}
+const login = () => {
+  auth.loginWithRedirect(window.location.origin)
 }
 </script>
 
@@ -90,15 +92,21 @@ const logout = () => {
         </div>
       </div>
       <div class="relative">
-        <button
+        <button v-if="auth.isAuthenticated"
           class="relative z-10 block w-8 h-8 overflow-hidden rounded-full shadow focus:outline-none"
           @click="dropdownOpen = !dropdownOpen"
         >
-          <img
+          <img 
             class="object-cover w-full h-full"
             :src="auth?.user?.picture"
             alt="Your avatar"
           />
+        </button>
+        <button v-else 
+          class="text-gray-600 relative z-10 block w-8 h-8 overflow-hidden focus:outline-none"
+          @click="dropdownOpen = !dropdownOpen"
+        >
+          <ion-icon :icon="personOutline"/>
         </button>
 
         <div
@@ -119,27 +127,38 @@ const logout = () => {
             v-show="dropdownOpen"
             class="absolute right-0 z-20 w-48 py-1 mt-2 bg-white rounded-lg shadow-xl"
           >
-            <router-link
-              to="/profile"
-              class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
-            >
-              <ion-icon class="tiny-icon" :icon="personOutline"></ion-icon>
-              Profile
-            </router-link>
+            <template v-if="auth.isAuthenticated">
+              <router-link
+                to="/profile"
+                class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
+              >
+                <ion-icon class="tiny-icon" :icon="personOutline"></ion-icon>
+                Profile
+              </router-link>
+              <a
+                href="#"
+                class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
+              >
+                <ion-icon class="tiny-icon" :icon="cogOutline"></ion-icon>
+                Settings</a
+              >
+              <a
+                href="#"
+                @click.prevent="logout"
+                class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
+              >
+                <ion-icon class="tiny-icon" :icon="logOutOutline"></ion-icon>
+                Log out
+              </a>
+            </template>
             <a
+              v-else
               href="#"
+              @click.prevent="login"
               class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
             >
-              <ion-icon class="tiny-icon" :icon="cogOutline"></ion-icon>
-              Settings</a
-            >
-            <a
-              href="#"
-              @click.prevent="logout"
-              class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
-            >
-              <ion-icon class="tiny-icon" :icon="logOutOutline"></ion-icon>
-              Log out
+              <ion-icon class="tiny-icon" :icon="logInOutline"></ion-icon>
+              Log in
             </a>
           </div>
         </transition>

@@ -80,8 +80,8 @@ export const useAuth0 = ({
           this.loading = false
         }
       },
-      loginWithRedirect() {
-        return this.auth0Client.loginWithRedirect()
+      loginWithRedirect(redirectTo: string) {
+        return this.auth0Client.loginWithRedirect({ redirect_uri: redirectTo })
       },
       getIdTokenClaims() {
         return this.auth0Client.getIdTokenClaims()
@@ -92,10 +92,8 @@ export const useAuth0 = ({
       getTokenWithPopup() {
         return this.auth0Client.getTokenWithPopup()
       },
-      logout() {
-        return this.auth0Client.logout({
-          returnTo: `${window.location.origin}/#/logout`
-        })
+      logout(returnTo: string) {
+        return this.auth0Client.logout({ returnTo })
       },
     },
   }).mount(document.createElement('div'))
