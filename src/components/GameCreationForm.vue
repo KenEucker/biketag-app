@@ -22,6 +22,8 @@ import {
   trashOutline,
   personAddOutline,
   addCircleOutline,
+  checkmarkCircleOutline,
+  bugOutline,
 } from 'ionicons/icons'
 import BikeTagClient from 'biketag'
 import Map from './Map.vue'
@@ -151,7 +153,7 @@ const launchGame = async () => {
     </ion-toolbar>
   </ion-header>
   <ion-content class="modal-content cnt">
-    <transition-group name="creation-form-steps" tag="div">
+    <transition-group name="creation-form-steps" tag="div" class="h-full">
 
       <ion-list v-if="current_step === 0">
         <ion-list-header>
@@ -291,27 +293,21 @@ const launchGame = async () => {
         <tag-form v-if="firstTag.game" :tag="firstTag" :commit="false"/>
       </ion-list>
 
-      <ion-list v-else-if="current_step === 4">
-        <ion-list-header lines="full">
-          <ion-label> Launched </ion-label>
-        </ion-list-header>
-        <ion-item>
-          {{ launchGameResults[0] ? 'Success' : 'Error launching the game' }}
-        </ion-item>
-        <ion-item>
-          {{ launchGameResults[0] ? 'Success' : 'Error uploading the First Tag' }}
-        </ion-item>
-      </ion-list>
-
+      <div class="card flex justify-center items-center flex-col h-full" v-else-if="current_step === 4">
+        <ion-icon class="icon--green" v-if="launchGameResults[0] && launchGameResults[1]" :icon="checkmarkCircleOutline"/>
+        <ion-icon class="icon--red" v-else :icon="bugOutline"/>
+        <h3 class="mt-6"> {{ launchGameResults[0] ? 'Success' : 'Error launching the game' }} </h3>
+        <h5> {{ launchGameResults[1] ? 'The first tag has been created!' : 'Error creating the first tag' }} </h5>
+      </div>
     </transition-group>
 
   </ion-content>
-  <ion-item class="cnt--sticky-footer mb-2">
-    <ion-button slot="end" v-if="current_step > 0 & current_step < steps + 1" @click="() => updateCurrentStep(-1)"> Back </ion-button>
-    <ion-button slot="end" v-if="current_step < steps" @click="() => updateCurrentStep(1)"> Next </ion-button>
-    <ion-button slot="end" type="submit" 
+  <ion-item class="cnt--sticky-footer">
+    <ion-button class="mb-4 md:mb-2" slot="end" v-if="current_step > 0 && current_step < steps + 1" @click="() => updateCurrentStep(-1)"> Back </ion-button>
+    <ion-button class="mb-4 md:mb-2" slot="end" v-if="current_step < steps" @click="() => updateCurrentStep(1)"> Next </ion-button>
+    <ion-button class="mb-4 md:mb-2" slot="end" type="submit" 
       v-else-if="progression == 100 && current_step == steps" 
-      @click="() => {updateCurrentStep(1), launchGame()}"
+      @click="() => {updateCurrentStep(1); launchGame()}"
       > 
       Launch 
     </ion-button>
@@ -319,7 +315,7 @@ const launchGame = async () => {
 </template>
 
 <style lang="scss">
-$size: 56px;
+$size: 48px;
 $md: 768px;
 
 .creation-form-steps {
@@ -338,6 +334,17 @@ $md: 768px;
   height: calc(var(--width) - 56px - $size) !important;
   &--sticky-footer {
     height: $size;
+  }
+}
+.icon {
+  &--green, &--red {
+    font-size: 78px;
+  }
+  &--green {
+    color: green;
+  }
+  &--red {
+    color: red;
   }
 }
 </style>

@@ -4,16 +4,18 @@ import { IonModal, IonIcon, IonButton } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import GameForm from '../components/GameForm.vue'
 import GameCreationForm from '../components/GameCreationForm.vue'
+import AmbassadorForm from '@/components/AmbassadorForm.vue'
 import {
   settingsOutline,
   pricetagsOutline,
   arrowBackOutline,
   arrowForwardOutline,
-  addCircleOutline
+  addCircleOutline,
 } from 'ionicons/icons'
 
 const modalIsOpen = ref(false)
 const creationModalIsOpen = ref(false)
+const ambassadorModalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
 const biketag = useBikeTagApiStore()
 const query = ref('')
@@ -107,6 +109,15 @@ onBeforeUnmount(() => {
     <ion-modal :is-open="creationModalIsOpen" @did-dismiss="closeCreationModal">
       <game-creation-form @on-close="closeCreationModal"/>
     </ion-modal>
+    <ion-modal :is-open="ambassadorModalIsOpen" @did-dismiss="closeCreationModal">
+      <ambassador-form @on-close="() => ambassadorModalIsOpen = false"/>
+    </ion-modal>
+
+    <div class="flex justify-center md:justify-start">
+      <ion-button @click="() => ambassadorModalIsOpen = true"> 
+        Create Ambassador
+      </ion-button>
+    </div>
 
     <div class="mt-8"></div>
 
