@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { IonIcon } from '@ionic/vue'
 import { useSidebar } from '../hooks/useSidebar'
 import { homeOutline } from 'ionicons/icons'
 import BikeTagLogo from './BikeTagLogo.vue'
 
+const auth : any = inject("auth")
 const { isOpen } = useSidebar()
 const activeClass = ref(
   'bg-gray-600 bg-opacity-25 text-gray-100 border-gray-100'
@@ -42,7 +43,7 @@ const inactiveClass = ref(
           :class="[
             $route.name === 'GamesDashboard' ? activeClass : inactiveClass,
           ]"
-          to="/games"
+          :to="auth.isAuthenticated ? '/games' : '/guest/games/'"
         >
           <ion-icon class="tiny-icon" :icon="homeOutline"></ion-icon>
 

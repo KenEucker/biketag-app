@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { IonModal, IonIcon, IonButton, IonRow, IonCol } from '@ionic/vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { IonIcon } from '@ionic/vue'
+import { useBikeTagApiStore } from '@/store/biketagClient'
 import { useRouter } from 'vue-router'
-import TagForm from '@/components/TagForm.vue'
-import { settingsOutline, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
-import ExportForm from '@/components/ExportForm.vue'
+import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons'
 
-const modalIsOpen = ref(false)
-const selectedTagIndex = ref(0)
 const routeParam = useRouter().currentRoute.value.params.name
 const biketag = useBikeTagApiStore()
 const query = ref('')
@@ -58,15 +54,6 @@ const changePagSelected = (i: number) => {
   }
 }
 
-const showModal = (index: number) => {
-  selectedTagIndex.value = index
-  modalIsOpen.value = true
-}
-
-const closeModal = () => {
-  modalIsOpen.value = false
-}
-
 const getThumbnail = (imgUrl: string) => {
   const imgType = imgUrl.lastIndexOf('.')
   return `${imgUrl.slice(0, imgType)}s${imgUrl.slice(imgType)}`
@@ -102,8 +89,6 @@ const getImgUrls = (tag: any) => {
   return data
 }
 
-const tagsImgsUrls = computed(() => shownTags.value.reduce((acc: any[], tag: any) => acc.concat(getImgUrls(tag)), []))
-
 onMounted(() => {
   const searchBar = document.getElementById('search-bar')
   if (searchBar) {
@@ -122,43 +107,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal()">
-      <tag-form
-        :gameName="($route.params.name as string)"
-        :tag="tags[selectedTagIndex]"
-        @on-close="closeModal"
-      />
-    </ion-modal>
-    <ion-row class="ion-justify-content-between">
-      <ion-col>
-        <export-form
-          :info="`${($route.params.name as string).toLowerCase()}-tags${query ? '--' + fileSafeQuery : ''}`"
-          :data="tagsFiltered"
-        />
-      </ion-col>
-      <ion-col
-        style="display: flex"
-        class="ion-align-items-center"
-        offset-md="2"
-        size-md="auto"
-      >
-        <ion-button
-          @click="() => $router.push(`/games/${$route.params.name}/import`)"
-        >
-          Import
-        </ion-button>
-      </ion-col>
-      <ion-col
-        style="display: flex"
-        class="ion-align-items-center"
-        size-md="auto"
-      >
-        <export-form variant="imgs" :data="tagsImgsUrls">
-          Download all
-        </export-form>
-      </ion-col>
-    </ion-row>
-
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
@@ -187,9 +135,8 @@ onBeforeUnmount(() => {
                 <th
                   class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
                 >
-                  GPS Location
+                  Hint
                 </th>
-                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
               </tr>
             </thead>
 
@@ -268,33 +215,11 @@ onBeforeUnmount(() => {
                 </td>
 
                 <td
-                  class="px-6 py-4 hidden lg:table-cell border-b border-gray-200 whitespace-nowrap"
+                  class="px-6 py-4 hidden lg:table-cell break-words border-b border-gray-200 whitespace-nowrap"
                 >
-                  <div class="text-sm leading-5 text-gray-900">
-                    Lat : {{ tag.gps.lat }}
-                  </div>
-                  <div class="text-sm leading-5 text-gray-500">
-                    Long : {{ tag.gps.long }}
-                  </div>
-                </td>
-
-                <td
-                  class="py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap"
-                >
-                  <div class="flex justify-around">
-                    <span class="flex justify-center">
-                      <ion-button
-                        fill="clear"
-                        @click="() => showModal(index)"
-                        class="mx-0 px-0 md:mx-2 md:px-2 rounded-md"
-                      >
-                        <ion-icon :icon="settingsOutline"></ion-icon>
-                      </ion-button>
-                    </span>
-                    <span class="flex justify-center">
-                      <export-form :data="getImgUrls(tag)" variant="inline-imgs"></export-form>
-                    </span>
-                  </div>
+                  <p v-if="tag.hint" class="text-sm leading-5 text-gray-900 break-all whitespace-pre-wrap">
+                    {{ tag.hint }}
+                  </p>
                 </td>
               </tr>
             </tbody>

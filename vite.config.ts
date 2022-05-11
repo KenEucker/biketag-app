@@ -35,6 +35,8 @@ export default defineConfig({
       A_CID: process.env.A_CID ?? null,
       A_DOMAIN: process.env.A_DOMAIN ?? null,
       A_TOKEN: process.env.A_TOKEN ?? null,
+      A_M_CS: process.env.A_M_CS ?? null,
+      A_M_CID: process.env.A_M_CID ?? null,
       /* BikeTag Configuration */
       GAME_NAME: process.env.GAME_NAME ?? 'null',
       GAME_SOURCE: process.env.GAME_SOURCE ?? null,

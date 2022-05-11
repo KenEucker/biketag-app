@@ -9,6 +9,18 @@ const routes: Array<RouteRecordRaw> = [
     meta: { layout: 'Empty' },
   },
   {
+    path: '/guest/games',
+    name: 'ClientGamesDashboard',
+    component: () => import('@/views/ClientGamesDashboard.vue'),
+    meta: { layout: 'Dashboard', showSearchBar: true },
+  },
+  {
+    path: '/guest/games/:name',
+    name: 'ClientTagsDashboard',
+    component: () => import('@/views/ClientTagsDashboard.vue'),
+    meta: { layout: 'Dashboard', showSearchBar: true },
+  },
+  {
     path: '/privacy',
     name: 'Privacy Policy',
     component: () => import('@/views/Wiki.vue'),

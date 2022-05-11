@@ -3,9 +3,12 @@ import { inject } from 'vue'
 import { useRouter } from 'vue-router'
 import BikeTagLogo from '@/components/BikeTagLogo.vue'
 const router = useRouter()
-const auth = inject('auth')
+const auth : any = inject('auth')
 function login() {
   router.push('/games')
+}
+function asGuest() {
+  router.push('/guest/games')
 }
 </script>
 
@@ -22,6 +25,12 @@ function login() {
       >
         Welcome {{ auth.user.name }}
       </p>
+      <button 
+        v-else @click="asGuest"
+        class="mt-6 w-full px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
+      >
+        Continue as Guest
+      </button>
       <button
         @click="login"
         class="mt-6 w-full px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"

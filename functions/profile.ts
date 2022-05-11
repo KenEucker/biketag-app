@@ -7,11 +7,12 @@ import {
   acceptCorsHeaders,
   constructAmbassadorProfile,
   constructPlayerProfile,
+  auth0Headers
 } from './common/methods'
 
 const profileHandler: Handler = async (event) => {
   /// Bailout on OPTIONS requests
-  const headers = acceptCorsHeaders(false)
+  const headers = acceptCorsHeaders()
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: HttpStatusCode.NoContent,
@@ -27,7 +28,7 @@ const profileHandler: Handler = async (event) => {
   /// We can only provide profile data if the profile already exists (created by Auth0)
   if (profile && profile.sub) {
     let options = {}
-    const authorizationHeaders = acceptCorsHeaders(true)
+    const authorizationHeaders = await auth0Headers()
 
     switch (event.httpMethod) {
       case 'PATCH':

@@ -1,22 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { IonModal, IonIcon, IonButton } from '@ionic/vue'
-import { useBikeTagApiStore } from '@/store/biketag'
-import GameForm from '../components/GameForm.vue'
-import GameCreationForm from '../components/GameCreationForm.vue'
-import AmbassadorForm from '@/components/AmbassadorForm.vue'
+import { IonIcon } from '@ionic/vue'
+import { useBikeTagApiStore } from '@/store/biketagClient'
 import {
-  settingsOutline,
   pricetagsOutline,
   arrowBackOutline,
   arrowForwardOutline,
-  addCircleOutline,
 } from 'ionicons/icons'
 
-const modalIsOpen = ref(false)
-const creationModalIsOpen = ref(false)
-const ambassadorModalIsOpen = ref(false)
-const selectedGameIndex = ref(0)
 const biketag = useBikeTagApiStore()
 const query = ref('')
 const splitBy = ref(20)
@@ -60,27 +51,12 @@ const shownGames = computed(() =>
 )
 
 biketag.setGames().then(() => (games.value = biketag.allGames))
-const showModal = (index: number) => {
-  selectedGameIndex.value = index
-  modalIsOpen.value = true
-}
-const closeModal = () => {
-  modalIsOpen.value = false
-}
-const showCreationModal = () => {
-  creationModalIsOpen.value = true
-}
-const closeCreationModal = () => {
-  creationModalIsOpen.value = false
-}
 
 const filter = (event: any) => {
   query.value = event.target.value.toLowerCase()
-  // games.value = biketag.allGames.filter((val) => val.name.toLowerCase().indexOf(query) > -1)
 }
 const clear = () => {
   query.value = ''
-  // games.value = biketag.allGames
 }
 
 const getGameUrl = (game: any) => `https://${ game.slug }.biketag.${'io'}`
@@ -103,22 +79,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <ion-modal :is-open="modalIsOpen" @did-dismiss="closeModal">
-      <game-form :game="games[selectedGameIndex]" @on-close="closeModal" />
-    </ion-modal>
-    <ion-modal :is-open="creationModalIsOpen" @did-dismiss="closeCreationModal">
-      <game-creation-form @on-close="closeCreationModal"/>
-    </ion-modal>
-    <ion-modal :is-open="ambassadorModalIsOpen" @did-dismiss="closeCreationModal">
-      <ambassador-form @on-close="() => ambassadorModalIsOpen = false"/>
-    </ion-modal>
-
-    <div class="flex justify-center md:justify-start">
-      <ion-button @click="() => ambassadorModalIsOpen = true"> 
-        Create Ambassador
-      </ion-button>
-    </div>
-
     <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
@@ -144,11 +104,7 @@ onBeforeUnmount(() => {
                 >
                   Site
                 </th>
-                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
-                  <ion-button fill="clear" @click="showCreationModal">
-                    <ion-icon :icon="addCircleOutline"></ion-icon>
-                  </ion-button>
-                </th>
+                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50" />
               </tr>
             </thead>
 
@@ -207,15 +163,8 @@ onBeforeUnmount(() => {
                     <span class="flex justify-center text-yellow-500">
                       <ion-button
                         fill="clear"
-                        @click.prevent="() => showModal(index)"
-                        class="rounded-md"
-                      >
-                        <ion-icon :icon="settingsOutline"></ion-icon>
-                      </ion-button>
-                      <ion-button
-                        fill="clear"
                         @click.prevent="
-                          () => $router.push(`/games/${game.name}`)
+                          () => $router.push(`/guest/games/${game.name}`)
                         "
                         class="ml-2 rounded-md"
                       >

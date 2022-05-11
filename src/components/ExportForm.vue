@@ -11,7 +11,6 @@ import {
 } from '@ionic/vue'
 import { cloudDownloadOutline, imageOutline } from 'ionicons/icons'
 import JSZip from 'jszip';
-import { execPath } from 'process';
 
 const zip = new JSZip();
 const props = defineProps({
