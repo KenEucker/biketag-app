@@ -1,7 +1,7 @@
 import { getInstance } from './authWrapper'
 
 export const authGuard = (
-  to: { fullPath: any },
+  to: { fullPath: string },
   from: any,
   next: (arg0?: boolean) => any
 ) => {
@@ -12,7 +12,7 @@ export const authGuard = (
       return next()
     }
 
-    authService.loginWithRedirect({ appState: { targetUrl: to.fullPath } })
+    authService.loginWithRedirect(to.fullPath.includes("http://") ? to.fullPath : window.location.origin)
     return next(false)
   }
 

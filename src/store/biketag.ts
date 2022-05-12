@@ -77,13 +77,13 @@ export const useBikeTagApiStore = defineStore({
           console.log(d)
           if (d.success) {
             const games = d.data as unknown as Game[]
-            const supportedGames: Game[] = games.filter(
-              (g: Game) =>
-                g.mainhash?.length &&
-                g.archivehash?.length &&
-                g.queuehash?.length
-            )
-            this.games = supportedGames
+            // const supportedGames: Game[] = games.filter(
+            //   (g: Game) =>
+            //     g.mainhash?.length &&
+            //     g.archivehash?.length &&
+            //     g.queuehash?.length
+            // )
+            this.games = games// supportedGames
           }
         })
         .catch((e) => {
@@ -112,8 +112,8 @@ export const useBikeTagApiStore = defineStore({
     },
     async launchGame(game: Game, tag: Tag) {
       const adminConfig = getBikeTagConfig(true, game)
-      adminConfig.game = game?.slug
-      adminConfig.imgur.hash = game.mainhash
+      // adminConfig.game = game?.slug
+      // adminConfig.imgur.hash = game.mainhash
       const biketagAdmin = new BikeTagClient(adminConfig)
       const launchGameResult = await biketagAdmin.updateGame(game, { source: 'sanity' })
       return [
