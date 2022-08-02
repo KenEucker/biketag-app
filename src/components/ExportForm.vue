@@ -113,18 +113,22 @@ const transformTags = () =>
     return val_copy
   })
 
+const toCsvLine = function(data: any[]): string {
+    return data.map((field: string) => `"${field}"`).join(',');
+}
+
 const exportToCsv = (data: any[]) => {
   // Headers for each column
   let headers = props.areTags ? tagKeys : Object.keys((data as Array<{}>)[0])
 
   // Convert users data to a csv
   let usersCsv = data.reduce((acc: Array<string>, datap: any) => {
-    acc.push(headers.map((val: string) => datap[val] ?? '').join(','))
+    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? ''))
     return acc
   }, [])
 
   downloadFile(
-    [headers.join(','), ...usersCsv].join('\n'),
+    [toCsvLine(headers), ...usersCsv].join('\n'),
     `${props.info}.csv`,
     'text/csv'
   )
