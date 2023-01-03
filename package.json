@@ -47,7 +47,7 @@
     "@serverless-jwt/jwt-verifier": "^0.2.1",
     "@vueuse/head": "~0.7",
     "ajv": "^8.10.0",
-    "axios": "^0.27.2",
+    "axios": "^1.2.2",
     "biketag": "^2.1.4",
     "crypto-js": "^4.1.1",
     "jose": "^4.6.0",
