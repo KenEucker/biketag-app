@@ -95,7 +95,7 @@
     "lint-staged": "^12.1.4",
     "netlify-cli": "^8.14.1",
     "postcss": "~8.4",
-    "postcss-import": "^14.0.2",
+    "postcss-import": "^15.1.0",
     "postcss-nesting": "~10",
     "prettier": "^2.5.1",
     "sass": "^1.45.2",
