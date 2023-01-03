@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps } from 'vue'
+import { ref } from 'vue'
 import {
   IonIcon,
   IonButton,
@@ -113,8 +113,8 @@ const transformTags = () =>
     return val_copy
   })
 
-const toCsvLine = function(data: any[]): string {
-    return data.map((field: string) => `"${field}"`).join(',');
+const toCsvLine = function (data: any[]): string {
+  return data.map((field: string) => `"${field}"`).join(',');
 }
 
 const exportToCsv = (data: any[]) => {
@@ -123,7 +123,7 @@ const exportToCsv = (data: any[]) => {
 
   // Convert users data to a csv
   let usersCsv = data.reduce((acc: Array<string>, datap: any) => {
-    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? ''))
+    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? '')))
     return acc
   }, [])
 
@@ -167,10 +167,8 @@ const downloadData = () => {
       </ion-col>
     </ion-row>
   </form>
-  <ion-button 
-    v-if="variant == 'inline-imgs'" class="mx-0 px-0 md:mx-2 md:px-2" 
-    fill="clear" @click="downloadPictures" :disabled="packing"
-  >
+  <ion-button v-if="variant == 'inline-imgs'" class="px-0 mx-0 md:mx-2 md:px-2" fill="clear" @click="downloadPictures"
+    :disabled="packing">
     <ion-icon :icon="imageOutline"></ion-icon>
   </ion-button>
   <ion-button v-if="variant == 'imgs'" @click="downloadPictures" :disabled="packing">

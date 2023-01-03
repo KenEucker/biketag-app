@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-extra-semi */
+import { createPinia } from 'pinia'
 import { InjectionKey } from 'vue'
 import {
   createStore,
@@ -48,3 +49,5 @@ export function useStore(): Store {
 }
 
 export { State, Mutation, Action }
+
+// export const store = createPinia()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, computed } from 'vue'
+import { ref, computed } from 'vue'
 import {
   IonIcon,
   IonButton,
@@ -61,22 +61,22 @@ const createAmbassador = async () => {}
           <ion-icon :icon="closeCircleOutline" />
         </ion-button>
       </ion-buttons>
-      <div class="uppercase tracking-wide text-xs font-bold text-gray-500 mb-1 ml-5 mt-2 md:mt-1 leading-tight">
+      <div class="mt-2 mb-1 ml-5 text-xs font-bold leading-tight tracking-wide text-gray-500 uppercase md:mt-1">
         Step: {{ Math.min(current_step, steps) }} of {{ steps }}
       </div>
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <ion-title v-if="current_step === 0" class="text-lg font-bold text-gray-700 leading-tight"> General Info </ion-title>
-        <ion-title v-if="current_step === 1" class="text-lg font-bold text-gray-700 leading-tight"> Assign Games </ion-title>
-        <ion-title v-if="current_step > 1" class="text-lg font-bold text-gray-700 leading-tight"> All set! </ion-title>
+        <ion-title v-if="current_step === 0" class="text-lg font-bold leading-tight text-gray-700"> General Info </ion-title>
+        <ion-title v-if="current_step === 1" class="text-lg font-bold leading-tight text-gray-700"> Assign Games </ion-title>
+        <ion-title v-if="current_step > 1" class="text-lg font-bold leading-tight text-gray-700"> All set! </ion-title>
         <div class="mb-4 md:mb-0"></div>
 
-        <div class="absolute md:static bottom-0 flex items-center h-1 md:h-2 md:ml-2 w-screen md:w-64">
+        <div class="absolute bottom-0 flex items-center w-screen h-1 md:static md:h-2 md:ml-2 md:w-64">
           <div class="w-full bg-white md:rounded-full md:mr-2">
             <div 
-              class="md:rounded-full bg-green-500 leading-none h-2 text-center text-white" 
+              class="h-2 leading-none text-center text-white bg-green-500 md:rounded-full" 
               :style="`width: ${progression}%`" />
           </div>
-          <div class="hidden md:block text-xs w-10 text-gray-600">
+          <div class="hidden w-10 text-xs text-gray-600 md:block">
             {{ progression }}%
           </div>
         </div>
@@ -114,7 +114,7 @@ const createAmbassador = async () => {}
         </ion-item>
       </ion-list>
 
-      <div class="card flex justify-center items-center flex-col h-full" v-else-if="current_step === 2">
+      <div class="flex flex-col items-center justify-center h-full card" v-else-if="current_step === 2">
         <ion-icon class="icon--green" v-if="ambassadorCreationResult" :icon="checkmarkCircleOutline"/>
         <ion-icon class="icon--red" v-else :icon="bugOutline"/>
         <h3 class="mt-6"> {{ ambassadorCreationResult ? 'Success' : `Error creating the new ambassador ${ambassador.name}` }} </h3>

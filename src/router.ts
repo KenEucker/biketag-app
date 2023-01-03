@@ -1,5 +1,5 @@
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
-import { authGuard } from './auth'
+import { useAuthGuard } from './auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -62,28 +62,28 @@ const protectedRoutes: Array<RouteRecordRaw> = [
   {
     path: '/games',
     name: 'GamesDashboard',
-    beforeEnter: authGuard,
+    beforeEnter: useAuthGuard,
     component: () => import('@/views/GamesDashboard.vue'),
     meta: { layout: 'Dashboard', showSearchBar: true },
   },
   {
     path: '/games/:name',
     name: 'TagsDashboard',
-    beforeEnter: authGuard,
+    beforeEnter: useAuthGuard,
     component: () => import('@/views/TagsDashboard.vue'),
     meta: { layout: 'Dashboard', showSearchBar: true },
   },
   {
     path: '/games/:name/import',
     name: 'ImportTags',
-    beforeEnter: authGuard,
+    beforeEnter: useAuthGuard,
     component: () => import('@/views/ImportTags.vue'),
     meta: { layout: 'Dashboard', showSearchBar: false },
   },
   {
     path: '/profile',
     name: 'Profile',
-    beforeEnter: authGuard,
+    beforeEnter: useAuthGuard,
     component: () => import('@/views/Profile.vue'),
     meta: { layout: 'Dashboard', showSearchBar: false },
   },

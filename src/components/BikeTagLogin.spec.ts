@@ -1,5 +1,5 @@
 import { mount } from '@cypress/vue'
-import BikeTagLogin from './BikeTagLogin'
+import BikeTagLogin from './BikeTagLogin.vue'
 
 it('Passes msg prop correctly', () => {
   mount(BikeTagLogin, {

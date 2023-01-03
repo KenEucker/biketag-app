@@ -4,7 +4,7 @@ import router from './router'
 import { createHead } from '@vueuse/head'
 import { store } from './store'
 import { createPinia } from 'pinia'
-import { Auth0Plugin } from './auth'
+import { auth } from './auth'
 import VueToast from 'vue-toast-notification'
 import VueGoogleMaps from '@fawmi/vue-google-maps'
 import Markdown from 'vue3-markdown-it'
@@ -38,25 +38,13 @@ import './theme/main.scss'
 
 const head = createHead()
 const app = createApp(App)
-const auth0Opts = {
-  domain: process.env.A_DOMAIN,
-  client_id: process.env.A_CID,
-  audience: process.env.A_AUDIENCE,
-  onRedirectCallback: (appState: any) => {
-    router.push(
-      appState && appState.targetUrl
-        ? appState.targetUrl
-        : window.location.pathname
-    )
-  },
-}
 
 app.use(IonicVue)
 app.use(store)
 app.use(router)
 app.use(head)
 app.use(createPinia())
-app.use(Auth0Plugin, auth0Opts)
+app.use(auth)
 app.use(VueToast)
 app.use(Markdown)
 app.use(VueGoogleMaps, {
