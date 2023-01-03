@@ -62,7 +62,7 @@
     "vue-router": "~4.0",
     "vue-toast-notification": "^3.0.0",
     "vue3-markdown-it": "^1.0.10",
-    "vuex": "~4.0"
+    "vuex": "~4.1"
   },
   "devDependencies": {
     "@cypress/vite-dev-server": "~2.2",
