@@ -1,41 +1,131 @@
-import type { UserConfig, ConfigEnv } from "vite";
-import { loadEnv } from "vite";
-import { createVitePlugins } from "./build/vite/plugin";
-import { wrapperEnv } from "./build/utils";
-import { resolve } from "path";
-// https://vitejs.dev/config/
-function pathResolve(dir: string) {
-  return resolve(process.cwd(), ".", dir);
-}
-export default ({ command, mode }: ConfigEnv): UserConfig => {
-  const root = process.cwd();
-  const isBuild = command === "build";
-  const env = loadEnv(mode, root);
-  const viteEnv = wrapperEnv(env);
-  return {
+import { defineConfig, type UserConfig } from 'vite'
+import { visualizer } from 'rollup-plugin-visualizer'
+import { checker } from 'vite-plugin-checker'
+import vue from '@vitejs/plugin-vue'
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+
+import { fileURLToPath, URL } from 'node:url'
+import fs from 'node:fs'
+
+/**
+ * Vite Configure
+ *
+ * @see {@link https://vitejs.dev/config/}
+ */
+export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
+  const config: UserConfig = {
+    // https://vitejs.dev/config/shared-options.html#base
+    base: './',
+    // https://vitejs.dev/config/shared-options.html#define
+    define: { 'process.env': {} },
+    plugins: [
+      // Vue3
+      vue({
+        template: {
+          // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin#image-loading
+          transformAssetUrls
+        }
+      }),
+      // Vuetify Loader
+      // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin#vite-plugin-vuetify
+      vuetify({
+        autoImport: true,
+        styles: { configFile: 'src/styles/settings.scss' }
+      }),
+      // vite-plugin-checker
+      // https://github.com/fi3ework/vite-plugin-checker
+      checker({
+        typescript: true,
+        vueTsc: true,
+        eslint: {
+          lintCommand:
+            'eslint . --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint' // for example, lint .ts & .tsx
+        }
+      })
+    ],
+    // https://vitejs.dev/config/server-options.html
+    server: {
+      fs: {
+        // Allow serving files from one level up to the project root
+        allow: ['..']
+      }
+    },
+    // Resolver
     resolve: {
-      alias: [
-        {
-          find: /\/#\//,
-          replacement: pathResolve("types") + "/",
-        },
-        {
-          find: "@",
-          replacement: pathResolve("src") + "/",
-        },
-      ],
-    },
-    css: {
-      preprocessorOptions: {
-        // 全局引入了 scss 的文件
-        scss: {
-          // 添加你的全局共享scss文件
-          additionalData: ``,
-          javascriptEnabled: true,
-        },
+      // https://vitejs.dev/config/shared-options.html#resolve-alias
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '~': fileURLToPath(new URL('./node_modules', import.meta.url))
       },
-      postcss: {},
+      extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue']
     },
-    plugins: createVitePlugins(viteEnv, isBuild),
-  };
+    // Build Options
+    // https://vitejs.dev/config/build-options.html
+    build: {
+      // Build Target
+      // https://vitejs.dev/config/build-options.html#build-target
+      target: 'esnext',
+      // Minify option
+      // https://vitejs.dev/config/build-options.html#build-minify
+      minify: 'esbuild',
+      // Rollup Options
+      // https://vitejs.dev/config/build-options.html#build-rollupoptions
+      rollupOptions: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        output: {
+          manualChunks: {
+            // Split external library from transpiled code.
+            vue: ['vue', 'vue-router', 'pinia', 'pinia-plugin-persistedstate'],
+            vuetify: [
+              'vuetify',
+              'vuetify/components',
+              'vuetify/directives',
+              'webfontloader'
+            ],
+            materialdesignicons: ['@mdi/font/css/materialdesignicons.css']
+          },
+          plugins: [
+            mode === 'analyze'
+              ? visualizer({
+                  open: true,
+                  filename: 'dist/stats.html'
+                })
+              : undefined
+            /*
+            // if you use Code encryption by rollup-plugin-obfuscator
+            // https://github.com/getkey/rollup-plugin-obfuscator
+            obfuscator({
+              globalOptions: {
+                debugProtection: true,
+              },
+            }),
+            */
+          ]
+        }
+      }
+    },
+    esbuild: {
+      // Drop console when production build.
+      drop: command === 'serve' ? [] : ['console']
+    }
+  }
+
+  // Write meta data.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const pack = require('./package.json')
+  fs.writeFileSync(
+    fileURLToPath(new URL('./src/Meta.ts', import.meta.url)),
+    `import type MetaInterface from '@/interfaces/MetaInterface';
+
+// This file is auto-generated by the build system.
+const meta: MetaInterface = {
+  version: '${pack.version}',
+  date: '${new Date().toISOString()}',
 };
+export default meta;
+`
+  )
+
+  return config
+})

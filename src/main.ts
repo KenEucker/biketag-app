@@ -1,34 +1,25 @@
-import { createApp } from "vue";
-import { setupRouter } from "@/router";
-import { setupStore } from "@/store";
-import {
-  setupCustomComponents,
-  setupGlobalMethods,
-  setupDirectives,
-  setupAssets,
-} from "@/plugins";
-import App from "./App.vue";
-async function bootStrap() {
-  // 设置样式加载
-  setupAssets();
-  // 创建vue
-  const app = createApp(App);
-  // 全局加载
-  // 注册全局常用的 组件
-  setupCustomComponents(app);
+/**
+ * Vue3 Main script
+ */
 
-  // 注册全局方法
-  setupGlobalMethods(app);
+// Load vue core
+import { createApp } from 'vue'
+import router from './router'
+import store from './store'
 
-  // 注册全局自定义指令
-  setupDirectives(app);
+// Load Vuetify
+import vuetify from './plugins/vuetify'
 
-  // 挂载状态管理
-  await setupStore(app);
+// Load Layout vue.
+import App from './App.vue'
 
-  // 挂载路由
-  await setupRouter(app);
+/** Register Vue */
+const vue = createApp(App)
+vue.use(router)
+vue.use(store)
+vue.use(vuetify)
 
-  app.mount("#app");
-}
-bootStrap();
+// Run!
+router.isReady().then(() => {
+  vue.mount('#app')
+})
