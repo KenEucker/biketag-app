@@ -11,6 +11,7 @@ import {
 } from 'vue'
 import { useTheme } from 'vuetify/lib/framework.mjs'
 import { useDark } from '@vueuse/core'
+import AppFooter from '@/components/app/AppFooter.vue'
 
 // Stores
 import { useGlobal } from '@/store'

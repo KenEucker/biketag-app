@@ -14,7 +14,6 @@ const query = ref('')
 const splitBy = ref(20)
 const tags = ref(biketag.tags(routeParam))
 const tagsFiltered = computed(() =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tags.value.filter((val: any) =>
     !query.value
       ? true

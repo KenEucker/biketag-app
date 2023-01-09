@@ -3,6 +3,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { checker } from 'vite-plugin-checker'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import Markdown from 'vite-plugin-vue-markdown'
 
 import { fileURLToPath, URL } from 'node:url'
 import fs from 'node:fs'
@@ -24,8 +25,10 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
         template: {
           // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin#image-loading
           transformAssetUrls
-        }
+        },
+        include: [/\.vue$/, /\.md$/]
       }),
+      Markdown(),
       // Vuetify Loader
       // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin#vite-plugin-vuetify
       vuetify({

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
+import Markdown from 'vite-plugin-vue-markdown'
 
 import { fileURLToPath, URL } from 'node:url'
 
@@ -26,7 +27,10 @@ export default defineConfig({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     // Vue3
-    vue(),
+    vue({
+      include: [/\.vue$/, /\.md$/]
+    }),
+    Markdown(),
     // Vuetify Loader
     // https://github.com/vuetifyjs/vuetify-loader
     vuetify({

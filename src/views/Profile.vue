@@ -1,10 +1,11 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, inject, onBeforeMount } from 'vue'
+import { useAuth0 } from '@auth0/auth0-vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import Imgur from '@/assets/images/Imgur.svg'
 
-const auth: any = inject('auth')
+const auth = useAuth0()
 const toast: any = inject('toast')
 const biketag = useBikeTagApiStore()
 const profile = ref(biketag.getProfile)
@@ -18,9 +19,9 @@ const socialNetworkIcons = ref([
 
 onBeforeMount(async () => {
   if (!Object.keys(profile.value).length) {
-    const claims = await auth.getIdTokenClaims()
+    const token = await auth.getAccessTokenSilently()
     try {
-      await biketag.setProfile(claims.__raw)
+      await biketag.setProfile(token)
     } catch (e) {
       console.log(e)
     }
@@ -29,9 +30,8 @@ onBeforeMount(async () => {
 })
 
 const updateProfile = async () => {
-  const claims = await auth.getIdTokenClaims()
-  if (claims) {
-    const token = claims.__raw
+  const token = await auth.getAccessTokenSilently()
+  if (token) {
     try {
       await biketag.updateProfile(profile.value, token)
       toast.open({

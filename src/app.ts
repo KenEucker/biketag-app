@@ -18,6 +18,7 @@ const app = createApp(App)
 
 // Register Auth
 if (auth) {
+  console.info('Registering Authentication Module')
   app.use(auth)
 }
 

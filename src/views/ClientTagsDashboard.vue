@@ -4,7 +4,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
 
-const routeParam = useRouter().currentRoute.value.params.name
+const routeParam = useRouter().currentRoute.value.params?.name
 const biketag = useBikeTagApiStore()
 const query = ref('')
 const splitBy = ref(20)

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import auth from '@/auth'
 import { useRouter } from 'vue-router'
 import BikeTagLogo from '@/components/biketag/BikeTagLogo.vue'
 const router = useRouter()
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const auth: any = inject('auth')
+
 function login() {
   router.push('/games')
 }
@@ -21,10 +20,10 @@ function asGuest() {
         <span class="text-2xl font-semibold text-gray-700">BikeTag</span>
       </div>
       <p
-        v-if="auth.isAuthenticated"
+        v-if="auth?.isAuthenticated"
         class="mt-6 font-semibold text-sm text-center"
       >
-        Welcome {{ auth.user.name }}
+        Welcome {{ auth?.user?.value.name }}
       </p>
       <button
         v-else
@@ -37,7 +36,7 @@ function asGuest() {
         class="mt-6 w-full px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
         @click="login"
       >
-        {{ auth.isAuthenticated ? 'Continue' : 'Sign in' }}
+        {{ auth?.isAuthenticated ? 'Continue' : 'Sign in' }}
       </button>
     </div>
   </div>

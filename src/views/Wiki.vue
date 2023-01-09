@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BikeTagLogo from '@/components/biketag/BikeTagLogo.vue'
-import Markdown from 'vue3-markdown-it'
-import axios from 'axios'
+import configuration from '@/assets/wiki/configuration.md'
+import contributing from '@/assets/wiki/contributing.md'
+import developers from '@/assets/wiki/developers.md'
+import privacy from '@/assets/wiki/privacy.md'
+import conduct from '@/assets/wiki/conduct.md'
+import terms from '@/assets/wiki/terms.md'
+
 const router = useRouter()
 
-const urlSlug = router.currentRoute.value.path.substring(1)
+const path = router.currentRoute.value.path
 const title = router.currentRoute.value.name
-const wikiMarkdown = ref('')
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-axios.get(`./wiki/${urlSlug}.md`).then((response: any) => {
-  wikiMarkdown.value = response.data
-})
 </script>
 
 <template>
@@ -25,7 +23,12 @@ axios.get(`./wiki/${urlSlug}.md`).then((response: any) => {
           >BikeTag {{ title }}</span
         >
       </div>
-      <markdown :source="wikiMarkdown"></markdown>
+      <configuration v-if="path === '/configuration'" />
+      <contributing v-else-if="path === '/contributing'" />
+      <developers v-else-if="path === '/developers'" />
+      <privacy v-else-if="path === '/privacy'" />
+      <conduct v-else-if="path === '/conduct'" />
+      <terms v-else-if="path === '/terms'" />
     </div>
   </div>
 </template>
