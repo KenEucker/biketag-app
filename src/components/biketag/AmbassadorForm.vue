@@ -106,7 +106,7 @@ const createAmbassador = async () => {}
         </v-list-header>
         <v-item v-for="(game, index) in games" :key="`game_${index}`">
           <v-label>{{ game.name }}</v-label>
-          <v-checkbox color="primary" @ionChange="toggleGame(game.name)" />
+          <v-checkbox color="primary" @change="toggleGame(game.name)" />
         </v-item>
       </v-list>
 

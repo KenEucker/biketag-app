@@ -1,8 +1,10 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, inject, defineEmits, defineProps } from 'vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 // import { Tag } from 'biketag/lib/common/schema';
 import Map from './Map.vue'
+import type { Tag } from 'biketag/lib/common/schema'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   tag: {
@@ -45,7 +47,7 @@ const updateTagGps = () => {
 const updateTag = () => {
   updateTagGps()
   if (props.commit) {
-    const res = biketag.updateTag(tag.value, props.gameName)
+    const res = biketag.updateTag(tag.value as Tag, props.gameName)
     if (res) {
       res
         .then(() =>
@@ -92,7 +94,7 @@ const typeEqualsTo = (value: any, type: string) => {
     </v-header>
     <v-content class="modal-content">
       <form @submit.prevent="updateTag">
-        <v-list lines="full" class="ion-no-margin">
+        <v-list lines="three" class="no-margin">
           <v-list>
             <template v-for="key in Object.keys(tag)">
               <v-item

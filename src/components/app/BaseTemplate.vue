@@ -1,7 +1,43 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useHead } from '@vueuse/head'
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: null
+  }
+})
+useHead({
+  meta: [
+    {
+      property: 'title',
+      content: props.title
+    },
+    {
+      property: 'og:title',
+      content: props.title
+    },
+    {
+      name: 'twitter:title',
+      content: props.title
+    }
+  ]
+})
+
+const thisYear = new Date().getFullYear()
+const version = computed(() => process?.env?.VITE_APP_VERSION ?? 'beta')
+const buildDate = computed(() =>
+  process?.env?.VITE_APP_BUILD_EPOCH
+    ? new Date(Number(process.env.VITE_APP_BUILD_EPOCH)).toLocaleDateString()
+    : null
+)
+</script>
+
 <template>
-  <div :class="!BUILD_DATE ? 'development-mode' : ''">
+  <div :class="!buildDate ? 'development-mode' : ''">
     <header class="container px-4 mx-auto mt-6 prose-sm md:px-6 md:prose">
-      <h1>BikeTag v{{ VERSION }}</h1>
+      <h1>BikeTag v{{ version }}</h1>
       <div
         class="github-ribbon"
         style="
@@ -51,60 +87,12 @@
         BikeTag is an Open-Source Project developed on GitHub
         <a class="underline" href="https://twitter.com/uninen">@BikeTagOrg</a>
         &copy; 2018-{{ thisYear }}.
-        <div v-if="BUILD_DATE">Site built {{ BUILD_DATE }}.</div>
+        <div v-if="buildDate">Site built {{ buildDate }}.</div>
         <div v-else class="dev-mode">Development mode</div>
       </div>
     </footer>
   </div>
 </template>
-<script>
-import { defineComponent } from 'vue'
-import { useHead } from '@vueuse/head'
-
-export default defineComponent({
-  name: 'QueueSubmit',
-  props: {
-    title: {
-      type: String,
-      default: null
-    }
-  },
-  setup(props) {
-    useHead({
-      bodyAttrs: {
-        title: props.title
-      },
-      meta: [
-        {
-          property: 'og:title',
-          content: props.title
-        },
-        {
-          name: 'twitter:title',
-          content: props.title
-        }
-      ]
-    })
-  },
-  data() {
-    return {
-      thisYear: new Date().getFullYear()
-    }
-  },
-  computed: {
-    VERSION() {
-      return process?.env?.VITE_APP_VERSION ?? 'beta'
-    },
-    BUILD_DATE() {
-      return process?.env?.VITE_APP_BUILD_EPOCH
-        ? new Date(
-            Number(process.env.VITE_APP_BUILD_EPOCH)
-          ).toLocaleDateString()
-        : null
-    }
-  }
-})
-</script>
 <style lang="scss" scoped>
 .dev-mode {
   background-color: green;

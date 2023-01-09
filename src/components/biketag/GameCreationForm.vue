@@ -297,7 +297,7 @@ const launchGame = async () => {
         <import-form
           class="m-auto mb-2"
           text="Upload First Tag"
-          @dataImported="loadTag"
+          @data-imported="loadTag"
         />
         <tag-form v-if="firstTag.game" :tag="firstTag" :commit="false" />
       </v-list>

@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
         @on-close="closeModal"
       />
     </v-modal>
-    <v-row class="ion-justify-content-between">
+    <v-row class="justify-content-between">
       <v-col>
         <export-form
           :info="`${($route.params.name as string).toLowerCase()}-tags${query ? '--' + fileSafeQuery : ''}`"
@@ -145,7 +145,7 @@ onBeforeUnmount(() => {
       </v-col>
       <v-col
         style="display: flex"
-        class="ion-align-items-center"
+        class="align-items-center"
         offset-md="2"
         size-md="auto"
       >
@@ -155,11 +155,7 @@ onBeforeUnmount(() => {
           Import
         </v-btn>
       </v-col>
-      <v-col
-        style="display: flex"
-        class="ion-align-items-center"
-        size-md="auto"
-      >
+      <v-col style="display: flex" class="align-items-center" size-md="auto">
         <export-form variant="imgs" :data="tagsImgsUrls">
           Download all
         </export-form>
@@ -314,7 +310,7 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin"
+      class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between margin-auto"
     >
       <div class="mt-3 ms:mt-0">
         <p class="text-sm text-gray-700">

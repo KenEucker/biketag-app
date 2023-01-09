@@ -106,7 +106,7 @@ const getFile = () => file.value?.click()
         @change="loadFile"
       />
       <v-btn
-        class="ion-justify-content-between"
+        class="justify-content-between"
         fill="clear"
         @click.prevent="getFile"
       >

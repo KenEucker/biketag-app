@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, defineEmits, defineProps, inject } from 'vue'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
 import { useBikeTagApiStore } from '@/store/biketag'

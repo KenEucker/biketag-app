@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { defineEmits } from 'vue'
 const props = defineProps({
   center: {

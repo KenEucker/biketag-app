@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 
@@ -175,7 +176,7 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between ion-margin"
+      class="sm:flex-1 flex items-center sm:items-around flex-col sm:flex-row sm:justify-between m-auto"
     >
       <div class="mt-3 ms:mt-0">
         <p class="text-sm text-gray-700">

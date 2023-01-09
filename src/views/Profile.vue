@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, inject, onBeforeMount } from 'vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import Imgur from '@/assets/images/Imgur.svg'

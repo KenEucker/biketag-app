@@ -1,10 +1,10 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, inject } from 'vue'
 import { useBikeTagApiStore } from '@/store/biketag'
 import { useRouter } from 'vue-router'
 import TagForm from '@/components/biketag/TagForm.vue'
 import ImportForm from '@/components/biketag/ImportForm.vue'
-import { CHANGED_VALUES } from '@/common/types'
 
 const toast: any = inject('toast')
 const modalIsOpen = ref(false)
@@ -65,21 +65,21 @@ const setTagUpdates = (tag: any) => {
       tag.mysteryPlayer != tagInStore.mysteryPlayer ||
       tag.mysteryTime != tagInStore.mysteryTime
     ) {
-      tag.changes.push(CHANGED_VALUES.MYSTERY)
+      tag.changes.push('MYSTERY')
     }
     if (
       tag.foundImageUrl != tagInStore.foundImageUrl ||
       tag.foundPlayer != tagInStore.foundPlayer ||
       tag.foundTime != tagInStore.foundTime
     ) {
-      tag.changes.push(CHANGED_VALUES.FOUND)
+      tag.changes.push('FOUND')
     }
     if (
       tag?.gps?.lat != tagInStore.gps.lat ||
       tag?.gps?.long != tagInStore.gps.long ||
       tag?.gps?.alt != tagInStore.gps.alt
     ) {
-      tag.changes.push(CHANGED_VALUES.GPS)
+      tag.changes.push('GPS')
     }
   }
 }
@@ -157,13 +157,13 @@ const importTags = async () => {
         @on-close="closeModal"
       />
     </v-modal>
-    <v-row class="ion-justify-content-between">
+    <v-row class="justify-content-between">
       <v-col>
-        <import-form @dataImported="loadTags" />
+        <import-form @data-imported="loadTags" />
       </v-col>
       <v-col
         style="display: flex"
-        class="ion-align-items-center"
+        class="align-items-center"
         offset-md="auto"
         size-md="2"
       >
@@ -238,9 +238,7 @@ const importTags = async () => {
 
                 <td
                   :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${
-                    tag.changes?.includes(CHANGED_VALUES.MYSTERY)
-                      ? 'bg-rose-400'
-                      : ''
+                    tag.changes?.includes('MYSTERY') ? 'bg-rose-400' : ''
                   }`"
                 >
                   <div class="flex items-center">
@@ -272,9 +270,7 @@ const importTags = async () => {
 
                 <td
                   :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${
-                    tag.changes?.includes(CHANGED_VALUES.FOUND)
-                      ? 'bg-rose-400'
-                      : ''
+                    tag.changes?.includes('FOUND') ? 'bg-rose-400' : ''
                   }`"
                 >
                   <div class="flex items-center">
@@ -306,9 +302,7 @@ const importTags = async () => {
 
                 <td
                   :class="`px-6 py-4 border-b border-gray-200 whitespace-nowrap ${
-                    tag.changes?.includes(CHANGED_VALUES.GPS)
-                      ? 'bg-rose-400'
-                      : ''
+                    tag.changes?.includes('GPS') ? 'bg-rose-400' : ''
                   }`"
                 >
                   <div class="text-sm leading-5 text-gray-900">
@@ -342,7 +336,7 @@ const importTags = async () => {
     </div>
 
     <div
-      class="sm:flex-1 sm:flex sm:items-center sm:justify-between ion-margin"
+      class="sm:flex-1 sm:flex sm:items-center sm:justify-between margin-auto"
     >
       <div>
         <p class="text-sm text-gray-700">
