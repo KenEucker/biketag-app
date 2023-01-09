@@ -24,7 +24,7 @@
   },
   "packageManager": "yarn@3.3.1",
   "scripts": {
-    "dev": "netlify dev --targetPort 8080 --functionsPort 7200",
+    "dev": "netlify dev --targetPort 8000 --port 8080 --functionsPort 7200",
     "clean": "rimraf ./node_modules/.vite",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "pnpm run lint:js && pnpm run lint:style",
@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@auth0/auth0-vue": "^1.0.2",
+    "@fawmi/vue-google-maps": "^0.9.79",
     "@mdi/font": "^7.1.96",
     "@vueuse/head": "^1.0.22",
     "ajv": "^8.12.0",
@@ -54,6 +55,7 @@
     "pinia-plugin-persistedstate": "^3.0.2",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
+    "vue-toast-notification": "^0.6.3",
     "vuetify": "^3.1.0",
     "webfontloader": "^1.6.28"
   },

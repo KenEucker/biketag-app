@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, inject } from 'vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 import { useRouter } from 'vue-router'
 import TagForm from '@/components/biketag/TagForm.vue'
 import ImportForm from '@/components/biketag/ImportForm.vue'
@@ -11,7 +11,7 @@ const modalIsOpen = ref(false)
 const selectedTagIndex = ref(0)
 const router = useRouter()
 const routeParam = router.currentRoute.value.params.name
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const splitBy = ref(20)
 const importAll = ref(false)
 const tags = ref([] as any[])

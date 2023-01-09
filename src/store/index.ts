@@ -11,6 +11,6 @@ export default pinia
 
 import useGlobal from './GlobalStore'
 import useConfig from './ConfigStore'
-import { useBikeTagApiStore } from './biketag'
+import { useBikeTagStore } from './biketag'
 
-export { useConfig, useGlobal, useBikeTagApiStore }
+export { useConfig, useGlobal, useBikeTagStore }

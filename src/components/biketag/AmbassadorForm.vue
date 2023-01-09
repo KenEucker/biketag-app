@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, defineEmits, computed } from 'vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const ambassador = ref({
   name: '',
   email: '',

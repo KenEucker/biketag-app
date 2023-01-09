@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 import GameForm from '@/components/biketag/GameForm.vue'
 import GameCreationForm from '../components/biketag/GameCreationForm.vue'
 import AmbassadorForm from '@/components/biketag/AmbassadorForm.vue'
@@ -9,7 +9,7 @@ const modalIsOpen = ref(false)
 const creationModalIsOpen = ref(false)
 const ambassadorModalIsOpen = ref(false)
 const selectedGameIndex = ref(0)
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const query = ref('')
 const splitBy = ref(20)
 const games = ref(biketag.allGames)

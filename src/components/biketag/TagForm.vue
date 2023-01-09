@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, inject, defineEmits, defineProps } from 'vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 // import { Tag } from 'biketag/lib/common/schema';
 import Map from './Map.vue'
 import type { Tag } from 'biketag/lib/common/schema'
@@ -26,7 +26,7 @@ const gps = ref({
   lng: tag.value.gps?.long ?? 0
 })
 const center = ref({ ...gps.value })
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const toast: any = inject('toast')
 const readOnly = [
   'tagnumber',

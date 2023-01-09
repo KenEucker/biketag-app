@@ -47,7 +47,7 @@ const getBikeTagConfig = (admin?: boolean, game?: Game) => {
   return opts
 }
 const biketagClient = new BikeTagClient(getBikeTagConfig(false))
-export const useBikeTagApiStore = defineStore({
+export const useBikeTagStore = defineStore({
   id: 'biketagAppState',
   state: (): BikeTagAppState => ({
     games: [] as Game[],
@@ -243,5 +243,5 @@ export const useBikeTagApiStore = defineStore({
 })
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useBikeTagApiStore, import.meta.hot))
+  import.meta.hot.accept(acceptHMRUpdate(useBikeTagStore, import.meta.hot))
 }

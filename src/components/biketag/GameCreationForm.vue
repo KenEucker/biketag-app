@@ -5,9 +5,9 @@ import BikeTagClient from 'biketag'
 import Map from './Map.vue'
 import ImportForm from './ImportForm.vue'
 import TagForm from './TagForm.vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const game = ref(BikeTagClient.createGameObject())
 ;(() => {
   const sett = {} //: settingsArray = {}

@@ -6,6 +6,7 @@ overrides:
 
 specifiers:
   '@auth0/auth0-vue': ^1.0.2
+  '@fawmi/vue-google-maps': ^0.9.79
   '@mdi/font': ^7.1.96
   '@netlify/functions': ^1.4.0
   '@serverless-jwt/jwt-verifier': ^0.2.1
@@ -76,12 +77,14 @@ specifiers:
   vue: ^3.2.45
   vue-eslint-parser: ^9.1.0
   vue-router: ^4.1.6
+  vue-toast-notification: ^0.6.3
   vue-tsc: ^1.0.19
   vuetify: ^3.1.0
   webfontloader: ^1.6.28
 
 dependencies:
   '@auth0/auth0-vue': 1.0.2_vue-router@4.1.6
+  '@fawmi/vue-google-maps': 0.9.79
   '@mdi/font': 7.1.96
   '@vueuse/head': 1.0.22_vue@3.2.45
   ajv: 8.12.0
@@ -93,6 +96,7 @@ dependencies:
   pinia-plugin-persistedstate: 3.0.2_pinia@2.0.28
   vue: 3.2.45
   vue-router: 4.1.6_vue@3.2.45
+  vue-toast-notification: 0.6.3_vue@3.2.45
   vuetify: 3.1.0_ihnv4ujwy6q3qcyepcitbzrajy
   webfontloader: 1.6.28
 
@@ -559,6 +563,19 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@fawmi/vue-google-maps/0.9.79:
+    resolution: {integrity: sha512-SnITonfrBfT/7uESF8SCs1DRWHSJyr/K0bPv9taONAUp/YiggmlwHOwAzA63UeDl8vP0bBmT56MYC1bZmAdUjQ==}
+    dependencies:
+      '@googlemaps/markerclusterer': 2.0.15
+    dev: false
+
+  /@googlemaps/markerclusterer/2.0.15:
+    resolution: {integrity: sha512-/I6Esi5FtyeVHsezN9Kut8zRJoqe7KkTIJXGVqpKFf6BjC7qQ1xRajLMkOz0s8XKgLevbr+KdYjuvmj+LohOGg==}
+    dependencies:
+      fast-deep-equal: 3.1.3
+      supercluster: 7.1.5
+    dev: false
 
   /@humanwhocodes/config-array/0.11.8:
     resolution: {integrity: sha512-UybHIJzJnR5Qc/MsD9Kr+RpO2h+/P1GhOwdiLPXK5TWk5sgTdu88bTD9UP+CKbPPh5Rni1u0GjAdYQLemG8g+g==}
@@ -7565,6 +7582,10 @@ packages:
     resolution: {integrity: sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==}
     dev: true
 
+  /kdbush/3.0.0:
+    resolution: {integrity: sha512-hRkd6/XW4HTsA9vjVpY9tuXJYLSlelnkTmVFu4M9/7MIYQtFcHpbugAU7UbOfjOiVSVYl2fqgBuJ32JUmRo5Ew==}
+    dev: false
+
   /keep-func-props/4.0.1:
     resolution: {integrity: sha512-87ftOIICfdww3SxR5P1veq3ThBNyRPG0JGL//oaR08v0k2yTicEIHd7s0GqSJfQvlb+ybC3GiDepOweo0LDhvw==}
     engines: {node: '>=12.20.0'}
@@ -11238,6 +11259,12 @@ packages:
       - supports-color
     dev: true
 
+  /supercluster/7.1.5:
+    resolution: {integrity: sha512-EulshI3pGUM66o6ZdH3ReiFcvHpM3vAigyK+vcxdjpJyEbIIrtbmBdY23mGgnI24uXiGFvrGq9Gkum/8U7vJWg==}
+    dependencies:
+      kdbush: 3.0.0
+    dev: false
+
   /supports-color/2.0.0:
     resolution: {integrity: sha512-KKNVtd6pCYgPIKU4cp2733HWYCpplQhddZLBUryaAHou723x+FRzQ5Df824Fj+IyyuiQTRoub4SnIFfIcrp70g==}
     engines: {node: '>=0.8.0'}
@@ -12310,6 +12337,15 @@ packages:
       de-indent: 1.0.2
       he: 1.2.0
     dev: true
+
+  /vue-toast-notification/0.6.3_vue@3.2.45:
+    resolution: {integrity: sha512-w4daYmEWsUsqDfON1snfhMUxxm+Blf9OISnoOeKrN3f7HqKvH4pQYwIcPOvIr9cX2EOsRReMWfv8Kha03n9nqw==}
+    engines: {node: '>=10.13.0'}
+    peerDependencies:
+      vue: ^2.0.0
+    dependencies:
+      vue: 3.2.45
+    dev: false
 
   /vue-tsc/1.0.24_typescript@4.9.4:
     resolution: {integrity: sha512-mmU1s5SAqE1nByQAiQnao9oU4vX+mSdsgI8H57SfKH6UVzq/jP9+Dbi2GaV+0b4Cn361d2ln8m6xeU60ApiEXg==}

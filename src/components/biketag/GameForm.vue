@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, defineEmits, defineProps, inject } from 'vue'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 import Map from './Map.vue'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
@@ -22,7 +22,7 @@ const gps = ref({
   lng: game.value.boundary?.long ?? 0
 })
 const center = ref({ ...gps.value })
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const toast: any = inject('toast')
 const settings = computed(() => Object.keys(game.value.settings))
 const newAmbassador = ref('')

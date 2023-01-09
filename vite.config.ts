@@ -18,7 +18,51 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
     // https://vitejs.dev/config/shared-options.html#base
     base: './',
     // https://vitejs.dev/config/shared-options.html#define
-    define: { 'process.env': {} },
+    define: {
+      'process.env': {
+        ACCESS_TOKEN:
+          process.env.ACCESS_TOKEN ?? '8b4e2b86a724bf3f39d6766de6e67212',
+        CONTEXT: process.env.CONTEXT ?? null,
+        APP_ID: process.env.APP_ID ?? 'com.app.biketag-admin',
+        ADMIN: process.env.ADMIN ?? 'biketag@biketag.org',
+        AMBASSADOR_ROLE: process.env.AMBASSADOR_ROLE ?? 'rol_iET51vzIn8z6Utz0',
+        PLAYER_ROLE: process.env.ADMIN ?? 'rol_pcbQ68Q9L0yn1o3O',
+        /* Auth0 Configuration */
+        A_AUDIENCE: process.env.A_AUDIENCE ?? null,
+        A_CID: process.env.A_CID ?? null,
+        A_DOMAIN: process.env.A_DOMAIN ?? null,
+        A_TOKEN: process.env.A_TOKEN ?? null,
+        A_M_CS: process.env.A_M_CS ?? null,
+        A_M_CID: process.env.A_M_CID ?? null,
+        /* BikeTag Configuration */
+        GAME_NAME: process.env.GAME_NAME ?? 'null',
+        GAME_SOURCE: process.env.GAME_SOURCE ?? null,
+        HOST: process.env.HOST ?? 'biketag.io',
+        HOST_KEY: process.env.HOST_KEY ?? 'BikeTagAdminPlatform',
+        /* Imgur Admin Configuration */
+        IA_CID: process.env.IA_CID ?? null,
+        IA_CSECRET: process.env.IA_CSECRET ?? null,
+        IA_RTOKEN: process.env.IA_RTOKEN ?? null,
+        IA_TOKEN: process.env.IA_TOKEN ?? null,
+        /* Imgur Configuration */
+        I_CID: process.env.I_CID ?? null,
+        I_CSECRET: process.env.I_CSECRET ?? null,
+        I_RTOKEN: process.env.I_RTOKEN ?? null,
+        I_TOKEN: process.env.I_TOKEN ?? null,
+        /* Sanity Admin Configuration */
+        SA_CDN_URL: process.env.SA_CDN_URL ?? 'https://cdn.sanity.io/images/',
+        SA_DSET: process.env.SA_DSET ?? null,
+        SA_PID: process.env.SA_PID ?? null,
+        SA_TOKEN: process.env.SA_TOKEN ?? null,
+        /* Sanity Configuration */
+        S_CURL: process.env.S_CURL ?? 'https://cdn.sanity.io/images/',
+        S_DSET: process.env.S_DSET ?? null,
+        S_PID: process.env.S_PID ?? null,
+        S_TOKEN: process.env.S_TOKEN ?? null,
+        /* Google Configuration */
+        G_AKEY: process.env.G_AKEY ?? null
+      }
+    },
     plugins: [
       // Vue3
       vue({
@@ -49,14 +93,14 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
     // https://vitejs.dev/config/server-options.html
     server: {
       host: 'localhost',
-      port: 8080,
+      port: 8000,
       fs: {
         // Allow serving files from one level up to the project root
         allow: ['..']
       }
     },
     preview: {
-      port: 8080
+      port: 80
     },
     // Resolver
     resolve: {

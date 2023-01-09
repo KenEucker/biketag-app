@@ -2,12 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, inject, onBeforeMount } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 import Imgur from '@/assets/images/Imgur.svg'
 
 const auth = useAuth0()
 const toast: any = inject('toast')
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const profile = ref(biketag.getProfile)
 const socialNetworkIcons = ref([
   ['reddit', 'mdi-reddit'],

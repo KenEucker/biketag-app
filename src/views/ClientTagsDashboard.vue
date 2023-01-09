@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useBikeTagApiStore } from '@/store/biketag'
+import { useBikeTagStore } from '@/store'
 import { useRouter } from 'vue-router'
 
 const routeParam = useRouter().currentRoute.value.params?.name
-const biketag = useBikeTagApiStore()
+const biketag = useBikeTagStore()
 const query = ref('')
 const splitBy = ref(20)
 const tags = ref(biketag.tags(routeParam))
