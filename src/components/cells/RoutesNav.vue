@@ -1,27 +1,22 @@
 <script setup lang="ts">
-import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface'
+import type { DrawerMenuItem } from '@/common/interfaces'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const routes = router.getRoutes()
 
 /** Drawer menu items */
-const items: DrawerMenuItem[] = [
-  {
-    title: 'Home',
-    icon: 'mdi-home',
-    to: { name: 'Home' }
-  },
-  {
-    title: '-' // Divider
-  },
-  {
-    title: 'About',
-    icon: 'mdi-information',
-    to: { name: 'About' }
-  },
-  {
-    title: 'Disabled Item',
-    icon: 'mdi-cancel'
-    // empty `to` value becomes to disabled item
-  }
-]
+const items: DrawerMenuItem[] = []
+routes.forEach((r) =>
+  items.push({
+    title: r.name?.toString() ?? '',
+    icon: r.meta?.icon?.toString() ?? '',
+    disabled: r.meta?.disabled === true,
+    to: {
+      name: r.name
+    }
+  })
+)
 </script>
 
 <template>
@@ -32,7 +27,7 @@ const items: DrawerMenuItem[] = [
         <!-- Menu Item -->
         <v-list-item
           v-if="!item.items"
-          :disabled="!item.to"
+          :disabled="item.disabled"
           :prepend-icon="item.icon"
           :title="item.title"
           :to="item.to"
@@ -52,7 +47,7 @@ const items: DrawerMenuItem[] = [
             <v-divider v-if="subItem.title === '-'" />
             <v-list-item
               v-else
-              :disabled="!subItem.to"
+              :disabled="subItem.disabled"
               :prepend-icon="subItem.icon"
               :title="subItem.title"
               :to="subItem.to"

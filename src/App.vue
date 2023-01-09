@@ -10,22 +10,28 @@ import {
   type WritableComputedRef
 } from 'vue'
 import { useTheme } from 'vuetify/lib/framework.mjs'
+import { useDark } from '@vueuse/core'
+
 // Stores
-import { useGlobal, useConfig } from '@/store'
+import { useGlobal } from '@/store'
 
 // Components
-import AppBarMenuComponent from '@/components/AppBarMenuComponent.vue'
-import DrawerComponent from '@/components/DrawerComponent.vue'
+import AppBarMenuComponent from '@/components/app/AppBarMenuComponent.vue'
+import DrawerComponent from '@/components/cells/RoutesNav.vue'
 
+// Assets
 import logo from '@/assets/logo.svg'
+
+import { useRouter } from 'vue-router'
 
 /** Vuetify Theme */
 const theme = useTheme()
+const isDark = useDark()
 
 /** Global Store */
 const globalStore = useGlobal()
 /** Config Store */
-const configStore = useConfig()
+// const configStore = useConfig()
 
 /** Title */
 const title = import.meta.env.VITE_APP_TITLE || 'Vuetify3 Application'
@@ -39,6 +45,28 @@ const loading: WritableComputedRef<boolean> = computed({
   set: (v) => globalStore.setLoading(v)
 })
 
+const router = useRouter()
+const routeMeta = {
+  '@schema': 'https://json.schemastore.org/jsonld.json',
+  '@context': 'http://schema.org',
+  '@type': 'WebSite',
+  name: 'BikeTag App',
+  content: 'BikeTag,bicycles,game,app,phone,camera,cycling',
+  description: 'The application for administrating BikeTag Games',
+  url: 'https://github.com/keneucker/biketag-app',
+  ...router.currentRoute.value.meta
+}
+const siteJson = {
+  '@schema': routeMeta['@schema'],
+  '@context': routeMeta['@context'],
+  '@type': routeMeta['@type'],
+  name: routeMeta.name ?? router.currentRoute.value.name,
+  url: routeMeta.url,
+  description: routeMeta.description
+}
+/** page object data */
+const jsonLd = JSON.stringify(siteJson, null, 2)
+
 /** Appbar progressbar value */
 const progress: ComputedRef<number | null> = computed(
   () => globalStore.progress
@@ -50,17 +78,11 @@ const snackbar: Ref<boolean> = ref(false)
 /** Snackbar text */
 const snackbarText: ComputedRef<string> = computed(() => globalStore.message)
 
-/** Toggle Dark mode */
-const isDark: ComputedRef<string> = computed(() =>
-  configStore._themeDark ? 'dark' : 'light'
-)
-
 /** Theme Color (Sync browser theme color to vuetify theme color) */
 const themeColor: ComputedRef<string> = computed(
-  () => theme.computedThemes.value[isDark.value].colors.primary
-)
-
-// When snackbar text has been set, show snackbar.
+  () =>
+    theme.computedThemes.value[isDark ? 'dark' : 'light'].colors.primary
+) // When snackbar text has been set, show snackbar.
 watch(
   () => globalStore.message,
   async (value) => {
@@ -85,7 +107,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-app :theme="isDark">
+  <v-app>
     <v-navigation-drawer v-model="drawer" temporary>
       <drawer-component />
     </v-navigation-drawer>
@@ -122,14 +144,16 @@ onMounted(() => {
         </v-btn>
       </template>
     </v-snackbar>
-
-    <v-footer app elevation="3">
-      <span class="mr-5">2022 &copy;</span>
-    </v-footer>
+    <app-footer />
   </v-app>
   <teleport to="head">
     <meta name="theme-color" :content="themeColor" />
     <link rel="icon" :href="logo" type="image/svg+xml" />
+    <meta name="keyword" :content="routeMeta.content?.toString()" />
+    <meta name="description" :content="routeMeta.description?.toString()" />
+    <component :is="'script'" type="application/ld+json">
+      {{ jsonLd }}
+    </component>
   </teleport>
 </template>
 
@@ -139,6 +163,7 @@ onMounted(() => {
 html {
   // Fix always scrollbar shown.
   overflow-y: auto;
+
   // Modern scrollbar style
   scrollbar-width: thin;
   scrollbar-color: map-get($grey, 'lighten-2') map-get($grey, 'base');
@@ -150,14 +175,14 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 0.5rem rgb(0 0 0 / 10%);
   background-color: map-get($grey, 'lighten-2');
 }
 
 ::-webkit-scrollbar-thumb {
   border-radius: 0.5rem;
   background-color: map-get($grey, 'base');
-  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 0.5rem rgb(0 0 0 / 10%);
 }
 
 // Fixed a bug that the theme color is interrupted when scrolling

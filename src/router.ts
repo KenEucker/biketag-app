@@ -14,18 +14,27 @@ import { useGlobal } from '@/store'
 // Components
 import AboutPage from '@/views/AboutPage.vue'
 import HomePage from '@/views/HomePage.vue'
+import DashboardPage from '@/views/DashboardPage.vue'
 
 /** Router Rules */
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: HomePage
+    component: HomePage,
+    meta: {
+      icon: 'mdi-home'
+    }
   },
   {
     path: '/about',
     name: 'About',
     component: AboutPage
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: DashboardPage
   }
 ]
 

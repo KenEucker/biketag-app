@@ -45,10 +45,15 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
     ],
     // https://vitejs.dev/config/server-options.html
     server: {
+      host: 'localhost',
+      port: 8080,
       fs: {
         // Allow serving files from one level up to the project root
         allow: ['..']
       }
+    },
+    preview: {
+      port: 8080
     },
     // Resolver
     resolve: {

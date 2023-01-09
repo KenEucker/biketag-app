@@ -1,0 +1,21 @@
+[build]
+  publish = "dist"
+  command = "pnpm build"
+  functions = "functions/"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[plugins]]
+  package = 'netlify-plugin-contextual-env'
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Credentials = "true"
+    Access-Control-Allow-Origin = "*"
+
+[dev]
+  command = "pnpm run start" # Command to start your dev server

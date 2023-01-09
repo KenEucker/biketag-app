@@ -43,6 +43,7 @@ module.exports = {
       }
     ],
     'order/order': ['custom-properties', 'declarations'],
-    'order/properties-order': ['width', 'height']
+    'order/properties-order': ['width', 'height'],
+    'scss/no-global-function-names': null
   }
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type MetaInterface from '@/interfaces/MetaInterface'
+import type { MetaInterface } from '@/common/interfaces'
+import LoginModal from '../cells/LoginModal.vue'
 import Meta from '@/Meta'
 
 type HelloWordProps = {
@@ -17,13 +18,13 @@ const meta: MetaInterface = Meta
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
       <v-img src="@/assets/logo.svg" alt="vuetify" style="height: 300px" />
-      <h1 class="text-h2 font-weight-bold">Welcome to the Vuetify 3</h1>
+      <h1 class="text-h2 font-weight-bold">Welcome to the BikeTag Platform</h1>
       <p class="text-medium-emphasis">
         <a
           href="https://github.com/logue/vite-vuetify-ts-starter"
           target="_blank"
         >
-          vite-vuetify-ts-starter
+          biketag-app
         </a>
         &nbsp;/&nbsp;Build:
         <time
@@ -64,17 +65,7 @@ const meta: MetaInterface = Meta
         </v-col>
 
         <v-col cols="auto">
-          <v-btn
-            href="https://community.vuetifyjs.com/"
-            min-width="164"
-            rel="noopener noreferrer"
-            target="_blank"
-            variant="text"
-          >
-            <v-icon icon="mdi-account-group" size="large" start />
-
-            Community
-          </v-btn>
+          <login-modal />
         </v-col>
       </v-row>
     </v-responsive>
