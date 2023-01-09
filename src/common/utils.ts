@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export const parseQuery = (query = '') => {
   const params: URLSearchParams = new URLSearchParams(query) ?? []
   return Object.fromEntries(params)
@@ -14,7 +15,6 @@ export const parseBody = (body = '') => {
   return parsed
 }
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 export const getPayloadOpts = (event: any, base = {}): any => {
   const parsedQuery = parseQuery(event.rawQuery)
   const parsedBody = parseBody(event.body)

@@ -80,8 +80,7 @@ const snackbarText: ComputedRef<string> = computed(() => globalStore.message)
 
 /** Theme Color (Sync browser theme color to vuetify theme color) */
 const themeColor: ComputedRef<string> = computed(
-  () =>
-    theme.computedThemes.value[isDark ? 'dark' : 'light'].colors.primary
+  () => theme.computedThemes.value[isDark ? 'dark' : 'light'].colors.primary
 ) // When snackbar text has been set, show snackbar.
 watch(
   () => globalStore.message,

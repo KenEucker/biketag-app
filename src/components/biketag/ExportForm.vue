@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ref, defineProps } from 'vue'
+import { ref } from 'vue'
 import JSZip from 'jszip'
 
 const zip = new JSZip()
@@ -141,25 +141,25 @@ const downloadData = () => {
 
 <template>
   <form v-if="variant == 'data'" class="export-form--fixed">
-    <ion-row>
-      <ion-col>
-        <ion-button fill="clear" @click.prevent="downloadData">
+    <v-row>
+      <v-col>
+        <v-btn fill="clear" @click.prevent="downloadData">
           <v-icon icon="mdi-download" />
-        </ion-button>
-      </ion-col>
-      <ion-col>
-        <ion-segment v-model="fileType" color="tertiary">
-          <ion-segment-button value="csv">
-            <ion-label> CSV </ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="json">
-            <ion-label> JSON </ion-label>
-          </ion-segment-button>
-        </ion-segment>
-      </ion-col>
-    </ion-row>
+        </v-btn>
+      </v-col>
+      <v-col>
+        <v-btn-toggle v-model="fileType" color="tertiary">
+          <v-btn value="csv">
+            <v-label> CSV </v-label>
+          </v-btn>
+          <v-btn value="json">
+            <v-label> JSON </v-label>
+          </v-btn>
+        </v-btn-toggle>
+      </v-col>
+    </v-row>
   </form>
-  <ion-button
+  <v-btn
     v-if="variant == 'inline-imgs'"
     class="mx-0 px-0 md:mx-2 md:px-2"
     fill="clear"
@@ -167,13 +167,9 @@ const downloadData = () => {
     @click="downloadPictures"
   >
     <v-icon icon="mdi-image-outline" />
-  </ion-button>
-  <ion-button
-    v-if="variant == 'imgs'"
-    :disabled="packing"
-    @click="downloadPictures"
-  >
+  </v-btn>
+  <v-btn v-if="variant == 'imgs'" :disabled="packing" @click="downloadPictures">
     <slot />
     <v-icon icon="mdi-image-multiple" />
-  </ion-button>
+  </v-btn>
 </template>
