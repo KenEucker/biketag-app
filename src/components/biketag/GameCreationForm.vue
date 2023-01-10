@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ref, defineEmits, computed } from 'vue'
+import { ref, computed } from 'vue'
 import BikeTagClient from 'biketag'
-import Map from './Map.vue'
+import GameMap from './GameMap.vue'
 import ImportForm from './ImportForm.vue'
 import TagForm from './TagForm.vue'
 import { useBikeTagStore } from '@/store'
@@ -168,34 +168,34 @@ const launchGame = async () => {
         <v-list-header>
           <v-label> Game General Information </v-label>
         </v-list-header>
-        <v-item>
+        <v-list-item>
           <v-label position="floating"> Name </v-label>
           <v-input v-model="game.name" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Logo URL </v-label>
           <v-input v-model="game.logo" />
-        </v-item>
+        </v-list-item>
 
         <v-list-header lines="full">
           <v-label> Region </v-label>
         </v-list-header>
-        <v-item>
+        <v-list-item>
           <v-label position="floating"> Slug </v-label>
           <v-input v-model="game.region.slug" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Name </v-label>
           <v-input v-model="game.region.name" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Description </v-label>
           <v-input v-model="game.region.description" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> ZipCode </v-label>
           <v-input v-model="game.region.zipcode" type="number" />
-        </v-item>
+        </v-list-item>
 
         <v-list-header lines="full">
           <v-label> Boundary </v-label>
@@ -203,25 +203,25 @@ const launchGame = async () => {
         <v-row
           class="flex ml-4 md:ml-3 flex-wrap md:flex-nowrap flex-row justify-start md:justify-around items-center"
         >
-          <v-item class="flex justify-center items-center">
+          <v-list-item class="flex justify-center items-center">
             <v-text> Latitude : {{ gps.lat }} </v-text>
-          </v-item>
-          <v-item class="flex justify-center items-center">
+          </v-list-item>
+          <v-list-item class="flex justify-center items-center">
             <v-text> Longitude : {{ gps.lng }} </v-text>
-          </v-item>
-          <v-item class="flex justify-center items-center mb-1">
+          </v-list-item>
+          <v-list-item class="flex justify-center items-center mb-1">
             <v-label position="floating"> Altitude </v-label>
             <v-input v-model="game.boundary.alt" />
-          </v-item>
+          </v-list-item>
         </v-row>
-        <Map :gps="gps" :center="center" @dragend="updateMarker" />
+        <game-map :gps="gps" :center="center" @dragend="updateMarker" />
       </v-list>
 
       <v-list v-else-if="current_step === 1">
         <v-list-header lines="full">
           <v-label> Ambassadors </v-label>
         </v-list-header>
-        <v-item
+        <v-list-item
           v-for="(ambassador, index) in game.ambassadors"
           :key="`amb_${index}`"
         >
@@ -229,8 +229,8 @@ const launchGame = async () => {
           <v-btn fill="clear" @click="() => removeAmbassador(index)">
             <v-icon icon="mdi-trash-can-outline" />
           </v-btn>
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-row style="width: 100%">
             <v-col size="8">
               <v-label position="floating"> Add an ambassador </v-label>
@@ -242,7 +242,7 @@ const launchGame = async () => {
               </v-btn>
             </v-col>
           </v-row>
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <v-list v-else-if="current_step === 2">
@@ -250,7 +250,10 @@ const launchGame = async () => {
           <v-label> Settings </v-label>
         </v-list-header>
         <template v-if="settings.length">
-          <v-item v-for="(key, index) in settings" :key="`${key}-${index}`">
+          <v-list-item
+            v-for="(key, index) in settings"
+            :key="`${key}-${index}`"
+          >
             <v-row style="width: 100%">
               <v-col size="8">
                 <v-label position="floating">
@@ -264,21 +267,21 @@ const launchGame = async () => {
                 </v-btn>
               </v-col>
             </v-row>
-          </v-item>
+          </v-list-item>
         </template>
         <v-list>
           <v-list-header lines="full">
             <v-label> Add new setting </v-label>
           </v-list-header>
-          <v-item>
+          <v-list-item>
             <v-label position="floating"> Setting key </v-label>
             <v-input v-model="newSettingKey" />
-          </v-item>
-          <v-item>
+          </v-list-item>
+          <v-list-item>
             <v-label position="floating"> Setting value </v-label>
             <v-input v-model="newSettingValue" />
-          </v-item>
-          <v-item>
+          </v-list-item>
+          <v-list-item>
             <v-btn
               style="margin: auto 2rem"
               fill="clear"
@@ -286,7 +289,7 @@ const launchGame = async () => {
             >
               <v-icon icon="mdi-plus-circle-outline" />
             </v-btn>
-          </v-item>
+          </v-list-item>
         </v-list>
       </v-list>
 
@@ -325,7 +328,7 @@ const launchGame = async () => {
       </div>
     </transition-group>
   </v-content>
-  <v-item class="cnt--sticky-footer">
+  <v-list-item class="cnt--sticky-footer">
     <v-btn
       v-if="current_step > 0 && current_step < steps + 1"
       class="mb-4 md:mb-2"
@@ -353,7 +356,7 @@ const launchGame = async () => {
     >
       Launch
     </v-btn>
-  </v-item>
+  </v-list-item>
 </template>
 
 <style lang="scss">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useBikeTagStore } from '@/store'
 
 const biketag = useBikeTagStore()
@@ -90,24 +90,24 @@ const createAmbassador = async () => {}
         <v-list-header>
           <v-label> Ambassador Information </v-label>
         </v-list-header>
-        <v-item>
+        <v-list-item>
           <v-label position="floating"> Name </v-label>
           <v-input v-model="ambassador.name" type="name" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Email </v-label>
           <v-input v-model="ambassador.email" type="email" />
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <v-list v-else-if="current_step === 1">
         <v-list-header lines="full">
           <v-label> Select Games </v-label>
         </v-list-header>
-        <v-item v-for="(game, index) in games" :key="`game_${index}`">
+        <v-list-item v-for="(game, index) in games" :key="`game_${index}`">
           <v-label>{{ game.name }}</v-label>
           <v-checkbox color="primary" @change="toggleGame(game.name)" />
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <div
@@ -130,7 +130,7 @@ const createAmbassador = async () => {}
       </div>
     </transition-group>
   </v-content>
-  <v-item class="cnt--sticky-footer">
+  <v-list-item class="cnt--sticky-footer">
     <v-btn
       v-if="current_step > 0 && current_step < steps + 1"
       class="mb-4 md:mb-2"
@@ -158,7 +158,7 @@ const createAmbassador = async () => {}
     >
       Create Ambassador
     </v-btn>
-  </v-item>
+  </v-list-item>
 </template>
 
 <style lang="scss">

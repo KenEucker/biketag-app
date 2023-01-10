@@ -149,14 +149,14 @@ const importTags = async () => {
 
 <template>
   <div>
-    <v-modal :is-open="modalIsOpen" @did-dismiss="closeModal()">
+    <v-dialog :is-open="modalIsOpen" @did-dismiss="closeModal()">
       <tag-form
         :game-name="($route.params.name as string)"
         :tag="tags[selectedTagIndex]"
         :commit="false"
         @on-close="closeModal"
       />
-    </v-modal>
+    </v-dialog>
     <v-row class="justify-content-between">
       <v-col>
         <import-form @data-imported="loadTags" />

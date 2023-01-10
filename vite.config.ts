@@ -4,6 +4,7 @@ import { checker } from 'vite-plugin-checker'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Markdown from 'vite-plugin-vue-markdown'
+import WindiCSS from 'vite-plugin-windicss'
 
 import { fileURLToPath, URL } from 'node:url'
 import fs from 'node:fs'
@@ -37,7 +38,7 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
         /* BikeTag Configuration */
         GAME_NAME: process.env.GAME_NAME ?? 'null',
         GAME_SOURCE: process.env.GAME_SOURCE ?? null,
-        HOST: process.env.HOST ?? 'biketag.io',
+        HOST: process.env.HOST ?? 'biketag.org',
         HOST_KEY: process.env.HOST_KEY ?? 'BikeTagAdminPlatform',
         /* Imgur Admin Configuration */
         IA_CID: process.env.IA_CID ?? null,
@@ -79,6 +80,7 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
         autoImport: true,
         styles: { configFile: 'src/styles/settings.scss' }
       }),
+      WindiCSS(),
       // vite-plugin-checker
       // https://github.com/fi3ework/vite-plugin-checker
       checker({

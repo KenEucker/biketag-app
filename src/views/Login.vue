@@ -1,11 +1,27 @@
 <script setup lang="ts">
-import auth from '@/auth'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BikeTagLogo from '@/components/biketag/BikeTagLogo.vue'
+import auth from '@/auth'
+
+if (auth) {
+  const authChanged = reactive(auth)
+  watch(authChanged, (e: any) => {
+    if (auth?.user?.value) {
+      console.log('user', auth.user, e)
+    }
+  })
+}
+
 const router = useRouter()
 
 function login() {
-  router.push('/games')
+  if (auth?.user?.value) {
+    router.push('/games')
+  } else {
+    auth?.loginWithRedirect({ redirect: '/games' })
+  }
 }
 function asGuest() {
   router.push('/guest/games')
@@ -23,7 +39,7 @@ function asGuest() {
         v-if="auth?.isAuthenticated"
         class="mt-6 font-semibold text-sm text-center"
       >
-        Welcome {{ auth?.user?.value.name }}
+        Welcome {{ auth?.user?.value?.name }}
       </p>
       <button
         v-else

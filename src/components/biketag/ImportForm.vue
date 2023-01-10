@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable no-case-declarations */
-import { ref, defineEmits, defineProps } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   areTags: {

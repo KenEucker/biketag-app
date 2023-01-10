@@ -76,26 +76,29 @@ const splitCamelCase = (str: string) =>
       @submit.prevent="updateProfile"
     >
       <v-list>
-        <v-item>
+        <v-list-item>
           <v-label position="floating"> User Name </v-label>
           <v-input v-model="profile.user_metadata.name" readonly />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> User Email </v-label>
           <v-input v-model="profile.email" readonly />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Passcode </v-label>
           <v-input
             v-model="profile.user_metadata.passcode"
             minlength="3"
             maxlength="30"
           />
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <v-list>
-        <v-item v-for="(social, i) in socialNetworkIcons" :key="`${i}_inputs`">
+        <v-list-item
+          v-for="(social, i) in socialNetworkIcons"
+          :key="`${i}_inputs`"
+        >
           <v-row class="w-full">
             <v-col size="10">
               <v-label position="floating">
@@ -118,7 +121,7 @@ const splitCamelCase = (str: string) =>
               <v-icon :icon="social[1]" />
             </v-col>
           </v-row>
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <v-list inset="true">
@@ -131,11 +134,11 @@ const splitCamelCase = (str: string) =>
             :key="`${i}_config`"
             :value="i"
           >
-            <v-item>
+            <v-list-item>
               <v-label> {{ firstToUperCase(credential) }} </v-label>
-            </v-item>
+            </v-list-item>
             <v-list class="px-10">
-              <v-item
+              <v-list-item
                 v-for="(inputField, j) in Object.keys(
                   profile.user_metadata.credentials[credential]
                 )"
@@ -150,7 +153,7 @@ const splitCamelCase = (str: string) =>
                   "
                   type="password"
                 />
-              </v-item>
+              </v-list-item>
             </v-list>
           </v-accordion>
         </v-accordion-group>

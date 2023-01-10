@@ -7,7 +7,7 @@ import {
   type RouteRecordRaw
 } from 'vue-router'
 import { nextTick } from 'vue'
-// import authGuard from './auth/authGuard'
+import authGuard from './auth/authGuard'
 
 // Pinia Store
 import { useGlobal } from '@/store'
@@ -126,52 +126,52 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
-// const protectedRoutes: Array<RouteRecordRaw> = [
-//   {
-//     path: '/games',
-//     name: 'GamesDashboard',
-//     beforeEnter: authGuard,
-//     component: () => import('@/views/GamesDashboard.vue'),
-//     meta: {
-//       icon: 'mdi-game-controller',
-//       layout: 'Dashboard',
-//       showSearchBar: true
-//     }
-//   },
-//   {
-//     path: '/games/:name',
-//     name: 'TagsDashboard',
-//     beforeEnter: authGuard,
-//     component: () => import('@/views/TagsDashboard.vue'),
-//     meta: {
-//       icon: 'mdi-game-controller',
-//       layout: 'Dashboard',
-//       showSearchBar: true
-//     }
-//   },
-//   {
-//     path: '/games/:name/import',
-//     name: 'ImportTags',
-//     beforeEnter: authGuard,
-//     component: () => import('@/views/ImportTags.vue'),
-//     meta: {
-//       icon: 'mdi-game-controller',
-//       layout: 'Dashboard',
-//       showSearchBar: false
-//     }
-//   },
-//   {
-//     path: '/profile',
-//     name: 'Profile',
-//     beforeEnter: authGuard,
-//     component: () => import('@/views/Profile.vue'),
-//     meta: {
-//       icon: 'mdi-game-controller',
-//       layout: 'Dashboard',
-//       showSearchBar: false
-//     }
-//   }
-// ]
+const protectedRoutes: Array<RouteRecordRaw> = [
+  {
+    path: '/games',
+    name: 'GamesDashboard',
+    beforeEnter: authGuard,
+    component: () => import('@/views/GamesDashboard.vue'),
+    meta: {
+      icon: 'mdi-game-controller',
+      layout: 'Dashboard',
+      showSearchBar: true
+    }
+  }
+  // {
+  //   path: '/games/:name',
+  //   name: 'TagsDashboard',
+  //   beforeEnter: authGuard,
+  //   component: () => import('@/views/TagsDashboard.vue'),
+  //   meta: {
+  //     icon: 'mdi-game-controller',
+  //     layout: 'Dashboard',
+  //     showSearchBar: true
+  //   }
+  // }
+  // {
+  //   path: '/games/:name/import',
+  //   name: 'ImportTags',
+  //   beforeEnter: authGuard,
+  //   component: () => import('@/views/ImportTags.vue'),
+  //   meta: {
+  //     icon: 'mdi-game-controller',
+  //     layout: 'Dashboard',
+  //     showSearchBar: false
+  //   }
+  // },
+  // {
+  //   path: '/profile',
+  //   name: 'Profile',
+  //   beforeEnter: authGuard,
+  //   component: () => import('@/views/Profile.vue'),
+  //   meta: {
+  //     icon: 'mdi-game-controller',
+  //     layout: 'Dashboard',
+  //     showSearchBar: false
+  //   }
+  // }
+]
 
 /** Vue Router */
 const router: Router = createRouter({
@@ -182,7 +182,7 @@ const router: Router = createRouter({
    */
   history: createWebHistory(import.meta.env.BASE_URL), // createWebHashHistory(import.meta.env.BASE_URL)
 
-  routes, //: [...routes, ...protectedRoutes],
+  routes: [...routes, ...protectedRoutes],
   scrollBehavior() {
     return { top: 0 }
   }

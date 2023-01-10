@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ref, computed, defineEmits, defineProps, inject } from 'vue'
+import { ref, computed, inject } from 'vue'
 // import { Game, settingsArray } from 'biketag/lib/common/schema';
 import { useBikeTagStore } from '@/store'
-import Map from './Map.vue'
+import GameMap from './GameMap.vue'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
   game: {
@@ -11,6 +11,7 @@ const props = defineProps({
     default: null
   }
 })
+console.log({ props })
 const game = ref({ ...props.game }) //as Game);
 ;(() => {
   const sett = {} //: settingsArray = {}
@@ -106,7 +107,7 @@ const updateMarker = (e: any) => {
     <form @submit.prevent="updateGame">
       <v-list>
         <template v-for="key in Object.keys(game)">
-          <v-item
+          <v-list-item
             v-if="
               game[key] != undefined &&
               (typeEqualsTo(game[key], 'string') ||
@@ -123,7 +124,7 @@ const updateMarker = (e: any) => {
               type="number"
             />
             <v-input v-else v-model="game[key]" />
-          </v-item>
+          </v-list-item>
         </template>
       </v-list>
 
@@ -131,7 +132,7 @@ const updateMarker = (e: any) => {
         <v-list-header lines="full">
           <v-label> Ambassadors </v-label>
         </v-list-header>
-        <v-item
+        <v-list-item
           v-for="(ambassador, index) in game.ambassadors"
           :key="`amb_${index}`"
         >
@@ -139,8 +140,8 @@ const updateMarker = (e: any) => {
           <v-btn fill="clear" @click="() => removeAmbassador(index)">
             <v-icon icon="mdi-trash-can-outline" />
           </v-btn>
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-row style="width: 100%">
             <v-col size="8">
               <v-label position="floating"> Add an ambassador </v-label>
@@ -152,7 +153,7 @@ const updateMarker = (e: any) => {
               </v-btn>
             </v-col>
           </v-row>
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <v-list>
@@ -160,7 +161,10 @@ const updateMarker = (e: any) => {
           <v-label> Settings </v-label>
         </v-list-header>
         <template v-if="settings.length">
-          <v-item v-for="(key, index) in settings" :key="`${key}-${index}`">
+          <v-list-item
+            v-for="(key, index) in settings"
+            :key="`${key}-${index}`"
+          >
             <v-row style="width: 100%">
               <v-col size="8">
                 <v-label position="floating">
@@ -174,21 +178,21 @@ const updateMarker = (e: any) => {
                 </v-btn>
               </v-col>
             </v-row>
-          </v-item>
+          </v-list-item>
         </template>
         <v-list>
           <v-list-header lines="full">
             <v-label> Add new setting </v-label>
           </v-list-header>
-          <v-item>
+          <v-list-item>
             <v-label position="floating"> Setting key </v-label>
             <v-input v-model="newSettingKey" />
-          </v-item>
-          <v-item>
+          </v-list-item>
+          <v-list-item>
             <v-label position="floating"> Setting value </v-label>
             <v-input v-model="newSettingValue" />
-          </v-item>
-          <v-item>
+          </v-list-item>
+          <v-list-item>
             <v-btn
               style="margin: auto 2rem"
               fill="clear"
@@ -196,7 +200,7 @@ const updateMarker = (e: any) => {
             >
               <v-icon icon="mdi-plus-circle-outline" />
             </v-btn>
-          </v-item>
+          </v-list-item>
         </v-list>
       </v-list>
 
@@ -204,42 +208,42 @@ const updateMarker = (e: any) => {
         <v-list-header lines="full">
           <v-label> Boundary </v-label>
         </v-list-header>
-        <v-item>
+        <v-list-item>
           <v-text> Latitude : {{ gps.lat }} </v-text>
           <v-text> Longitude : {{ gps.lng }} </v-text>
-        </v-item>
-        <Map :gps="gps" :center="center" @dragend="updateMarker" />
-        <v-item>
+        </v-list-item>
+        <game-map :gps="gps" :center="center" @dragend="updateMarker" />
+        <v-list-item>
           <v-label position="floating"> Altitude </v-label>
           <v-input v-model="game.boundary.alt" />
-        </v-item>
+        </v-list-item>
       </v-list>
 
       <v-list v-if="typeof game.region != 'string'">
         <v-list-header lines="full">
           <v-label> Region </v-label>
         </v-list-header>
-        <v-item>
+        <v-list-item>
           <v-label position="floating"> Slug </v-label>
           <v-input v-model="game.region.slug" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Name </v-label>
           <v-input v-model="game.region.name" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> Description </v-label>
           <v-input v-model="game.region.description" />
-        </v-item>
-        <v-item>
+        </v-list-item>
+        <v-list-item>
           <v-label position="floating"> ZipCode </v-label>
           <v-input v-model="game.region.zipcode" type="number" />
-        </v-item>
+        </v-list-item>
       </v-list>
 
-      <v-item>
+      <v-list-item>
         <v-btn type="submit"> Update </v-btn>
-      </v-item>
+      </v-list-item>
     </form>
   </v-content>
 </template>

@@ -10,6 +10,8 @@ import Vuetify from './plugins/vuetify'
 // import VueGoogleMaps from '@fawmi/vue-google-maps'
 
 /// Load Styles
+import 'virtual:windi-devtools'
+import 'virtual:windi.css'
 import './styles/base.scss'
 
 // Load Layout vue.

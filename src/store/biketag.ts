@@ -199,7 +199,7 @@ export const useBikeTagStore = defineStore({
             .replace('image-', '')
             .replace('-png', '.png')
             .replace('-jpg', '.jpg')}${size.length ? `?${size}` : ''}`
-        : 'https://biketag.io/assets/biketag-logo.svg'
+        : 'https://biketag.org/assets/biketag-logo.svg'
     },
     createTag(tag: any): Tag {
       return BikeTagClient.createTagObject(tag)

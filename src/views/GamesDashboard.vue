@@ -97,23 +97,24 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <v-modal :is-open="modalIsOpen" @did-dismiss="closeModal">
+    <v-dialog :is-open="modalIsOpen" @did-dismiss="closeModal">
       <game-form :game="games[selectedGameIndex]" @on-close="closeModal" />
-    </v-modal>
-    <v-modal :is-open="creationModalIsOpen" @did-dismiss="closeCreationModal">
+    </v-dialog>
+    <v-dialog :is-open="creationModalIsOpen" @did-dismiss="closeCreationModal">
       <game-creation-form @on-close="closeCreationModal" />
-    </v-modal>
-    <v-modal :is-open="ambassadorModalIsOpen" @did-dismiss="closeCreationModal">
+    </v-dialog>
+    <v-dialog
+      :is-open="ambassadorModalIsOpen"
+      @did-dismiss="closeCreationModal"
+    >
       <ambassador-form @on-close="() => (ambassadorModalIsOpen = false)" />
-    </v-modal>
+    </v-dialog>
 
     <div class="flex justify-center md:justify-start">
       <v-btn @click="() => (ambassadorModalIsOpen = true)">
         Create Ambassador
       </v-btn>
     </div>
-
-    <div class="mt-8"></div>
 
     <div class="flex flex-col mt-8">
       <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

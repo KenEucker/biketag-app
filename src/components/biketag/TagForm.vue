@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ref, inject, defineEmits, defineProps } from 'vue'
+import { ref, inject } from 'vue'
 import { useBikeTagStore } from '@/store'
 // import { Tag } from 'biketag/lib/common/schema';
-import Map from './Map.vue'
+import GameMap from './GameMap.vue'
 import type { Tag } from 'biketag/lib/common/schema'
 const emit = defineEmits(['onClose'])
 const props = defineProps({
@@ -97,7 +97,7 @@ const typeEqualsTo = (value: any, type: string) => {
         <v-list lines="three" class="no-margin">
           <v-list>
             <template v-for="key in Object.keys(tag)">
-              <v-item
+              <v-list-item
                 v-if="
                   tag[key] != undefined &&
                   (typeEqualsTo(tag[key], 'string') ||
@@ -119,7 +119,7 @@ const typeEqualsTo = (value: any, type: string) => {
                   v-model="tag[key]"
                   :readonly="readOnly.includes(key)"
                 />
-              </v-item>
+              </v-list-item>
             </template>
           </v-list>
 
@@ -130,30 +130,30 @@ const typeEqualsTo = (value: any, type: string) => {
             <v-row
               class="flex ml-4 md:ml-3 flex-wrap md:flex-nowrap flex-row justify-start md:justify-around items-center"
             >
-              <v-item class="flex justify-center items-center">
+              <v-list-item class="flex justify-center items-center">
                 <v-text> Latitude : {{ gps.lat }} </v-text>
-              </v-item>
-              <v-item class="flex justify-center items-center">
+              </v-list-item>
+              <v-list-item class="flex justify-center items-center">
                 <v-text> Longitude : {{ gps.lng }} </v-text>
-              </v-item>
-              <v-item class="flex justify-center items-center mb-1">
+              </v-list-item>
+              <v-list-item class="flex justify-center items-center mb-1">
                 <v-label position="floating"> Altitude </v-label>
                 <v-input v-model="tag.gps.alt" />
-              </v-item>
+              </v-list-item>
             </v-row>
-            <Map :gps="gps" :center="center" @dragend="updateMarker" />
+            <game-map :gps="gps" :center="center" @dragend="updateMarker" />
           </v-list>
         </v-list>
 
-        <v-item v-if="commit">
+        <v-list-item v-if="commit">
           <v-btn type="submit"> Update </v-btn>
-        </v-item>
+        </v-list-item>
       </form>
     </v-content>
   </template>
   <template v-else>
     <template v-for="key in Object.keys(tag)">
-      <v-item
+      <v-list-item
         v-if="
           tag[key] != undefined &&
           (typeEqualsTo(tag[key], 'string') || typeEqualsTo(tag[key], 'number'))
@@ -170,7 +170,7 @@ const typeEqualsTo = (value: any, type: string) => {
           type="number"
         />
         <v-input v-else v-model="tag[key]" :readonly="readOnly.includes(key)" />
-      </v-item>
+      </v-list-item>
     </template>
     <v-list-header lines="full">
       <v-label> GPS </v-label>
@@ -178,17 +178,17 @@ const typeEqualsTo = (value: any, type: string) => {
     <v-row
       class="flex ml-4 md:ml-3 flex-wrap md:flex-nowrap flex-row justify-start md:justify-around items-center"
     >
-      <v-item class="flex justify-center items-center">
+      <v-list-item class="flex justify-center items-center">
         <v-text> Latitude : {{ gps.lat }} </v-text>
-      </v-item>
-      <v-item class="flex justify-center items-center">
+      </v-list-item>
+      <v-list-item class="flex justify-center items-center">
         <v-text> Longitude : {{ gps.lng }} </v-text>
-      </v-item>
-      <v-item class="flex justify-center items-center mb-1">
+      </v-list-item>
+      <v-list-item class="flex justify-center items-center mb-1">
         <v-label position="floating"> Altitude </v-label>
         <v-input v-model="tag.gps.alt" />
-      </v-item>
+      </v-list-item>
     </v-row>
-    <Map :gps="gps" :center="center" @dragend="updateMarker" />
+    <game-map :gps="gps" :center="center" @dragend="updateMarker" />
   </template>
 </template>
