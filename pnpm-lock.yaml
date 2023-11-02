@@ -55,6 +55,8 @@ specifiers:
   postcss-html: ^1.5.0
   postcss-scss: ^4.0.6
   prettier: ^2.8.1
+  primeicons: ^6.0.1
+  primevue: ^3.24.0
   qs: ^6.11.0
   request: ^2.88.2
   rimraf: ^3.0.2
@@ -96,6 +98,8 @@ dependencies:
   jszip: 3.10.1
   pinia: 2.0.28_prq2uz4lho2pwp6irk4cfkrxwu
   pinia-plugin-persistedstate: 3.0.2_pinia@2.0.28
+  primeicons: 6.0.1
+  primevue: 3.24.0_5f3kdig7wnjzidee4jtphf73cq
   vue: 3.2.45
   vue-router: 4.1.6_vue@3.2.45
   vue-toast-notification: 0.6.3_vue@3.2.45
@@ -9829,6 +9833,20 @@ packages:
       colors: 1.4.0
       minimist: 1.2.7
     dev: true
+
+  /primeicons/6.0.1:
+    resolution: {integrity: sha512-KDeO94CbWI4pKsPnYpA1FPjo79EsY9I+M8ywoPBSf9XMXoe/0crjbUK7jcQEDHuc0ZMRIZsxH3TYLv4TUtHmAA==}
+    dev: false
+
+  /primevue/3.24.0_5f3kdig7wnjzidee4jtphf73cq:
+    resolution: {integrity: sha512-mJxXQrWPnKv9IrVPj8wj8bdH/ukoM4K0ErpaMbc31/rVwqCYSAezpyDmRMWIkALvThcgN3TSy2nGowMQCfNqKA==}
+    peerDependencies:
+      primeicons: ^5.0.0 || ^6.0.0
+      vue: ^3.0.0
+    dependencies:
+      primeicons: 6.0.1
+      vue: 3.2.45
+    dev: false
 
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}

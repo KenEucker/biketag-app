@@ -53,17 +53,29 @@ const shownGames = computed(() =>
 
 biketag.setGames().then(() => (games.value = biketag.allGames))
 const showModal = (index: number) => {
+  console.log('showing modal')
   selectedGameIndex.value = index
   modalIsOpen.value = true
 }
 const closeModal = () => {
+  console.log('closing modal')
   modalIsOpen.value = false
 }
 const showCreationModal = () => {
+  console.log('showing create game modal', creationModalIsOpen)
   creationModalIsOpen.value = true
 }
 const closeCreationModal = () => {
+  console.log('closing create game modal', creationModalIsOpen)
   creationModalIsOpen.value = false
+}
+const showAmbassadorModal = () => {
+  console.log('showing ambassador game modal', ambassadorModalIsOpen)
+  ambassadorModalIsOpen.value = true
+}
+const closeAmbassadorModal = () => {
+  console.log('closing ambassador game modal', ambassadorModalIsOpen)
+  ambassadorModalIsOpen.value = false
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,22 +109,22 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <v-dialog :is-open="modalIsOpen" @did-dismiss="closeModal">
+    <v-dialog :v-model="modalIsOpen" activator="parent">
       <game-form :game="games[selectedGameIndex]" @on-close="closeModal" />
     </v-dialog>
-    <v-dialog :is-open="creationModalIsOpen" @did-dismiss="closeCreationModal">
+    <v-dialog :v-model="creationModalIsOpen" activator="parent">
       <game-creation-form @on-close="closeCreationModal" />
     </v-dialog>
-    <v-dialog
-      :is-open="ambassadorModalIsOpen"
-      @did-dismiss="closeCreationModal"
-    >
-      <ambassador-form @on-close="() => (ambassadorModalIsOpen = false)" />
+    <v-dialog :v-model="ambassadorModalIsOpen" activator="parent">
+      <ambassador-form @on-close="closeAmbassadorModal" />
     </v-dialog>
 
-    <div class="flex justify-center md:justify-start">
-      <v-btn @click="() => (ambassadorModalIsOpen = true)">
-        Create Ambassador
+    <div class="flex justify-center md:justify-start gap-8">
+      <v-btn @click="showAmbassadorModal">
+        Create Ambassador <v-icon icon="mdi-plus-circle-outline" />
+      </v-btn>
+      <v-btn fill="clear" @click="showCreationModal()">
+        Create Game <v-icon icon="mdi-plus-circle-outline" />
       </v-btn>
     </div>
 
@@ -139,10 +151,10 @@ onBeforeUnmount(() => {
                 >
                   Site
                 </th>
-                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50">
-                  <v-btn fill="clear" @click="showCreationModal">
-                    <v-icon icon="mdi-plus-circle-outline"></v-icon>
-                  </v-btn>
+                <th
+                  class="px-6 py-3 hidden lg:table-cell text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50"
+                >
+                  Settings/Tags
                 </th>
               </tr>
             </thead>

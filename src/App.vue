@@ -25,7 +25,7 @@ import AppFooter from '@/components/app/AppFooter.vue'
 
 html {
   // Fix always scrollbar shown.
-  overflow-y: hidden;
+  // overflow-y: hidden;
 
   // Modern scrollbar style
   scrollbar-width: thin;
@@ -49,9 +49,9 @@ html {
 }
 
 // Fixed a bug that the theme color is interrupted when scrolling
-.v-application {
-  overflow-y: auto;
-}
+// .v-application {
+//   overflow-y: auto;
+// }
 
 // Fix app-bar's progress-bar
 .v-app-bar .v-progress-linear {

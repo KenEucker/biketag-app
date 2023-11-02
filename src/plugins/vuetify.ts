@@ -20,6 +20,21 @@ loadFonts()
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 
+const biketagLightTheme = {
+  dark: false,
+  colors: {
+    primary: '#673ab7',
+    secondary: '#03a9f4',
+    accent: '#ffeb3b',
+    error: '#607d8b',
+    warning: '#ff9800',
+    info: '#00bcd4',
+    success: '#8bc34a',
+    background: '#FFFFFF',
+    surface: '#FFFFFF'
+  }
+}
+
 export default createVuetify({
   // Global configuration
   // https://next.vuetifyjs.com/en/features/global-configuration/
@@ -52,7 +67,11 @@ export default createVuetify({
   // Theme
   // https://next.vuetifyjs.com/en/features/theme/
   theme: {
-    defaultTheme: 'light'
+    defaultTheme: 'biketagLightTheme',
+    // cspNonce: 'dQw4w9WgXcQ',
+    themes: {
+      biketagLightTheme
+    }
   }
 })
 

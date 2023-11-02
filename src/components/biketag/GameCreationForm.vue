@@ -162,7 +162,7 @@ const launchGame = async () => {
       </div>
     </v-toolbar>
   </v-header>
-  <v-content class="modal-content cnt">
+  <v-container class="modal-content cnt">
     <transition-group name="creation-form-steps" tag="div" class="h-full">
       <v-list v-if="current_step === 0">
         <v-list-header>
@@ -327,7 +327,7 @@ const launchGame = async () => {
         </h5>
       </div>
     </transition-group>
-  </v-content>
+  </v-container>
   <v-list-item class="cnt--sticky-footer">
     <v-btn
       v-if="current_step > 0 && current_step < steps + 1"

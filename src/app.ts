@@ -5,7 +5,8 @@ import store from './store'
 import auth from './auth'
 
 // Load Components
-import Vuetify from './plugins/vuetify'
+// import Vuetify from './plugins/vuetify'
+import PrimeVue from 'primevue/config'
 // import VueToast from 'vue-toast-notification'
 // import VueGoogleMaps from '@fawmi/vue-google-maps'
 
@@ -13,6 +14,9 @@ import Vuetify from './plugins/vuetify'
 import 'virtual:windi-devtools'
 import 'virtual:windi.css'
 import './styles/base.scss'
+import 'primevue/resources/themes/lara-light-teal/theme.css'
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css'
 
 // Load Layout vue.
 import App from './App.vue'
@@ -31,7 +35,8 @@ app.use(router)
 app.use(store)
 
 // Register Components
-app.use(Vuetify)
+app.use(PrimeVue)
+// app.use(Vuetify)
 // app.use(VueToast)
 
 // Google Maps
