@@ -1,7 +1,12 @@
 [build]
   publish = "dist"
-  command = "yarn build"
+  command = "npm build"
   functions = "functions/"
+
+[dev]
+  targetPort = 8080
+  autoLaunch = false
+  command = "vite --host localhost --port 8080"
 
 [[redirects]]
   from = "/api/*"
