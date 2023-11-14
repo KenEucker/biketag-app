@@ -20,7 +20,7 @@ ion-icon {
 }
 
 .center-end {
-  @include flx($j_c: end);
+  @include flx($j_c: flex-end);
   padding: 0;
 }
 

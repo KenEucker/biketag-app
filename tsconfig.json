@@ -1,23 +1,32 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "jsx": "preserve",
-    "baseUrl": ".",
+    "target": "ESNext",
+    "outDir": "dist",
+    "module": "ESNext",
+    "useDefineForClassFields": true,
+    "moduleResolution": "Node",
     "strict": true,
-    "sourceMap": false,
-    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "jsx": "preserve",
+    "allowJs": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "lib": ["esnext", "ScriptHost", "dom"],
-    "types": ["./src/vue-shim", "./src/vuex-shim", "vite/client", "cypress"],
-    "plugins": [{ "name": "@vuedx/typescript-plugin-vue" }],
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowUmdGlobalAccess": true,
+    "baseUrl": ".",
+    "sourceMap": true,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
+
+    "types": ["./src/vue-shim"],
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"]
+    },
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "ScriptHost", "WebWorker"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
-  "exclude": ["node_modules", "dist", "public", "tests", "src/coverage/"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -123,7 +123,7 @@ const exportToCsv = (data: any[]) => {
 
   // Convert users data to a csv
   let usersCsv = data.reduce((acc: Array<string>, datap: any) => {
-    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? ''))
+    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? '')))
     return acc
   }, [])
 
@@ -168,7 +168,7 @@ const downloadData = () => {
     </ion-row>
   </form>
   <ion-button 
-    v-if="variant == 'inline-imgs'" class="mx-0 px-0 md:mx-2 md:px-2" 
+    v-if="variant == 'inline-imgs'" class="px-0 mx-0 md:mx-2 md:px-2" 
     fill="clear" @click="downloadPictures" :disabled="packing"
   >
     <ion-icon :icon="imageOutline"></ion-icon>

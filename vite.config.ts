@@ -77,14 +77,20 @@ export default defineConfig({
       G_AKEY: process.env.G_AKEY ?? null,
     }),
   ],
+  optimizeDeps: {
+    include: [
+      "vue-google-maps-community-fork",
+      "fast-deep-equal",
+    ],
+  },
   build: {
     rollupOptions: {},
   },
   server: {
     host: 'localhost',
-    port: 8080,
+    port: 8000,
   },
   preview: {
-    port: 8080,
+    port: 8000,
   },
 })
