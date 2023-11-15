@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue'
+import { ref } from 'vue'
 import { useSidebar } from '../hooks/useSidebar'
 import { IonHeader, IonIcon, IonSearchbar } from '@ionic/vue'
 import {
@@ -19,8 +19,8 @@ const logout = () =>
   auth0.logout({
     returnTo: window.location.origin
   })
-const login = () => {
-  auth0.loginWithRedirect()
+const login = async () => {
+  await auth0.loginWithRedirect()
 }
 </script>
 

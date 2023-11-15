@@ -47,6 +47,11 @@ app.use(createPinia())
 app.use(createAuth0({
   domain: process.env.A_DOMAIN as string,
   clientId: process.env.A_CID as string,
+  authorizationParams: {
+    redirect_uri: window.location.origin,
+  },
+  useRefreshTokens: true,
+  cacheLocation: 'localstorage',
   // onRedirectCallback: (appState: any) => {
   //   router.push(
   //     appState && appState.targetUrl

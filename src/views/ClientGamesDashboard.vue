@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { IonIcon } from '@ionic/vue'
+import { IonIcon, IonButton } from '@ionic/vue'
 import { useBikeTagApiStore } from '@/store/biketagClient'
 import {
   pricetagsOutline,

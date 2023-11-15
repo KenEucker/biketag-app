@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, defineProps } from 'vue'
+import { ref } from 'vue'
 import { IonIcon, IonButton, IonLabel } from '@ionic/vue'
 import { cloudUploadOutline } from 'ionicons/icons'
 

@@ -5,16 +5,5 @@
   SOCIAL LOGIN BUTTON
 </template>
 
-<script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'BikeTagLogin',
-  props: {
-    msg: {
-      type: String,
-      default: 'Log In To BikeTag',
-    },
-  },
-})
+<script setup>
 </script>

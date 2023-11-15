@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, defineEmits, defineProps, inject } from 'vue'
+import { ref, computed, inject } from 'vue'
 import {
   IonContent,
   IonButton,
