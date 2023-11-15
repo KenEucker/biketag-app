@@ -6,7 +6,7 @@
 [dev]
   targetPort = 8080
   autoLaunch = false
-  command = "vite --host localhost --port 8080"
+  command = "vite --host localhost"
 
 [[redirects]]
   from = "/api/*"

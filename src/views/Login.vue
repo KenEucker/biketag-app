@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { inject } from 'vue'
 import { useRouter } from 'vue-router'
 import BikeTagLogo from '@/components/BikeTagLogo.vue'
+import { useAuth0 } from '@auth0/auth0-vue'
+
 const router = useRouter()
-const auth : any = inject('auth')
+const auth0 = useAuth0()
 function login() {
   router.push('/games')
 }
@@ -20,22 +21,22 @@ function asGuest() {
         <span class="text-2xl font-semibold text-gray-700">BikeTag</span>
       </div>
       <p
-        class="mt-6 font-semibold text-sm text-center"
-        v-if="auth.isAuthenticated"
+        class="mt-6 text-sm font-semibold text-center"
+        v-if="auth0.isAuthenticated"
       >
-        Welcome {{ auth.user.name }}
+        Welcome {{ auth0.user?.value?.name }}
       </p>
       <button 
         v-else @click="asGuest"
-        class="mt-6 w-full px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
+        class="w-full px-4 py-2 mt-6 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
       >
         Continue as Guest
       </button>
       <button
         @click="login"
-        class="mt-6 w-full px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
+        class="w-full px-4 py-2 mt-6 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
       >
-        {{ auth.isAuthenticated ? 'Continue' : 'Sign in' }}
+        {{ auth0.isAuthenticated ? 'Continue' : 'Sign in' }}
       </button>
     </div>
   </div>

@@ -30,7 +30,7 @@
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
     "convert": "tsoa spec-and-routes",
-    "dev": "netlify dev --port 8080 --functionsPort 7200",
+    "dev": "netlify dev --functionsPort 7200",
     "build": "vite build",
     "preview": "vite build && vite preview",
     "serve": "vite",
@@ -40,7 +40,6 @@
     "test:ci-components": "cypress run-ct"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^1.19.4",
     "@auth0/auth0-vue": "^2.0.0",
     "@fawmi/vue-google-maps": "^0.9.79",
     "@googlemaps/google-maps-services-js": "^3.3.5",

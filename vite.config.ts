@@ -2,6 +2,7 @@ import * as path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import EnvironmentPlugin from 'vite-plugin-environment'
+import envCompatible from 'vite-plugin-env-compatible'
 
 export default defineConfig({
   resolve: {
@@ -76,6 +77,7 @@ export default defineConfig({
       /* Google Configuration */
       G_AKEY: process.env.G_AKEY ?? null,
     }),
+    envCompatible(),
   ],
   optimizeDeps: {
     include: [
@@ -84,6 +86,7 @@ export default defineConfig({
     ],
   },
   build: {
+    sourcemap: true,
     rollupOptions: {},
   },
   server: {

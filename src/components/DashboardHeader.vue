@@ -9,16 +9,18 @@ import {
   logOutOutline,
   logInOutline
 } from 'ionicons/icons'
+import { useAuth0 } from '@auth0/auth0-vue'
 
 const dropdownOpen = ref(false)
 const { isOpen } = useSidebar()
 const notificationOpen = ref(false)
-const auth: any = inject('auth')
-const logout = () => {
-  auth.logout(window.location.origin)
-}
+const auth0 = useAuth0()
+const logout = () =>
+  auth0.logout({
+    returnTo: window.location.origin
+  })
 const login = () => {
-  auth.loginWithRedirect(window.location.origin)
+  auth0.loginWithRedirect()
 }
 </script>
 
@@ -92,18 +94,18 @@ const login = () => {
         </div>
       </div>
       <div class="relative">
-        <button v-if="auth.isAuthenticated"
+        <button v-if="auth0.isAuthenticated"
           class="relative z-10 block w-8 h-8 overflow-hidden rounded-full shadow focus:outline-none"
           @click="dropdownOpen = !dropdownOpen"
         >
           <img 
             class="object-cover w-full h-full"
-            :src="auth?.user?.picture"
+            :src="auth0?.user?.value?.picture"
             alt="Your avatar"
           />
         </button>
         <button v-else 
-          class="text-gray-600 relative z-10 block w-8 h-8 overflow-hidden focus:outline-none"
+          class="relative z-10 block w-8 h-8 overflow-hidden text-gray-600 focus:outline-none"
           @click="dropdownOpen = !dropdownOpen"
         >
           <ion-icon :icon="personOutline"/>
@@ -127,7 +129,7 @@ const login = () => {
             v-show="dropdownOpen"
             class="absolute right-0 z-20 w-48 py-1 mt-2 bg-white rounded-lg shadow-xl"
           >
-            <template v-if="auth.isAuthenticated">
+            <template v-if="auth0.isAuthenticated">
               <router-link
                 to="/profile"
                 class="flex px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-indigo-600 hover:text-white"
