@@ -1,32 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "outDir": "dist",
-    "module": "ESNext",
-    "useDefineForClassFields": true,
-    "moduleResolution": "Node",
-    "strict": true,
-    "strictNullChecks": true,
-    "jsx": "preserve",
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "allowUmdGlobalAccess": true,
-    "baseUrl": ".",
-    "sourceMap": true,
-    "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
-
-    "types": ["./src/vue-shim"],
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "ScriptHost", "WebWorker"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  // https://nuxt.com/docs/guide/concepts/typescript
+  "extends": "./.nuxt/tsconfig.json"
 }
