@@ -1,8 +1,12 @@
 [build]
   publish = "dist"
-  command = "pnpm build"
-  functions = "functions/"
+  command = "npm run build"
 
+[dev]
+  targetPort = 8080
+  autoLaunch = false
+  command = "npm run dev"
+  
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
@@ -14,8 +18,5 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Access-Control-Allow-Credentials = "true"
     Access-Control-Allow-Origin = "*"
-
-[dev]
-  command = "pnpm run start" # Command to start your dev server
+    Access-Control-Allow-Credentials = "true"
