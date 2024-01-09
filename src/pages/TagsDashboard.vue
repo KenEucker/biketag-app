@@ -4,6 +4,7 @@ import { useBikeTagStore } from 'src/stores/biketag';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getThumbnail, getLocalDateTime } from 'src/utils/global';
+import { useAuthStore } from 'src/stores/auth';
 
 type StateType = {
   searchTag: string;
@@ -12,6 +13,12 @@ type StateType = {
 const route = useRoute();
 const router = useRouter();
 const bikeTagStore = useBikeTagStore();
+
+const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => {
+  return authStore.getIsAuthenticated;
+});
 
 const state = reactive<StateType>({
   searchTag: '',
@@ -39,7 +46,9 @@ const rows = computed((): QTableProps['rows'] => {
   if (state.searchTag) {
     return bikeTagStore.getGamesTag.filter((item) => {
       if (item.name) {
-        return item.name.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1;
+        return (
+          item.name.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
+        );
       }
     });
   } else {
@@ -69,13 +78,21 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'foundTag',
       sortable: true,
     },
-    {
-      name: 'gpsLocation',
-      align: 'left',
-      label: 'GPS Location',
-      field: 'gpsLocation',
-      sortable: true,
-    },
+    isAuthenticated.value
+      ? {
+          name: 'gpsLocation',
+          align: 'left',
+          label: 'GPS Location',
+          field: 'gpsLocation',
+          sortable: true,
+        }
+      : {
+          name: 'hint',
+          align: 'left',
+          label: 'Hint',
+          field: 'hint',
+          sortable: true,
+        },
     {
       name: 'action',
       align: 'center',
@@ -110,7 +127,9 @@ onUnmounted(() => {
 <template>
   <q-card flat bordered class="mb-10">
     <div class="grid grid-cols-1 md:grid-cols-5 gap-x-4 py-2 px-2 bg-slate-200">
-      <p class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2">
+      <p
+        class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2"
+      >
         <q-btn
           dense
           round
@@ -153,7 +172,16 @@ onUnmounted(() => {
           <q-th :props="props" key="number" rowspan="2">Number</q-th>
           <q-th :props="props" key="mysteryTag" rowspan="2">Mystery tag</q-th>
           <q-th :props="props" key="foundTag" rowspan="2">Found tag</q-th>
-          <q-th :props="props" key="gpsLocation" rowspan="2">GPS Location</q-th>
+          <q-th
+            :props="props"
+            key="gpsLocation"
+            rowspan="2"
+            v-if="isAuthenticated"
+            >GPS Location</q-th
+          >
+          <q-th :props="props" key="hint" rowspan="2" class="w-[400px]" v-else
+            >Hint</q-th
+          >
           <q-th :props="props" key="action" style="text-align: center"></q-th>
         </q-tr>
       </template>
@@ -166,6 +194,7 @@ onUnmounted(() => {
             class="text-primary"
             size="md"
             icon="o_settings"
+            v-if="isAuthenticated"
           ></q-btn>
           <q-btn
             dense
@@ -184,14 +213,19 @@ onUnmounted(() => {
               <q-img
                 class="rounded-full"
                 :ratio="1 / 1"
-                :src="getThumbnail(props.row.mysteryImageUrl)"
+                :src="getThumbnail(props.row.mysteryImageUrl ?? '')"
               >
                 <template v-slot:loading>
                   <q-skeleton width="35px" height="35px" />
                 </template>
                 <template v-slot:error>
                   <div class="absolute-full flex flex-center !bg-slate-300">
-                    <q-icon class="px-0 mx-0" color="white" name="image" size="18px" />
+                    <q-icon
+                      class="px-0 mx-0"
+                      color="white"
+                      name="image"
+                      size="18px"
+                    />
                   </div>
                 </template>
               </q-img>
@@ -201,10 +235,17 @@ onUnmounted(() => {
                 class="text-start text-md font-medium truncate"
                 v-if="props.row.mysteryPlayer"
               >
-                {{ props.row.mysteryPlayer }}
+                {{ props.row.mysteryPlayer ?? '-' }}
               </p>
-              <p class="text-start text-xs text-gray-500" v-if="props.row.mysteryTime">
-                {{ getLocalDateTime(props.row.mysteryTime) }}
+              <p
+                class="text-start text-xs text-gray-500"
+                v-if="props.row.mysteryTime"
+              >
+                {{
+                  props.row.mysteryTime
+                    ? getLocalDateTime(props.row.mysteryTime)
+                    : '00:00:00'
+                }}
               </p>
             </div>
           </div>
@@ -213,37 +254,55 @@ onUnmounted(() => {
       <template #body-cell-foundTag="props">
         <q-td :props="props">
           <div class="!flex items-center">
-            <q-avatar v-if="props.row.foundImageUrl">
+            <q-avatar>
               <q-img
                 class="rounded-full"
                 :ratio="1 / 1"
-                :src="getThumbnail(props.row.foundImageUrl)"
+                :src="getThumbnail(props.row.foundImageUrl ?? '')"
               >
                 <template v-slot:loading>
                   <q-skeleton width="35px" height="35px" />
                 </template>
                 <template v-slot:error>
                   <div class="absolute-full flex flex-center !bg-slate-300">
-                    <q-icon class="px-0 mx-0" color="white" name="image" size="18px" />
+                    <q-icon
+                      class="px-0 mx-0"
+                      color="white"
+                      name="image"
+                      size="18px"
+                    />
                   </div>
                 </template>
               </q-img>
             </q-avatar>
             <div class="ms-2">
-              <p class="text-start text-md font-medium" v-if="props.row.foundPlayer">
-                {{ props.row.foundPlayer }}
+              <p class="text-start text-md font-medium">
+                {{ props.row.foundPlayer ?? '-' }}
               </p>
-              <p class="text-start text-xs text-gray-500" v-if="props.row.foundTime">
-                {{ getLocalDateTime(props.row.foundTime) }}
+              <p class="text-start text-xs text-gray-500">
+                {{
+                  props.row.foundTime
+                    ? getLocalDateTime(props.row.foundTime)
+                    : '00:00:00'
+                }}
               </p>
             </div>
           </div>
         </q-td>
       </template>
-      <template #body-cell-gpsLocation="props">
+      <template #body-cell-gpsLocation="props" v-if="isAuthenticated">
         <q-td :props="props">
           <p>Lat: {{ props.row.gps.lat }}</p>
           <p class="text-gray-500">Long: {{ props.row.gps.long }}</p>
+        </q-td>
+      </template>
+      <template #body-cell-hint="props" v-else>
+        <q-td :props="props">
+          <p
+            class="text-sm leading-5 text-gray-900 break-all whitespace-pre-wrap min-w-64"
+          >
+            {{ props.row.hint }}
+          </p>
         </q-td>
       </template>
       <template #bottom>
@@ -266,7 +325,9 @@ onUnmounted(() => {
               class="px-1 my-2 md:my-0 md:px-0 border-black md:border-0 rounded-md w-full"
             >
               <template #prepend>
-                <span class="text-caption text-primary-100 font-medium">Per page:</span>
+                <span class="text-caption text-primary-100 font-medium"
+                  >Per page:</span
+                >
               </template>
             </q-select>
             <div>
