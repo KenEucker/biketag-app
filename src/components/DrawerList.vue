@@ -33,11 +33,6 @@ const essentialLinks: linkProps[] = [
     icon: 'home',
     path: '/games',
   },
-  // {
-  //   title: 'Client Games Dashboard',
-  //   icon: 'school',
-  //   path: '/guest/games',
-  // },
 ];
 </script>
 <template>

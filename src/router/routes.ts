@@ -16,23 +16,11 @@ const routes: RouteRecordRaw[] = [
         path: '/games',
         name: 'GamesDashboard',
         component: () => import('pages/GamesDashboard.vue'),
-        meta: { isAuthRequired: true },
       },
       {
         path: '/games/:name/:mainhash?',
         name: 'TagDashboard',
         component: () => import('pages/TagsDashboard.vue'),
-        meta: { isAuthRequired: true },
-      },
-      {
-        path: '/guest/games',
-        name: 'ClientGamesDashboard',
-        component: () => import('pages/ClientGamesDashboard.vue'),
-      },
-      {
-        path: '/guest/games/:name/:mainhash?',
-        name: 'ClientTagsDashboard',
-        component: () => import('pages/ClientTagsDashboard.vue'),
       },
     ],
   },

@@ -5,6 +5,7 @@ import { useBikeTagStore } from 'src/stores/biketag';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getLogoUrl } from 'src/utils/global';
+import { useAuthStore } from 'src/stores/auth';
 
 type StateType = {
   searchGame: string;
@@ -13,6 +14,12 @@ type StateType = {
 const bikeTagStore = useBikeTagStore();
 
 const router = useRouter();
+
+const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => {
+  return authStore.getIsAuthenticated;
+});
 
 // state for binding
 const state = reactive<StateType>({
@@ -98,16 +105,19 @@ const getGameUrl = (game: Game): string =>
 </script>
 <template>
   <q-card flat bordered class="mb-10">
-    <div
-      class="grid grid-cols-1 md:grid-cols-5 gap-x-4 my-3 md:px-4 px-2 md:text-end"
-    >
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-x-4 py-2 px-2 bg-slate-200">
+      <p
+        class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2"
+      >
+        Game List
+      </p>
       <q-input
         outlined
         dense
         clearable
         debounce="400"
         v-model="state.searchGame"
-        class="md:col-start-6 col-start-1"
+        class="md:col-start-6 col-start-4"
         placeholder="Search"
         rounded
       >
@@ -127,6 +137,12 @@ const getGameUrl = (game: Game): string =>
       v-model:pagination="pagination"
       hide-pagination
     >
+      <template #loading>
+        <q-inner-loading
+          showing
+          class="z-10 text-lg bg-slate-600 !bg-opacity-65 text-white font-semibold"
+        />
+      </template>
       <template #header="props">
         <q-tr class="bg-gray-100 text-gray-500 uppercase h-md">
           <!-- <q-th :props="props" key="id" rowspan="2">Id</q-th> -->
@@ -154,6 +170,7 @@ const getGameUrl = (game: Game): string =>
             class="text-primary"
             size="md"
             icon="o_settings"
+            v-if="isAuthenticated"
           ></q-btn>
           <q-btn
             dense
