@@ -37,9 +37,7 @@ const rows = computed((): QTableProps['rows'] => {
   if (state.searchGame) {
     return bikeTagStore.getGames.filter((item) => {
       if (item.name) {
-        return (
-          item.name.toLowerCase().indexOf(state.searchGame.toLowerCase()) > -1
-        );
+        return item.name.toLowerCase().indexOf(state.searchGame.toLowerCase()) > -1;
       }
     });
   } else {
@@ -93,21 +91,21 @@ const onPagePerItem = (perItem: number) => {
   pagination.value.page = 1;
 };
 
-const getGameUrl = (game: Game): string =>
-  `https://${game.slug}.biketag.${'io'}`;
+const getGameUrl = (game: Game): string => `https://${game.slug}.biketag.${'io'}`;
 </script>
 <template>
   <q-card flat bordered class="mb-10">
-    <div
-      class="grid grid-cols-1 md:grid-cols-5 gap-x-4 my-3 md:px-4 px-2 md:text-end"
-    >
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-x-4 py-2 px-2 bg-slate-200">
+      <p class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2">
+        Game List
+      </p>
       <q-input
         outlined
         dense
         clearable
         debounce="400"
         v-model="state.searchGame"
-        class="md:col-start-6 col-start-1"
+        class="md:col-start-6 col-start-4"
         placeholder="Search"
         rounded
       >
@@ -162,9 +160,7 @@ const getGameUrl = (game: Game): string =>
             class="text-primary"
             size="md"
             icon="o_sell"
-            @click="
-              router.push('/games/' + props.row.name + '/' + props.row.mainhash)
-            "
+            @click="router.push('/games/' + props.row.name + '/' + props.row.mainhash)"
           ></q-btn>
         </q-td>
       </template>
@@ -183,12 +179,7 @@ const getGameUrl = (game: Game): string =>
                 </template>
                 <template v-slot:error>
                   <div class="absolute-full flex flex-center !bg-slate-300">
-                    <q-icon
-                      class="px-0 mx-0"
-                      color="white"
-                      name="image"
-                      size="18px"
-                    />
+                    <q-icon class="px-0 mx-0" color="white" name="image" size="18px" />
                   </div>
                 </template>
               </q-img>
@@ -250,9 +241,7 @@ const getGameUrl = (game: Game): string =>
               class="px-1 my-2 md:my-0 md:px-0 border-black md:border-0 rounded-md"
             >
               <template #prepend>
-                <span class="text-caption text-primary-100 font-medium"
-                  >Per page:</span
-                >
+                <span class="text-caption text-primary-100 font-medium">Per page:</span>
               </template>
             </q-select>
             <div class="">

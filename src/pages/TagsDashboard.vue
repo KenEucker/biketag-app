@@ -39,9 +39,7 @@ const rows = computed((): QTableProps['rows'] => {
   if (state.searchTag) {
     return bikeTagStore.getGamesTag.filter((item) => {
       if (item.name) {
-        return (
-          item.name.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
-        );
+        return item.name.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1;
       }
     });
   } else {
@@ -111,18 +109,18 @@ onUnmounted(() => {
 </script>
 <template>
   <q-card flat bordered class="mb-10">
-    <div class="grid grid-cols-6 gap-x-4 my-3 px-4 md:grid-cols-6">
-      <p
-        class="font-medium text-lg text-primary-400 col-span-1 md:col-start-1 pt-1 md:pt-0"
-      >
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-x-4 py-2 px-2 bg-slate-200">
+      <p class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2">
         <q-btn
           dense
           round
           flat
           size="md"
           icon="arrow_back"
+          class="p-0 m-0"
           @click="router.push('/games')"
         ></q-btn>
+        Tag List
       </p>
       <q-input
         outlined
@@ -130,7 +128,7 @@ onUnmounted(() => {
         clearable
         debounce="400"
         v-model="state.searchTag"
-        class="md:col-start-11 md:col-span-2 col-start-3 col-span-10 w-full md:w-auto"
+        class="md:col-start-6 col-start-4 w-full md:w-auto"
         placeholder="Search"
         rounded
       >
@@ -193,12 +191,7 @@ onUnmounted(() => {
                 </template>
                 <template v-slot:error>
                   <div class="absolute-full flex flex-center !bg-slate-300">
-                    <q-icon
-                      class="px-0 mx-0"
-                      color="white"
-                      name="image"
-                      size="18px"
-                    />
+                    <q-icon class="px-0 mx-0" color="white" name="image" size="18px" />
                   </div>
                 </template>
               </q-img>
@@ -210,10 +203,7 @@ onUnmounted(() => {
               >
                 {{ props.row.mysteryPlayer }}
               </p>
-              <p
-                class="text-start text-xs text-gray-500"
-                v-if="props.row.mysteryTime"
-              >
+              <p class="text-start text-xs text-gray-500" v-if="props.row.mysteryTime">
                 {{ getLocalDateTime(props.row.mysteryTime) }}
               </p>
             </div>
@@ -234,27 +224,16 @@ onUnmounted(() => {
                 </template>
                 <template v-slot:error>
                   <div class="absolute-full flex flex-center !bg-slate-300">
-                    <q-icon
-                      class="px-0 mx-0"
-                      color="white"
-                      name="image"
-                      size="18px"
-                    />
+                    <q-icon class="px-0 mx-0" color="white" name="image" size="18px" />
                   </div>
                 </template>
               </q-img>
             </q-avatar>
             <div class="ms-2">
-              <p
-                class="text-start text-md font-medium"
-                v-if="props.row.foundPlayer"
-              >
+              <p class="text-start text-md font-medium" v-if="props.row.foundPlayer">
                 {{ props.row.foundPlayer }}
               </p>
-              <p
-                class="text-start text-xs text-gray-500"
-                v-if="props.row.foundTime"
-              >
+              <p class="text-start text-xs text-gray-500" v-if="props.row.foundTime">
                 {{ getLocalDateTime(props.row.foundTime) }}
               </p>
             </div>
@@ -287,9 +266,7 @@ onUnmounted(() => {
               class="px-1 my-2 md:my-0 md:px-0 border-black md:border-0 rounded-md w-full"
             >
               <template #prepend>
-                <span class="text-caption text-primary-100 font-medium"
-                  >Per page:</span
-                >
+                <span class="text-caption text-primary-100 font-medium">Per page:</span>
               </template>
             </q-select>
             <div>
