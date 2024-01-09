@@ -137,6 +137,12 @@ const getGameUrl = (game: Game): string =>
       v-model:pagination="pagination"
       hide-pagination
     >
+      <template #loading>
+        <q-inner-loading
+          showing
+          class="z-10 text-lg bg-slate-600 !bg-opacity-65 text-white font-semibold"
+        />
+      </template>
       <template #header="props">
         <q-tr class="bg-gray-100 text-gray-500 uppercase h-md">
           <!-- <q-th :props="props" key="id" rowspan="2">Id</q-th> -->
