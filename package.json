@@ -15,7 +15,6 @@
   "dependencies": {
     "@auth0/auth0-vue": "^2.3.3",
     "@quasar/extras": "^1.16.4",
-    "axios": "^1.2.1",
     "biketag": "^3.2.4",
     "pinia": "^2.1.7",
     "quasar": "^2.8.0",
