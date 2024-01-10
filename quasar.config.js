@@ -8,7 +8,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { configure } = require('quasar/wrappers');
+const { configure } = require('quasar/wrappers')
 const biketag = require('biketag-vue')
 
 module.exports = configure(function (/* ctx */) {
@@ -203,5 +203,5 @@ module.exports = configure(function (/* ctx */) {
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
     },
-  };
-});
+  }
+})
