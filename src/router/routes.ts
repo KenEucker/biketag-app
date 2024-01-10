@@ -1,4 +1,6 @@
-import { RouteRecordRaw } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router'
+// import { authGuard } from '@auth0/auth0-vue'
+// import { debug, isAuthenticationEnabled } from 'biketag-vue/common/utils'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -18,7 +20,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/GamesDashboard.vue'),
       },
       {
-        path: '/games/:name/:mainhash?',
+        path: '/games/:name',
         name: 'TagDashboard',
         component: () => import('pages/TagsDashboard.vue'),
       },
@@ -38,6 +40,25 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-];
+]
 
-export default routes;
+const protectedRoutes: Array<RouteRecordRaw> = []
+
+// if (isAuthenticationEnabled()) {
+//   protectedRoutes = [
+//     {
+//       path: '/profile',
+//       name: 'Profile',
+//       beforeEnter: authGuard,
+//       component: () => import('@/views/Profile.vue'),
+//     },
+//     {
+//       path: '/approve',
+//       name: 'Approve',
+//       beforeEnter: authGuard,
+//       component: () => import('@/views/Approve.vue'),
+//     },
+//   ]
+// }
+
+export default [...routes, ...protectedRoutes]

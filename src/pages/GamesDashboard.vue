@@ -180,9 +180,7 @@ const getGameUrl = (game: Game): string =>
             class="text-primary"
             size="md"
             icon="o_sell"
-            @click="
-              router.push('/games/' + props.row.name + '/' + props.row.mainhash)
-            "
+            @click="router.push('/games/' + props.row.name)"
           ></q-btn>
         </q-td>
       </template>

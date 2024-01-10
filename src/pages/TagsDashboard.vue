@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { QTableProps } from 'quasar'
 import { useBikeTagStore } from 'biketag-vue'
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getThumbnail, getLocalDateTime } from 'src/utils/global'
 import { useAuthStore } from 'src/stores/auth'
@@ -36,26 +36,30 @@ const pagination = ref({
 })
 const rowsPerPageOptions = ref([5, 10, 15, 25, 50])
 
-onMounted(async () => {
-  if (route?.params?.name) {
-    await bikeTagStore.setGame(route?.params?.name as string)
-    await bikeTagStore.fetchTags()
-  }
+onMounted(() => {
+  nextTick(async () => {
+    const name: string | null = (route?.params?.name as string) ?? null
+    if (name) {
+      await bikeTagStore.fetchAllGames()
+      console.log('setting game', name)
+      await bikeTagStore.setGame(name)
+      await bikeTagStore.fetchTags()
+    }
+  })
 })
 
 // data table data using computed
-const rows = computed((): QTableProps['rows'] => {
+const rows = computed(() => {
   if (state.searchTag) {
-    return bikeTagStore.getTags.filter((item) => {
-      if (item.name) {
-        return (
-          item.name.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
-        )
-      }
-    })
-  } else {
-    return bikeTagStore.getTags
+    return (
+      bikeTagStore.getTags.filter(
+        (item) =>
+          item?.name?.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
+      )
+    )
   }
+
+  return bikeTagStore.getTags ?? []
 })
 const columns = computed((): QTableProps['columns'] => {
   return [
