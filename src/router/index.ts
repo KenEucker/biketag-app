@@ -1,14 +1,14 @@
-import { route } from 'quasar/wrappers';
+import { route } from 'quasar/wrappers'
 import {
   // createMemoryHistory,
   createRouter,
   // createWebHashHistory,
   createWebHistory,
-} from 'vue-router';
+} from 'vue-router'
 
-import routes from './routes';
-import { useAuthStore } from 'src/stores/auth';
-import { storeToRefs } from 'pinia';
+import routes from './routes'
+import { useAuthStore } from 'src/stores/auth'
+import { storeToRefs } from 'pinia'
 
 /*
  * If not building with SSR mode, you can
@@ -24,27 +24,28 @@ export default route(function (/* { store, ssrContext } */) {
   //   ? createMemoryHistory
   //   : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
 
-  const useAuth = useAuthStore();
-  const { isAuthenticated } = storeToRefs(useAuth);
+  const useAuth = useAuthStore()
+  const { isAuthenticated } = storeToRefs(useAuth)
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
     history: createWebHistory(),
-  });
+  })
   Router.beforeEach(async (to, from, next) => {
     if (!to.meta?.isAuthRequired) {
+      /// What is this for and why not use an authGuard?
       return isAuthenticated.value && to.path === '/login'
         ? from.path !== '/games'
           ? next('/games')
           : next(false)
-        : next();
+        : next()
     }
     if (to.meta?.isAuthRequired && !isAuthenticated.value) {
-      return next('/login');
+      return next('/login')
     }
-    return next();
-  });
+    return next()
+  })
 
-  return Router;
-});
+  return Router
+})

@@ -30,7 +30,7 @@ async function login() {
   }
 }
 function asGuest() {
-  router.push('/guest/games');
+  router.push('/games');
 }
 </script>
 <template>
