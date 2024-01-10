@@ -1,28 +1,29 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { Notify } from 'quasar';
-import JSZip from 'jszip';
-import { Tag } from 'biketag/lib/common/schema';
-import { computed, ref } from 'vue';
+import { Notify } from 'quasar'
+import JSZip from 'jszip'
+import { Tag } from 'biketag/lib/common/schema'
+import { computed, ref } from 'vue'
 
-const zip = new JSZip();
+const zip = new JSZip()
 
 interface MyTag {
-  [key: string]: string;
+  [key: string]: string
 }
 
-const csvLoader = ref<boolean>(false);
-const jsonLoader = ref<boolean>(false);
-const allImageLoader = ref<boolean>(false);
+const csvLoader = ref<boolean>(false)
+const jsonLoader = ref<boolean>(false)
+const allImageLoader = ref<boolean>(false)
 
 interface Props {
-  downloadLoader?: boolean;
-  tag?: MyTag | null;
-  downloadType?: string;
-  data?: Tag[] | null;
-  info?: string;
+  downloadLoader?: boolean
+  tag?: MyTag | null
+  downloadType?: string
+  data?: Tag[] | null
+  info?: string
 }
 
-const emit = defineEmits(['update:downloadLoader']);
+const emit = defineEmits(['update:downloadLoader'])
 
 const props = withDefaults(defineProps<Props>(), {
   downloadLoader: false,
@@ -30,21 +31,21 @@ const props = withDefaults(defineProps<Props>(), {
   downloadType: 'data',
   data: null,
   info: '',
-});
+})
 
 // download tag images
 const download = (data: Blob, fileName: string) => {
-  const a = document.createElement('a');
-  a.download = fileName;
-  a.href = window.URL.createObjectURL(data);
+  const a = document.createElement('a')
+  a.download = fileName
+  a.href = window.URL.createObjectURL(data)
   const clickEvt = new MouseEvent('click', {
     view: window,
     bubbles: true,
     cancelable: true,
-  });
-  a.dispatchEvent(clickEvt);
-  a.remove();
-};
+  })
+  a.dispatchEvent(clickEvt)
+  a.remove()
+}
 
 const tagsImgsUrls = computed(() =>
   props.data?.reduce(
@@ -52,27 +53,27 @@ const tagsImgsUrls = computed(() =>
       acc.concat(reduceImgUrls(tagData as MyTag) as MyTag[]),
     []
   )
-);
+)
 
 const getImgUrls = async (tag: MyTag | MyTag[] = []) => {
-  emit('update:downloadLoader', true);
-  let data: MyTag[] | null = null;
+  emit('update:downloadLoader', true)
+  let data: MyTag[] | null = null
   if (props.downloadType === 'all-images') {
-    allImageLoader.value = true;
-    data = tagsImgsUrls?.value as MyTag[];
+    allImageLoader.value = true
+    data = tagsImgsUrls?.value as MyTag[]
   } else {
-    data = reduceImgUrls(tag as MyTag) as MyTag[];
+    data = reduceImgUrls(tag as MyTag) as MyTag[]
   }
   for (const img of data) {
-    const image = await fetch(img[0]);
-    const imageBlog = await image.blob();
-    zip.file(img[1], imageBlog);
+    const image = await fetch(img[0])
+    const imageBlog = await image.blob()
+    zip.file(img[1], imageBlog)
   }
 
   zip.generateAsync({ type: 'blob' }).then((content) => {
-    download(content, 'tags-pictures.zip');
-    emit('update:downloadLoader', false);
-    allImageLoader.value = false;
+    download(content, 'tags-pictures.zip')
+    emit('update:downloadLoader', false)
+    allImageLoader.value = false
     Notify.create({
       icon: 'check_circle',
       color: 'green',
@@ -80,69 +81,69 @@ const getImgUrls = async (tag: MyTag | MyTag[] = []) => {
       type: 'success',
       timeout: Math.random() * 5000 + 3000,
       actions: [{ icon: 'close', color: 'white' }],
-    });
-  });
-  return data;
-};
+    })
+  })
+  return data
+}
 
 const reduceImgUrls = (tag: MyTag): MyTag[] | string[][] => {
-  const data: string[][] = [];
+  const data: string[][] = []
   const pushImg = (prop: string, name: string) => {
     data.push([
       tag[prop],
       `tag-${tag.tagnumber}-${name}${tag[prop].slice(
         tag[prop].lastIndexOf('.')
       )}`,
-    ]);
-  };
+    ])
+  }
   if (tag.foundImageUrl) {
-    pushImg('foundImageUrl', 'found-image');
+    pushImg('foundImageUrl', 'found-image')
   }
   if (tag.mysteryImageUrl) {
-    pushImg('mysteryImageUrl', 'mystery-image');
+    pushImg('mysteryImageUrl', 'mystery-image')
   }
-  return data;
-};
+  return data
+}
 // Export csv or json
 
 const downloadFile = (data: string, fileName: string, fileType: string) => {
-  const blob = new Blob([data], { type: fileType });
-  download(blob, fileName);
-};
+  const blob = new Blob([data], { type: fileType })
+  download(blob, fileName)
+}
 
 const exportToJson = () => {
-  downloadFile(JSON.stringify(props.data), `${props.info}.json`, 'text/json');
-};
+  downloadFile(JSON.stringify(props.data), `${props.info}.json`, 'text/json')
+}
 
 const toCsvLine = function (data: string[]): string {
-  return data.map((field: string) => `"${field}"`).join(',');
-};
+  return data.map((field: string) => `"${field}"`).join(',')
+}
 
 const exportToCsv = (data: Tag[]) => {
   // Headers for each column
-  let headers = Object.keys((data as Tag[])[0]);
+  let headers = Object.keys((data as Tag[])[0])
 
   // Convert users data to a csv
   let usersCsv = data.reduce((acc: Array<string>, datap: any) => {
-    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? '')));
-    return acc;
-  }, []);
+    acc.push(toCsvLine(headers.map((val: string) => datap[val] ?? '')))
+    return acc
+  }, [])
 
   downloadFile(
     [toCsvLine(headers), ...usersCsv].join('\n'),
     `${props.info}.csv`,
     'text/csv'
-  );
-};
+  )
+}
 
 const downloadData = (fileType: string) => {
   switch (fileType) {
     case 'csv':
-      csvLoader.value = true;
-      emit('update:downloadLoader', true);
-      exportToCsv(props.data as Tag[]);
-      csvLoader.value = false;
-      emit('update:downloadLoader', false);
+      csvLoader.value = true
+      emit('update:downloadLoader', true)
+      exportToCsv(props.data as Tag[])
+      csvLoader.value = false
+      emit('update:downloadLoader', false)
       Notify.create({
         icon: 'check_circle',
         color: 'green',
@@ -150,15 +151,15 @@ const downloadData = (fileType: string) => {
         type: 'success',
         timeout: Math.random() * 5000 + 3000,
         actions: [{ icon: 'close', color: 'white' }],
-      });
-      break;
+      })
+      break
     case 'json':
     default:
-      jsonLoader.value = true;
-      emit('update:downloadLoader', true);
-      exportToJson();
-      jsonLoader.value = false;
-      emit('update:downloadLoader', false);
+      jsonLoader.value = true
+      emit('update:downloadLoader', true)
+      exportToJson()
+      jsonLoader.value = false
+      emit('update:downloadLoader', false)
       Notify.create({
         icon: 'check_circle',
         color: 'green',
@@ -166,17 +167,17 @@ const downloadData = (fileType: string) => {
         type: 'success',
         timeout: Math.random() * 5000 + 3000,
         actions: [{ icon: 'close', color: 'white' }],
-      });
-      break;
+      })
+      break
   }
-};
+}
 </script>
 <template>
   <q-btn
     dense
     round
     flat
-    class="text-primary capitalize"
+    class="capitalize text-primary"
     size="md"
     icon="o_broken_image"
     v-if="downloadType === 'images'"
@@ -186,7 +187,7 @@ const downloadData = (fileType: string) => {
   <div v-else>
     <q-btn
       color="primary"
-      class="rounded-lg capitalize"
+      class="capitalize rounded-lg"
       :loading="csvLoader"
       :disable="csvLoader"
       outline
@@ -196,7 +197,7 @@ const downloadData = (fileType: string) => {
       @click="downloadData('csv')"
     />
     <q-btn
-      class="ms-2 rounded-lg capitalize"
+      class="capitalize rounded-lg ms-2"
       outline
       :loading="jsonLoader"
       :disable="jsonLoader"
@@ -208,7 +209,7 @@ const downloadData = (fileType: string) => {
     />
     <q-btn
       color="primary"
-      class="ms-2 rounded-lg capitalize"
+      class="capitalize rounded-lg ms-2"
       :disable="allImageLoader"
       outline
       icon="o_download"

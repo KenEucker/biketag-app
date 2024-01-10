@@ -1,64 +1,62 @@
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
-import { useBikeTagStore } from 'src/stores/biketag';
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getThumbnail, getLocalDateTime } from 'src/utils/global';
-import { useAuthStore } from 'src/stores/auth';
-import ExportForm from 'src/components/ExportForm.vue';
+import { QTableProps } from 'quasar'
+import { useBikeTagStore } from 'biketag-vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getThumbnail, getLocalDateTime } from 'src/utils/global'
+import { useAuthStore } from 'src/stores/auth'
+import ExportForm from 'src/components/ExportForm.vue'
 
 type StateType = {
-  searchTag: string;
-};
+  searchTag: string
+}
 
-const route = useRoute();
-const router = useRouter();
-const bikeTagStore = useBikeTagStore();
+const route = useRoute()
+const router = useRouter()
+const bikeTagStore = useBikeTagStore()
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 const isAuthenticated = computed(() => {
-  return authStore.getIsAuthenticated;
-});
+  return authStore.getIsAuthenticated
+})
 
 const state = reactive<StateType>({
   searchTag: '',
-});
+})
 
 // image download loader
-const downloadLoader = ref<boolean>(false);
+const downloadLoader = ref<boolean>(false)
 
 // pagination component props
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
   // rowsNumber: 10
-});
-const rowsPerPageOptions = ref([5, 10, 15, 25, 50]);
+})
+const rowsPerPageOptions = ref([5, 10, 15, 25, 50])
 
 onMounted(async () => {
-  if (route.params.name) {
-    await bikeTagStore.fetchTagsList(
-      route.params.name as string,
-      route.params.mainhash as string
-    );
+  if (route?.params?.name) {
+    await bikeTagStore.setGame(route?.params?.name as string)
+    await bikeTagStore.fetchTags()
   }
-});
+})
 
 // data table data using computed
 const rows = computed((): QTableProps['rows'] => {
   if (state.searchTag) {
-    return bikeTagStore.getGamesTag.filter((item) => {
+    return bikeTagStore.getTags.filter((item) => {
       if (item.name) {
         return (
           item.name.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
-        );
+        )
       }
-    });
+    })
   } else {
-    return bikeTagStore.getGamesTag;
+    return bikeTagStore.getTags
   }
-});
+})
 const columns = computed((): QTableProps['columns'] => {
   return [
     {
@@ -103,30 +101,28 @@ const columns = computed((): QTableProps['columns'] => {
       label: 'Action',
       field: 'action',
     },
-  ];
-});
+  ]
+})
 const pagesNumber = computed(() => {
   if (rows.value?.length) {
-    return Math.ceil(rows.value.length / pagination.value.rowsPerPage);
+    return Math.ceil(rows.value.length / pagination.value.rowsPerPage)
   }
-  return 0;
-});
-const onUpdatePage = async (props: number) => {
-  if (route.params.name) {
-    await bikeTagStore.fetchTagsList(
-      route.params.name as string,
-      route.params.mainhash as string
-    );
-  }
-};
+  return 0
+})
+const onUpdatePage = async () => {
+  //props: number) => {
+  // if (route.params.name) {
+  // await bikeTagStore.fetchTags()
+  // }
+}
 const onPagePerItem = (perItem: number) => {
-  pagination.value.rowsPerPage = perItem;
-  pagination.value.page = 1;
-};
+  pagination.value.rowsPerPage = perItem
+  pagination.value.page = 1
+}
 
 onUnmounted(() => {
-  bikeTagStore.$state.gamesTag = [];
-});
+  /// unset tags?
+})
 </script>
 <template>
   <div>
@@ -147,10 +143,10 @@ onUnmounted(() => {
     </div>
     <q-card flat bordered class="mb-10">
       <div
-        class="grid grid-cols-1 md:grid-cols-5 gap-x-4 py-2 px-2 bg-slate-200"
+        class="grid grid-cols-1 px-2 py-2 md:grid-cols-5 gap-x-4 bg-slate-200"
       >
         <p
-          class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2"
+          class="col-span-3 col-start-1 pt-2 text-lg font-medium text-primary-400"
         >
           <q-btn
             dense
@@ -169,7 +165,7 @@ onUnmounted(() => {
           clearable
           debounce="400"
           v-model="state.searchTag"
-          class="md:col-start-6 col-start-4 w-full md:w-auto"
+          class="w-full col-start-4 md:col-start-6 md:w-auto"
           placeholder="Search"
           rounded
         >
@@ -179,7 +175,7 @@ onUnmounted(() => {
         </q-input>
       </div>
       <q-table
-        :loading="bikeTagStore.getGamesLoader || downloadLoader"
+        :loading="downloadLoader"
         :rows="rows"
         :columns="columns"
         row-key="id"
@@ -197,7 +193,7 @@ onUnmounted(() => {
           />
         </template>
         <template #header="props">
-          <q-tr class="bg-gray-100 text-gray-500 uppercase">
+          <q-tr class="text-gray-500 uppercase bg-gray-100">
             <q-th :props="props" key="number" rowspan="2">Number</q-th>
             <q-th :props="props" key="mysteryTag" rowspan="2">Mystery tag</q-th>
             <q-th :props="props" key="foundTag" rowspan="2">Found tag</q-th>
@@ -258,13 +254,13 @@ onUnmounted(() => {
               </q-avatar>
               <div class="ms-2">
                 <p
-                  class="text-start text-md font-medium truncate"
+                  class="font-medium truncate text-start text-md"
                   v-if="props.row.mysteryPlayer"
                 >
                   {{ props.row.mysteryPlayer ?? '-' }}
                 </p>
                 <p
-                  class="text-start text-xs text-gray-500"
+                  class="text-xs text-gray-500 text-start"
                   v-if="props.row.mysteryTime"
                 >
                   {{
@@ -302,10 +298,10 @@ onUnmounted(() => {
                 </q-img>
               </q-avatar>
               <div class="ms-2">
-                <p class="text-start text-md font-medium">
+                <p class="font-medium text-start text-md">
                   {{ props.row.foundPlayer ?? '-' }}
                 </p>
-                <p class="text-start text-xs text-gray-500">
+                <p class="text-xs text-gray-500 text-start">
                   {{
                     props.row.foundTime
                       ? getLocalDateTime(props.row.foundTime)
@@ -332,9 +328,9 @@ onUnmounted(() => {
           </q-td>
         </template>
         <template #bottom>
-          <div class="md:flex md:items-center md:justify-between w-full">
+          <div class="w-full md:flex md:items-center md:justify-between">
             <div class="font-medium md:!block !hidden">
-              Total row count: {{ bikeTagStore.getGamesTag.length }}
+              Total row count: {{ bikeTagStore.getTags.length }}
             </div>
             <div class="!flex flex-row items-center justify-between">
               <q-select
@@ -348,10 +344,10 @@ onUnmounted(() => {
                 behavior="menu"
                 :menu-offset="[0, 5]"
                 popup-content-class="border"
-                class="px-1 my-2 md:my-0 md:px-0 border-black md:border-0 rounded-md w-full"
+                class="w-full px-1 my-2 border-black rounded-md md:my-0 md:px-0 md:border-0"
               >
                 <template #prepend>
-                  <span class="text-caption text-primary-100 font-medium"
+                  <span class="font-medium text-caption text-primary-100"
                     >Per page:</span
                   >
                 </template>

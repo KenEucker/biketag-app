@@ -1,7 +1,8 @@
 // Auth 0 login
 
-import { User } from '@auth0/auth0-vue';
-import { defineStore } from 'pinia';
+import { User } from '@auth0/auth0-vue'
+import { defineStore } from 'pinia'
+
 export const useAuthStore = defineStore({
   id: 'Auth',
   state: () => ({
@@ -16,8 +17,8 @@ export const useAuthStore = defineStore({
   },
   actions: {
     logout() {
-      this.isAuthenticated = false;
-      this.loginUser = {};
+      this.isAuthenticated = false
+      this.loginUser = {}
     },
   },
-});
+})

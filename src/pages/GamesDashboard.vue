@@ -1,58 +1,58 @@
 <script setup lang="ts">
-import { Game } from 'biketag/lib/common/schema';
-import { QTableProps } from 'quasar';
-import { useBikeTagStore } from 'src/stores/biketag';
-import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { getLogoUrl } from 'src/utils/global';
-import { useAuthStore } from 'src/stores/auth';
+import { Game } from 'biketag/lib/common/schema'
+import { QTableProps } from 'quasar'
+import { useBikeTagStore } from 'biketag-vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { getLogoUrl } from 'src/utils/global'
+import { useAuthStore } from 'src/stores/auth'
 
 type StateType = {
-  searchGame: string;
-};
+  searchGame: string
+}
 
-const bikeTagStore = useBikeTagStore();
+const bikeTagStore = useBikeTagStore()
 
-const router = useRouter();
+const router = useRouter()
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 const isAuthenticated = computed(() => {
-  return authStore.getIsAuthenticated;
-});
+  return authStore.getIsAuthenticated
+})
 
 // state for binding
 const state = reactive<StateType>({
   searchGame: '',
-});
+})
 
 // pagination component props
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
   // rowsNumber: 10
-});
-const rowsPerPageOptions = ref([5, 10, 15, 25, 50]);
+})
+const rowsPerPageOptions = ref([5, 10, 15, 25, 50])
 
 onMounted(async () => {
   // Get game list
-  await bikeTagStore.fetchGamesList();
-});
+  await bikeTagStore.fetchAllGames()
+})
 
 // data table data using computed
 const rows = computed((): QTableProps['rows'] => {
   if (state.searchGame) {
-    return bikeTagStore.getGames.filter((item) => {
+    return bikeTagStore.getAllGames?.filter((item) => {
       if (item.name) {
         return (
           item.name.toLowerCase().indexOf(state.searchGame.toLowerCase()) > -1
-        );
+        )
       }
-    });
+    })
   } else {
-    return bikeTagStore.getGames;
+    return bikeTagStore.getAllGames
   }
-});
+})
 const columns = computed((): QTableProps['columns'] => {
   return [
     {
@@ -82,32 +82,34 @@ const columns = computed((): QTableProps['columns'] => {
       label: 'Action',
       field: 'action',
     },
-  ];
-});
+  ]
+})
 
 // total page number for pagination
 const pagesNumber = computed(() => {
   if (rows.value?.length) {
-    return Math.ceil(rows.value.length / pagination.value.rowsPerPage);
+    return Math.ceil(rows.value.length / pagination.value.rowsPerPage)
   }
-  return 0;
-});
-const onUpdatePage = async (props: number) => {
-  await bikeTagStore.fetchGamesList();
-};
+  return 0
+})
+const onUpdatePage = async () => {
+  //props: number) => {
+  // TODO: why is this being done on each page update?
+  // await bikeTagStore.fetchAllGames()
+}
 const onPagePerItem = (perItem: number) => {
-  pagination.value.rowsPerPage = perItem;
-  pagination.value.page = 1;
-};
+  pagination.value.rowsPerPage = perItem
+  pagination.value.page = 1
+}
 
 const getGameUrl = (game: Game): string =>
-  `https://${game.slug}.biketag.${'io'}`;
+  `https://${game.slug}.biketag.${'org'}`
 </script>
 <template>
   <q-card flat bordered class="mb-10">
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-x-4 py-2 px-2 bg-slate-200">
+    <div class="grid grid-cols-1 px-2 py-2 md:grid-cols-5 gap-x-4 bg-slate-200">
       <p
-        class="font-medium text-lg text-primary-400 col-span-3 col-start-1 pt-2"
+        class="col-span-3 col-start-1 pt-2 text-lg font-medium text-primary-400"
       >
         Game List
       </p>
@@ -117,7 +119,7 @@ const getGameUrl = (game: Game): string =>
         clearable
         debounce="400"
         v-model="state.searchGame"
-        class="md:col-start-6 col-start-4"
+        class="col-start-4 md:col-start-6"
         placeholder="Search"
         rounded
       >
@@ -127,7 +129,6 @@ const getGameUrl = (game: Game): string =>
       </q-input>
     </div>
     <q-table
-      :loading="bikeTagStore.getGamesLoader"
       :rows="rows"
       :columns="columns"
       row-key="id"
@@ -144,7 +145,7 @@ const getGameUrl = (game: Game): string =>
         />
       </template>
       <template #header="props">
-        <q-tr class="bg-gray-100 text-gray-500 uppercase h-md">
+        <q-tr class="text-gray-500 uppercase bg-gray-100 h-md">
           <!-- <q-th :props="props" key="id" rowspan="2">Id</q-th> -->
           <q-th :props="props" key="name" rowspan="2">Name</q-th>
           <q-th :props="props" key="region" rowspan="2">Region</q-th>
@@ -211,8 +212,8 @@ const getGameUrl = (game: Game): string =>
               </q-img>
             </q-avatar>
             <div class="ms-2">
-              <p class="text-start text-md font-medium">{{ props.row.slug }}</p>
-              <p class="text-start text-xs text-gray-500">
+              <p class="font-medium text-start text-md">{{ props.row.slug }}</p>
+              <p class="text-xs text-gray-500 text-start">
                 {{ props.row.name }}
               </p>
             </div>
@@ -242,15 +243,15 @@ const getGameUrl = (game: Game): string =>
             no-caps
             color="indigo-10"
             :text="getGameUrl(props.row)"
-            class="underline p-0"
+            class="p-0 underline"
           />
         </q-td>
       </template>
 
       <template #bottom>
-        <div class="md:flex md:items-center md:justify-between w-full">
+        <div class="w-full md:flex md:items-center md:justify-between">
           <div class="font-medium text-right md:text-left md:!block !hidden">
-            Total row count: {{ bikeTagStore.getGames.length }}
+            Total row count: {{ bikeTagStore.getAllGames?.length }}
           </div>
           <div class="!flex flex-row items-center justify-between">
             <q-select
@@ -264,10 +265,10 @@ const getGameUrl = (game: Game): string =>
               behavior="menu"
               :menu-offset="[0, 5]"
               popup-content-class="border"
-              class="px-1 my-2 md:my-0 md:px-0 border-black md:border-0 rounded-md"
+              class="px-1 my-2 border-black rounded-md md:my-0 md:px-0 md:border-0"
             >
               <template #prepend>
-                <span class="text-caption text-primary-100 font-medium"
+                <span class="font-medium text-caption text-primary-100"
                   >Per page:</span
                 >
               </template>
