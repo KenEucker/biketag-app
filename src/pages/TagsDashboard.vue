@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getThumbnail, getLocalDateTime } from 'src/utils/global'
 import { useAuthStore } from 'src/stores/auth'
 import ExportForm from 'src/components/ExportForm.vue'
+import { Tag } from 'biketag/lib/common/schema'
 
 type StateType = {
   searchTag: string
@@ -51,11 +52,9 @@ onMounted(() => {
 // data table data using computed
 const rows = computed(() => {
   if (state.searchTag) {
-    return (
-      bikeTagStore.getTags.filter(
-        (item) =>
-          item?.name?.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
-      )
+    return bikeTagStore.getTags.filter(
+      (item: Tag) =>
+        item?.name?.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
     )
   }
 

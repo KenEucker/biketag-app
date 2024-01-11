@@ -28,7 +28,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['authInit', 'biketagInit'],
+    boot: ['authInit', 'biketagInit', 'googleMaps'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss', 'tailwind.css'],
@@ -68,6 +68,12 @@ module.exports = configure(function (/* ctx */) {
       env: {
         ...biketag.BikeTagEnv,
         ...require('dotenv').config().parsed,
+      },
+
+      extendViteConf(viteConf) {
+        Object.assign(viteConf.optimizeDeps, {
+          include: ['vue-google-maps-community-fork', 'fast-deep-equal'],
+        })
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

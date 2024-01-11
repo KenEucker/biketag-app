@@ -24,6 +24,14 @@ const routes: RouteRecordRaw[] = [
         name: 'TagDashboard',
         component: () => import('pages/TagsDashboard.vue'),
       },
+      {
+        path: '/games/action',
+        name: 'GameCreation',
+        component: () => import('pages/GameCreationForm.vue'),
+        meta: {
+          isAuthRequired: true,
+        },
+      },
     ],
   },
   {

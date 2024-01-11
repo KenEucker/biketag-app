@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useBikeTagStore } from 'src/stores/biketag';
-import { QForm } from 'quasar';
+import { computed, ref } from 'vue'
+import { useBikeTagStore } from 'biketag-vue'
+import { QForm } from 'quasar'
 
-const bikeTagStore = useBikeTagStore();
+const bikeTagStore = useBikeTagStore()
 type StateType = {
-  step: number;
-  name: string;
-  email: string;
-  selectGame: string[]; // Change from any[] to string[]
-};
+  step: number
+  name: string
+  email: string
+  selectGame: string[] // Change from any[] to string[]
+}
 // state for binding
 const state = ref<StateType>({
   step: 1,
   name: '',
   email: '',
   selectGame: [],
-});
+})
 
-const generalForm = ref<QForm | null>(null);
-const emailForm = ref<QForm | null>(null);
+const generalForm = ref<QForm | null>(null)
+const emailForm = ref<QForm | null>(null)
 
-const emit = defineEmits(['update:ambassadorForm']);
+const emit = defineEmits(['update:ambassadorForm'])
 
 const progress = computed(() => {
-  const nameCompletion = state.value.name ? 0.3 : 0;
+  const nameCompletion = state.value.name ? 0.3 : 0
   const emailCompletion =
     state.value.email && state.value.step == 1
       ? emailForm.value?.validate()
@@ -32,46 +32,46 @@ const progress = computed(() => {
         : 0
       : state.value.email
       ? 0.3
-      : 0;
-  const selectGameCompletion = state.value.selectGame.length !== 0 ? 0.4 : 0;
-  return nameCompletion + emailCompletion + selectGameCompletion;
-});
+      : 0
+  const selectGameCompletion = state.value.selectGame.length !== 0 ? 0.4 : 0
+  return nameCompletion + emailCompletion + selectGameCompletion
+})
 
 const nameValid = computed(() => {
-  return [(v: string) => !!v || 'Name is required'];
-});
+  return [(v: string) => !!v || 'Name is required']
+})
 
 // Email validation
 const emailValidation = computed(() => {
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
   return [
     (v: string) => !!v || 'Email is required',
     (v: string) => (v && emailRegex.test(v)) || 'Email format is not valid',
-  ];
-});
+  ]
+})
 
 // on form submit for check form validation
 const onChangeNext = async () => {
   if (await generalForm.value?.validate()) {
     // check form validation and after move on next step
     if (state.value.step === 1) {
-      handleNext();
+      handleNext()
     }
     if (state.value.step === 2) {
       // check form validation and after move on submit
-      handleCreateAmbassador();
+      handleCreateAmbassador()
     }
   }
-};
+}
 
 // Function to handle moving to the next step
 const handleNext = () => {
-  state.value.step = Math.min(state.value.step + 1, 4);
-};
+  state.value.step = Math.min(state.value.step + 1, 4)
+}
 // Function to handle moving to the previous step
 const handlePrevious = () => {
-  state.value.step = Math.max(state.value.step - 1, 1);
-};
+  state.value.step = Math.max(state.value.step - 1, 1)
+}
 
 // Function to handle creating an ambassador
 const handleCreateAmbassador = () => {
@@ -80,8 +80,8 @@ const handleCreateAmbassador = () => {
     state.value.name,
     state.value.email,
     state.value.selectGame
-  );
-};
+  )
+}
 </script>
 
 <template>
@@ -174,7 +174,7 @@ const handleCreateAmbassador = () => {
               width: '0px',
             }"
           >
-            <div v-for="game in bikeTagStore.getGames" :key="game._id">
+            <div v-for="game in bikeTagStore.getAllGames" :key="game._id">
               <q-checkbox
                 v-model="state.selectGame"
                 :val="game._id"
