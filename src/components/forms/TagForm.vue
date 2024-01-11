@@ -4,7 +4,6 @@ import { ref } from 'vue'
 // import { Tag } from 'biketag/lib/common/schema';
 import MapView from '../global/MapView.vue'
 import { Tag } from 'biketag/lib/common/schema'
-import { Tags } from 'biketag/lib/common/types'
 
 // const emit = defineEmits(['onClose'])
 

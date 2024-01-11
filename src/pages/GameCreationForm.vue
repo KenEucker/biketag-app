@@ -2,11 +2,12 @@
 import { ref, computed } from 'vue'
 import { Notify } from 'quasar'
 import BikeTagClient from 'biketag'
-import MapView from '../global/MapView.vue'
-import ImportForm from '../global/ImportForm.vue'
+import MapView from '../components/global/MapView.vue'
+import ImportForm from '../components/global/ImportForm.vue'
 import { Game, Tag } from 'biketag/lib/common/schema'
-import TagForm from './TagForm.vue'
+import TagForm from '../components/forms/TagForm.vue'
 import { useBikeTagStore } from 'biketag-vue'
+import { useRouter } from 'vue-router'
 
 interface LatLng {
   lat: number
@@ -17,6 +18,8 @@ interface LatLng {
 interface Boundarydata extends LatLng {
   gps: LatLng
 }
+
+const router = useRouter()
 
 const bikeTagStore = useBikeTagStore()
 
@@ -57,7 +60,7 @@ const progression = computed(() => {
   return Math.ceil((progress / 12) * 100)
 })
 const center = ref({ ...gps.value })
-const emit = defineEmits(['update:gameCreationForm'])
+
 const updateMarker = (e: Boundarydata) => {
   gps.value = { ...e }
 }
@@ -93,7 +96,6 @@ const updateCurrentStep = (by: number) => {
 }
 const loadTag = (data: Tag[]) => {
   if (data.length) {
-    console.log(data)
     firstTag.value = data[0]
   }
 }
@@ -118,7 +120,6 @@ const launchGame = async () => {
       timeout: Math.random() * 5000 + 3000,
       actions: [{ icon: 'close', color: 'white' }],
     })
-    emit('update:gameCreationForm', false)
     // const res: any = await biketag.launchGame(game.value as any, firstTag as any);
     launchGameResults.value = [res.success, res.success]
   } catch (e) {
@@ -134,7 +135,6 @@ const launchGame = async () => {
   }
 }
 
-// import { computed, ref } from 'vue';
 type StateType = {
   step: number
 }
@@ -155,38 +155,49 @@ const handlePrevious = () => {
 <template>
   <q-card flat bordered class="mb-10">
     <!-- Stepper component -->
-    <q-toolbar class="bg-slate-200 px-6 py-2">
+    <q-toolbar class="bg-slate-200 p-2">
       <q-toolbar-title>
         <div class="grid grid-cols-8 md:gap-x-4 gap-x-4">
-          <div class="self-center">
-            <p class="p-0 text-sm font-medium pt-1 md:pt-0">
-              STEP:
-              {{
-                state.step === 1
-                  ? 0
-                  : state.step === 2
-                  ? 1
-                  : state.step === 3
-                  ? 2
-                  : state.step === 4
-                  ? 3
-                  : 3
-              }}
-              OF 3
-            </p>
-            <p class="p-0 text-lg text-gray-500 font-medium">
-              {{
-                state.step === 1
-                  ? 'General Info'
-                  : state.step === 2
-                  ? 'Ambassadors'
-                  : state.step === 3
-                  ? 'Settings'
-                  : state.step === 4
-                  ? 'First Tag'
-                  : ''
-              }}
-            </p>
+          <div class="self-center flex col-span-4">
+            <q-btn
+              dense
+              round
+              flat
+              size="md"
+              icon="arrow_back"
+              class="p-0 m-0 self-center h-fit me-3"
+              @click="router.push('/games')"
+            ></q-btn>
+            <div>
+              <p class="p-0 text-sm font-medium pt-1 md:pt-0">
+                STEP:
+                {{
+                  state.step === 1
+                    ? 0
+                    : state.step === 2
+                    ? 1
+                    : state.step === 3
+                    ? 2
+                    : state.step === 4
+                    ? 3
+                    : 3
+                }}
+                OF 3
+              </p>
+              <p class="p-0 text-lg text-gray-500 font-medium">
+                {{
+                  state.step === 1
+                    ? 'General Info'
+                    : state.step === 2
+                    ? 'Ambassadors'
+                    : state.step === 3
+                    ? 'Settings'
+                    : state.step === 4
+                    ? 'First Tag'
+                    : ''
+                }}
+              </p>
+            </div>
           </div>
           <div class="col-start-5 col-span-4 flex">
             <q-linear-progress
@@ -202,13 +213,6 @@ const handlePrevious = () => {
           </div>
         </div>
       </q-toolbar-title>
-
-      <q-icon
-        name="highlight_off"
-        size="md"
-        class="cursor-pointer"
-        @click="emit('update:gameCreationForm', false)"
-      ></q-icon>
     </q-toolbar>
     <q-separator />
     <q-stepper v-model="state.step" ref="stepper" color="primary" animated>

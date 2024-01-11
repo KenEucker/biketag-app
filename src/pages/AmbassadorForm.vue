@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useBikeTagStore } from 'biketag-vue'
 import { QForm } from 'quasar'
+import { useRouter } from 'vue-router'
 
 const bikeTagStore = useBikeTagStore()
 type StateType = {
@@ -17,11 +18,9 @@ const state = ref<StateType>({
   email: '',
   selectGame: [],
 })
-
+const router = useRouter()
 const generalForm = ref<QForm | null>(null)
 const emailForm = ref<QForm | null>(null)
-
-const emit = defineEmits(['update:ambassadorForm'])
 
 const progress = computed(() => {
   const nameCompletion = state.value.name ? 0.3 : 0
@@ -87,16 +86,27 @@ const handleCreateAmbassador = () => {
 <template>
   <q-card flat bordered class="mb-10">
     <!-- Stepper component -->
-    <q-toolbar class="bg-slate-200 px-6 py-2">
+    <q-toolbar class="bg-slate-200 p-2">
       <q-toolbar-title>
         <div class="grid grid-cols-8 md:gap-x-4 gap-x-4">
-          <div class="self-center">
-            <p class="p-0 text-sm font-medium pt-1 md:pt-0">
-              STEP: {{ state.step == 1 ? 0 : 1 }} OF 1
-            </p>
-            <p class="p-0 text-lg text-gray-500 font-medium">
-              {{ state.step == 1 ? 'General Info' : 'Assign Games' }}
-            </p>
+          <div class="self-center flex col-span-4">
+            <q-btn
+              dense
+              round
+              flat
+              size="md"
+              icon="arrow_back"
+              class="p-0 m-0 self-center h-fit me-3"
+              @click="router.push('/games')"
+            ></q-btn>
+            <div>
+              <p class="p-0 text-sm font-medium pt-1 md:pt-0">
+                STEP: {{ state.step == 1 ? 0 : 1 }} OF 1
+              </p>
+              <p class="p-0 text-lg text-gray-500 font-medium">
+                {{ state.step == 1 ? 'General Info' : 'Assign Games' }}
+              </p>
+            </div>
           </div>
           <div class="col-start-5 col-span-4 flex">
             <q-linear-progress
@@ -112,13 +122,6 @@ const handleCreateAmbassador = () => {
           </div>
         </div>
       </q-toolbar-title>
-
-      <q-icon
-        name="highlight_off"
-        size="md"
-        class="cursor-pointer"
-        @click="emit('update:ambassadorForm', false)"
-      ></q-icon>
     </q-toolbar>
 
     <q-separator />

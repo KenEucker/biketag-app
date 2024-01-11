@@ -32,6 +32,14 @@ const routes: RouteRecordRaw[] = [
           isAuthRequired: true,
         },
       },
+      {
+        path: '/games/ambassador',
+        name: 'AddAmbassador',
+        component: () => import('pages/AmbassadorForm.vue'),
+        meta: {
+          isAuthRequired: true,
+        },
+      },
     ],
   },
   {

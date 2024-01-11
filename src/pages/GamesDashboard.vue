@@ -6,13 +6,9 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getLogoUrl } from 'src/utils/global'
 import { useAuthStore } from 'src/stores/auth'
-import AmbassadorForm from 'src/components/forms/AmbassadorForm.vue'
-import GameCreationForm from 'src/components/forms/GameCreationForm.vue'
 
 type StateType = {
   searchGame: string
-  ambassadorForm: boolean
-  gameCreationForm: boolean
 }
 
 const bikeTagStore = useBikeTagStore()
@@ -28,8 +24,6 @@ const isAuthenticated = computed(() => {
 // state for binding
 const state = reactive<StateType>({
   searchGame: '',
-  ambassadorForm: false,
-  gameCreationForm: false,
 })
 
 // pagination component props
@@ -112,16 +106,18 @@ const getGameUrl = (game: Game): string =>
   `https://${game.slug}.biketag.${'org'}`
 </script>
 <template>
-  <div class="text-end">
-    <q-btn
-      v-if="isAuthenticated"
-      color="primary"
-      class="my-2 capitalize rounded-lg"
-      outline
-      icon="add"
-      label="Ambassador"
-      @click="state.ambassadorForm = true"
-    />
+  <div>
+    <div class="text-end">
+      <q-btn
+        v-if="isAuthenticated"
+        color="primary"
+        class="my-2 capitalize rounded-lg"
+        outline
+        icon="add"
+        label="Ambassador"
+        @click="router.push('/games/ambassador')"
+      />
+    </div>
     <q-card flat bordered class="mb-10">
       <div
         class="grid grid-cols-1 px-2 py-2 md:grid-cols-5 gap-x-4 bg-slate-200"
@@ -176,7 +172,7 @@ const getGameUrl = (game: Game): string =>
                 color="primary"
                 size="sm"
                 icon="add"
-                @click="state.gameCreationForm = true"
+                @click="router.push('/games/action')"
               ></q-btn
             ></q-th>
           </q-tr>
@@ -308,26 +304,6 @@ const getGameUrl = (game: Game): string =>
           </div>
         </template>
       </q-table>
-      <q-dialog
-        v-model="state.ambassadorForm"
-        persistent
-        maximized
-        transition-show="slide-up"
-        transition-hide="slide-down"
-        ><ambassador-form
-          v-model:ambassadorForm="state.ambassadorForm"
-        ></ambassador-form>
-      </q-dialog>
-      <q-dialog
-        v-model="state.gameCreationForm"
-        persistent
-        maximized
-        transition-show="slide-up"
-        transition-hide="slide-down"
-        ><game-creation-form
-          v-model:gameCreationForm="state.gameCreationForm"
-        ></game-creation-form>
-      </q-dialog>
     </q-card>
   </div>
 </template>
