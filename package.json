@@ -23,6 +23,7 @@
     "quasar": "^2.8.0",
     "tailwindcss": "^3.4.0",
     "vue": "^3.3.8",
+    "vue-google-maps-community-fork": "^0.3.1",
     "vue-router": "^4.0.12"
   },
   "devDependencies": {
