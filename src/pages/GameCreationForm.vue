@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Notify } from 'quasar'
 import BikeTagClient from 'biketag'
 import MapView from '../components/global/MapView.vue'
 import ImportForm from '../components/global/ImportForm.vue'
-import { Game, Tag } from 'biketag/lib/common/schema'
+import { Tag } from 'biketag/lib/common/schema'
 import TagForm from '../components/forms/TagForm.vue'
 import { useBikeTagStore } from 'biketag-vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 interface LatLng {
   lat: number
@@ -20,10 +20,25 @@ interface Boundarydata extends LatLng {
 }
 
 const router = useRouter()
+const route = useRoute()
 
 const bikeTagStore = useBikeTagStore()
 
 const game = ref(BikeTagClient.createGameObject())
+
+onMounted(async () => {
+  if (route.params.name) {
+    nextTick(async () => {
+      loader.value = true
+      await bikeTagStore.setGame(route.params.name as string)
+      game.value = bikeTagStore.getGame
+      gps.value = game.value.boundary as unknown as Boundarydata
+      center.value = gps.value
+      loader.value = false
+    })
+    // await bikeTagStore.fetchTags()
+  }
+})
 
 const loader = ref<boolean>(false)
 // setting
@@ -57,7 +72,7 @@ const progression = computed(() => {
   if (game.value.ambassadors.length) progress++
   if (settings.value.length || skipSettings.value) progress++
   if (firstTag.value.game) progress++
-  return Math.ceil((progress / 12) * 100)
+  return Math.ceil((progress / (!route.params.name ? 12 : 11)) * 100)
 })
 const center = ref({ ...gps.value })
 
@@ -79,6 +94,7 @@ const newSettingValue = ref('')
 const addNewSetting = () => {
   if (newSettingKey.value) {
     game.value.settings[newSettingKey.value] = newSettingValue.value
+    game.value.settings = Object.assign({ ...game.value.settings })
   }
   newSettingKey.value = ''
   newSettingValue.value = ''
@@ -106,12 +122,9 @@ const launchGame = async () => {
     alt: (game.value.boundary as unknown as Boundarydata).gps?.alt ?? 0,
   }
   try {
-    // Need to verify for which api will be used for create game
+    // Need to verify for which api will be used for create and update game
     loader.value = true
-    const res = await bikeTagStore.setGame(
-      game.value as Game,
-      firstTag as unknown as Tag
-    )
+    // const res = await bikeTagStore.setGame(game.value.name)
     Notify.create({
       icon: 'check_circle',
       color: 'green',
@@ -120,8 +133,9 @@ const launchGame = async () => {
       timeout: Math.random() * 5000 + 3000,
       actions: [{ icon: 'close', color: 'white' }],
     })
+    router.push('/games')
     // const res: any = await biketag.launchGame(game.value as any, firstTag as any);
-    launchGameResults.value = [res.success, res.success]
+    // launchGameResults.value = [res.success, res.success]
   } catch (e) {
     launchGameResults.value = [String(e), '']
     Notify.create({
@@ -154,6 +168,11 @@ const handlePrevious = () => {
 
 <template>
   <q-card flat bordered class="mb-10">
+    <q-inner-loading
+      :showing="loader"
+      class="z-10 text-lg !bg-opacity-65 font-semibold"
+    >
+    </q-inner-loading>
     <!-- Stepper component -->
     <q-toolbar class="bg-slate-200 p-2">
       <q-toolbar-title>
@@ -445,7 +464,13 @@ const handlePrevious = () => {
           </div>
         </div>
       </q-step>
-      <q-step :name="4" title="" icon="settings" :done="state.step > 1">
+      <q-step
+        :name="4"
+        title=""
+        icon="settings"
+        :done="state.step > 1"
+        v-if="!route.params.name"
+      >
         <div>
           <p class="p-0 text-base font-medium py-2">First Mystery tag</p>
           <ImportForm
@@ -470,7 +495,11 @@ const handlePrevious = () => {
               class="q-mr-sm"
             />
             <q-btn
-              v-if="state.step === 1 || state.step === 2 || state.step === 3"
+              v-if="
+                state.step === 1 ||
+                state.step === 2 ||
+                (!route.params.name && state.step === 3)
+              "
               @click="handleNext"
               unelevated
               no-caps
@@ -478,7 +507,12 @@ const handlePrevious = () => {
               label="Next"
             />
             <q-btn
-              v-if="state.step === 4 && progression == 100"
+              v-if="
+                (!route.params.name &&
+                  state.step === 4 &&
+                  progression == 100) ||
+                (route.params.name && state.step === 3 && progression == 100)
+              "
               @click="
                 () => {
                   updateCurrentStep(1)
@@ -492,13 +526,6 @@ const handlePrevious = () => {
               color="primary"
               label="Launch"
             />
-            <!-- <q-btn
-              unelevated
-              no-caps
-              color="primary"
-              label="Create Ambassador"
-              @click="handleCreateAmbassador"
-            /> -->
           </div>
         </q-stepper-navigation>
       </template>

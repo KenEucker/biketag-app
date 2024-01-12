@@ -17,6 +17,9 @@ const router = useRouter()
 
 const authStore = useAuthStore()
 
+// table list loader
+const tableLoader = ref<boolean>(false)
+
 const isAuthenticated = computed(() => {
   return authStore.getIsAuthenticated
 })
@@ -36,7 +39,9 @@ const rowsPerPageOptions = ref([5, 10, 15, 25, 50])
 
 onMounted(async () => {
   // Get game list
+  tableLoader.value = true
   await bikeTagStore.fetchAllGames()
+  tableLoader.value = false
 })
 
 // data table data using computed
@@ -145,6 +150,7 @@ const getGameUrl = (game: Game): string =>
       <q-table
         :rows="rows"
         :columns="columns"
+        :loading="tableLoader"
         row-key="id"
         :filter="state.searchGame"
         title-class="primary"
@@ -153,10 +159,7 @@ const getGameUrl = (game: Game): string =>
         hide-pagination
       >
         <template #loading>
-          <q-inner-loading
-            showing
-            class="z-10 text-lg bg-slate-600 !bg-opacity-65 text-white font-semibold"
-          />
+          <q-inner-loading showing class="z-10 text-lg !bg-opacity-65" />
         </template>
         <template #header="props">
           <q-tr class="text-gray-500 uppercase bg-gray-100 h-md">
@@ -186,6 +189,7 @@ const getGameUrl = (game: Game): string =>
               class="text-primary"
               size="md"
               icon="o_settings"
+              @click="router.push('/games/action/' + props.row.name)"
               v-if="isAuthenticated"
             ></q-btn>
             <q-btn
