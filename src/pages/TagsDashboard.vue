@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { QTableProps } from 'quasar'
+import { QTableProps, useQuasar } from 'quasar'
 import { useBikeTagStore } from 'biketag-vue'
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -14,6 +14,7 @@ type StateType = {
   tagUpdateForm: boolean
 }
 
+const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const bikeTagStore = useBikeTagStore()
@@ -68,7 +69,7 @@ const rows = computed(() => {
   return bikeTagStore.getTags ?? []
 })
 const columns = computed((): QTableProps['columns'] => {
-  return [
+  const mainColumns = [
     {
       name: 'number',
       align: 'left',
@@ -90,6 +91,9 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'foundTag',
       sortable: true,
     },
+  ]
+
+  const expandedColumns = [
     isAuthenticated.value
       ? {
           name: 'gpsLocation',
@@ -105,6 +109,9 @@ const columns = computed((): QTableProps['columns'] => {
           field: 'hint',
           sortable: true,
         },
+  ]
+
+  const actionColumnns = [
     {
       name: 'action',
       align: 'center',
@@ -112,6 +119,10 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'action',
     },
   ]
+
+  return $q.screen.lt.md
+    ? mainColumns.concat(actionColumnns)
+    : mainColumns.concat(expandedColumns).concat(actionColumnns)
 })
 const pagesNumber = computed(() => {
   if (rows.value?.length) {
@@ -273,7 +284,7 @@ const updateTagForm = (tagData: Tag) => {
                   </template>
                 </q-img>
               </q-avatar>
-              <div class="ms-2">
+              <div class="ms-2" v-if="$q.screen.gt.xs">
                 <p
                   class="font-medium truncate text-start text-md"
                   v-if="props.row.mysteryPlayer"
@@ -318,7 +329,7 @@ const updateTagForm = (tagData: Tag) => {
                   </template>
                 </q-img>
               </q-avatar>
-              <div class="ms-2">
+              <div class="ms-2" v-if="$q.screen.gt.xs">
                 <p class="font-medium text-start text-md">
                   {{ props.row.foundPlayer ?? '-' }}
                 </p>

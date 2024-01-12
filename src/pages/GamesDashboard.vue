@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Game } from 'biketag/lib/common/schema'
-import { QTableProps } from 'quasar'
+import { QTableProps, useQuasar } from 'quasar'
 import { useBikeTagStore } from 'biketag-vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,8 @@ import { useAuthStore } from 'src/stores/auth'
 type StateType = {
   searchGame: string
 }
+
+const $q = useQuasar()
 
 const bikeTagStore = useBikeTagStore()
 
@@ -59,7 +61,7 @@ const rows = computed((): QTableProps['rows'] => {
   }
 })
 const columns = computed((): QTableProps['columns'] => {
-  return [
+  const mainColumns = [
     {
       name: 'name',
       align: 'left',
@@ -67,13 +69,8 @@ const columns = computed((): QTableProps['columns'] => {
       field: (row: { name: string }): string => row.name,
       sortable: true,
     },
-    {
-      name: 'region',
-      align: 'left',
-      label: 'Region',
-      field: 'region',
-      sortable: true,
-    },
+  ]
+  let expandedColumns = [
     {
       name: 'site',
       align: 'left',
@@ -81,6 +78,21 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'site',
       sortable: true,
     },
+  ]
+
+  if ($q.screen.gt.sm) {
+    expandedColumns = [
+      {
+        name: 'region',
+        align: 'left',
+        label: 'Region',
+        field: 'region',
+        sortable: true,
+      },
+    ].concat(expandedColumns)
+  }
+
+  const actionColumnns = [
     {
       name: 'action',
       align: 'center',
@@ -88,6 +100,10 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'action',
     },
   ]
+
+  return $q.screen.gt.xs
+    ? mainColumns.concat(expandedColumns).concat(actionColumnns)
+    : mainColumns.concat(actionColumnns)
 })
 
 // total page number for pagination
