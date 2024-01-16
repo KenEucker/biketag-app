@@ -25,6 +25,10 @@ const isAuthenticated = computed(() => {
   return authStore.getIsAuthenticated
 })
 
+const usreIsAdmin = computed(() => {
+  return authStore.getLoginUser.email === process.env.ADMIN_EMAIL
+})
+
 const state = reactive<StateType>({
   searchTag: '',
   tagUpdateForm: false,
@@ -69,7 +73,7 @@ const rows = computed(() => {
   return bikeTagStore.getTags ?? []
 })
 const columns = computed((): QTableProps['columns'] => {
-  const mainColumns = [
+  const mainColumns: QTableProps['columns'] = [
     {
       name: 'number',
       align: 'left',
@@ -93,7 +97,7 @@ const columns = computed((): QTableProps['columns'] => {
     },
   ]
 
-  const expandedColumns = [
+  const expandedColumns: QTableProps['columns'] = [
     isAuthenticated.value
       ? {
           name: 'gpsLocation',
@@ -111,12 +115,13 @@ const columns = computed((): QTableProps['columns'] => {
         },
   ]
 
-  const actionColumnns = [
+  const actionColumnns: QTableProps['columns'] = [
     {
       name: 'action',
       align: 'center',
       label: 'Action',
       field: 'action',
+      sortable: false,
     },
   ]
 
@@ -251,7 +256,7 @@ const updateTagForm = (tagData: Tag) => {
               size="md"
               icon="o_settings"
               @click="updateTagForm(props.row)"
-              v-if="isAuthenticated"
+              v-if="isAuthenticated && usreIsAdmin"
             ></q-btn>
             <export-form
               v-model:download-loader="downloadLoader"

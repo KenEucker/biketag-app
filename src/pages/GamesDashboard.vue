@@ -26,6 +26,10 @@ const isAuthenticated = computed(() => {
   return authStore.getIsAuthenticated
 })
 
+const usreIsAdmin = computed(() => {
+  return authStore.getLoginUser.email === process.env.ADMIN_EMAIL
+})
+
 // state for binding
 const state = reactive<StateType>({
   searchGame: '',
@@ -61,7 +65,7 @@ const rows = computed((): QTableProps['rows'] => {
   }
 })
 const columns = computed((): QTableProps['columns'] => {
-  const mainColumns = [
+  const mainColumns: QTableProps['columns'] = [
     {
       name: 'name',
       align: 'left',
@@ -70,7 +74,7 @@ const columns = computed((): QTableProps['columns'] => {
       sortable: true,
     },
   ]
-  let expandedColumns = [
+  let expandedColumns: QTableProps['columns'] = [
     {
       name: 'site',
       align: 'left',
@@ -81,7 +85,7 @@ const columns = computed((): QTableProps['columns'] => {
   ]
 
   if ($q.screen.gt.sm) {
-    expandedColumns = [
+    const regionColumn: QTableProps['columns'] = [
       {
         name: 'region',
         align: 'left',
@@ -89,15 +93,18 @@ const columns = computed((): QTableProps['columns'] => {
         field: 'region',
         sortable: true,
       },
-    ].concat(expandedColumns)
+    ]
+
+    expandedColumns = regionColumn.concat(expandedColumns)
   }
 
-  const actionColumnns = [
+  const actionColumnns: QTableProps['columns'] = [
     {
       name: 'action',
       align: 'center',
       label: 'Action',
       field: 'action',
+      sortable: false,
     },
   ]
 
@@ -206,7 +213,7 @@ const getGameUrl = (game: Game): string =>
               size="md"
               icon="o_settings"
               @click="router.push('/games/action/' + props.row.name)"
-              v-if="isAuthenticated"
+              v-if="isAuthenticated && usreIsAdmin"
             ></q-btn>
             <q-btn
               dense
