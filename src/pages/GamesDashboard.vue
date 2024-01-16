@@ -145,6 +145,15 @@ const getGameUrl = (game: Game): string =>
         label="Ambassador"
         @click="router.push('/games/ambassador')"
       />
+      <q-btn
+        v-if="isAuthenticated"
+        color="primary"
+        class="my-2 ms-2 capitalize rounded-lg"
+        outline
+        icon="add"
+        label="Player"
+        @click="router.push('/games/player/action')"
+      />
     </div>
     <q-card flat bordered class="mb-10">
       <div

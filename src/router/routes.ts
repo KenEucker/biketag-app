@@ -40,6 +40,14 @@ const routes: RouteRecordRaw[] = [
           isAuthRequired: true,
         },
       },
+      {
+        path: '/games/player/action',
+        name: 'AddPlayer',
+        component: () => import('pages/PlayerForm.vue'),
+        meta: {
+          isAuthRequired: true,
+        },
+      },
     ],
   },
   {
