@@ -8,7 +8,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { configure } = require('quasar/wrappers');
+const { configure } = require('quasar/wrappers')
 const biketag = require('biketag-vue')
 
 module.exports = configure(function (/* ctx */) {
@@ -28,7 +28,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['authInit', 'biketagInit'],
+    boot: ['authInit', 'biketagInit', 'googleMaps'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss', 'tailwind.css'],
@@ -68,6 +68,12 @@ module.exports = configure(function (/* ctx */) {
       env: {
         ...biketag.BikeTagEnv,
         ...require('dotenv').config().parsed,
+      },
+
+      extendViteConf(viteConf) {
+        Object.assign(viteConf.optimizeDeps, {
+          include: ['vue-google-maps-community-fork', 'fast-deep-equal'],
+        })
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -203,5 +209,5 @@ module.exports = configure(function (/* ctx */) {
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
     },
-  };
-});
+  }
+})

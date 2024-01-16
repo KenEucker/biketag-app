@@ -18,11 +18,12 @@
     "@auth0/auth0-vue": "^2.3.3",
     "@quasar/extras": "^1.16.4",
     "biketag": "^3.2.4",
-    "biketag-vue": "^2.1.1",
+    "biketag-vue": "^2.1.2",
     "pinia": "^2.1.7",
     "quasar": "^2.8.0",
     "tailwindcss": "^3.4.0",
     "vue": "^3.3.8",
+    "vue-google-maps-community-fork": "^0.3.1",
     "vue-router": "^4.0.12"
   },
   "devDependencies": {

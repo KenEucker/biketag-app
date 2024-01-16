@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { QTableProps } from 'quasar'
+import { QTableProps, useQuasar } from 'quasar'
 import { useBikeTagStore } from 'biketag-vue'
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getThumbnail, getLocalDateTime } from 'src/utils/global'
 import { useAuthStore } from 'src/stores/auth'
 import ExportForm from 'src/components/ExportForm.vue'
+import { Tag } from 'biketag/lib/common/schema'
+import TagForm from '../components/forms/TagForm.vue'
 
 type StateType = {
   searchTag: string
+  tagUpdateForm: boolean
 }
 
+const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const bikeTagStore = useBikeTagStore()
@@ -23,10 +27,14 @@ const isAuthenticated = computed(() => {
 
 const state = reactive<StateType>({
   searchTag: '',
+  tagUpdateForm: false,
 })
 
 // image download loader
 const downloadLoader = ref<boolean>(false)
+
+// table list loader
+const tableLoader = ref<boolean>(false)
 
 // pagination component props
 const pagination = ref({
@@ -40,10 +48,11 @@ onMounted(() => {
   nextTick(async () => {
     const name: string | null = (route?.params?.name as string) ?? null
     if (name) {
-      await bikeTagStore.fetchAllGames()
+      tableLoader.value = true
       console.log('setting game', name)
       await bikeTagStore.setGame(name)
       await bikeTagStore.fetchTags()
+      tableLoader.value = false
     }
   })
 })
@@ -51,18 +60,16 @@ onMounted(() => {
 // data table data using computed
 const rows = computed(() => {
   if (state.searchTag) {
-    return (
-      bikeTagStore.getTags.filter(
-        (item) =>
-          item?.name?.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
-      )
+    return bikeTagStore.getTags.filter(
+      (item: Tag) =>
+        item?.name?.toLowerCase().indexOf(state.searchTag.toLowerCase()) > -1
     )
   }
 
   return bikeTagStore.getTags ?? []
 })
 const columns = computed((): QTableProps['columns'] => {
-  return [
+  const mainColumns = [
     {
       name: 'number',
       align: 'left',
@@ -84,6 +91,9 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'foundTag',
       sortable: true,
     },
+  ]
+
+  const expandedColumns = [
     isAuthenticated.value
       ? {
           name: 'gpsLocation',
@@ -99,6 +109,9 @@ const columns = computed((): QTableProps['columns'] => {
           field: 'hint',
           sortable: true,
         },
+  ]
+
+  const actionColumnns = [
     {
       name: 'action',
       align: 'center',
@@ -106,6 +119,10 @@ const columns = computed((): QTableProps['columns'] => {
       field: 'action',
     },
   ]
+
+  return $q.screen.lt.md
+    ? mainColumns.concat(actionColumnns)
+    : mainColumns.concat(expandedColumns).concat(actionColumnns)
 })
 const pagesNumber = computed(() => {
   if (rows.value?.length) {
@@ -127,6 +144,16 @@ const onPagePerItem = (perItem: number) => {
 onUnmounted(() => {
   /// unset tags?
 })
+
+// Get tag data for update
+const tagData = computed(() => {
+  return bikeTagStore.getCurrentBikeTag
+})
+
+const updateTagForm = (tagData: Tag) => {
+  bikeTagStore.SET_CURRENT_TAG(tagData)
+  state.tagUpdateForm = true
+}
 </script>
 <template>
   <div>
@@ -179,7 +206,7 @@ onUnmounted(() => {
         </q-input>
       </div>
       <q-table
-        :loading="downloadLoader"
+        :loading="downloadLoader || tableLoader"
         :rows="rows"
         :columns="columns"
         row-key="id"
@@ -192,7 +219,7 @@ onUnmounted(() => {
         <template #loading>
           <q-inner-loading
             showing
-            class="z-10 text-lg bg-slate-600 !bg-opacity-65 text-white font-semibold"
+            class="z-10 text-lg !bg-opacity-65"
             :label="downloadLoader ? 'Downloading...' : ''"
           />
         </template>
@@ -223,6 +250,7 @@ onUnmounted(() => {
               class="text-primary"
               size="md"
               icon="o_settings"
+              @click="updateTagForm(props.row)"
               v-if="isAuthenticated"
             ></q-btn>
             <export-form
@@ -256,7 +284,7 @@ onUnmounted(() => {
                   </template>
                 </q-img>
               </q-avatar>
-              <div class="ms-2">
+              <div class="ms-2" v-if="$q.screen.gt.xs">
                 <p
                   class="font-medium truncate text-start text-md"
                   v-if="props.row.mysteryPlayer"
@@ -301,7 +329,7 @@ onUnmounted(() => {
                   </template>
                 </q-img>
               </q-avatar>
-              <div class="ms-2">
+              <div class="ms-2" v-if="$q.screen.gt.xs">
                 <p class="font-medium text-start text-md">
                   {{ props.row.foundPlayer ?? '-' }}
                 </p>
@@ -372,6 +400,19 @@ onUnmounted(() => {
           </div>
         </template>
       </q-table>
+      <q-dialog
+        v-model="state.tagUpdateForm"
+        persistent
+        maximized
+        transition-show="slide-up"
+        transition-hide="slide-down"
+        ><tag-form
+          v-if="tagData && tagData.game"
+          :tag="tagData"
+          :commit="true"
+          v-model:tagUpdateForm="state.tagUpdateForm"
+        />
+      </q-dialog>
     </q-card>
   </div>
 </template>
