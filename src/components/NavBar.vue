@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import { useAuth0 } from '@auth0/auth0-vue';
-import { useAuthStore } from 'src/stores/auth';
-import { useRouter } from 'vue-router';
+import { useAuth0 } from '@auth0/auth0-vue'
+import { useAuthStore } from 'src/stores/auth'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 interface Props {
-  leftDrawerOpen: boolean;
+  leftDrawerOpen: boolean
 }
 
-const emit = defineEmits(['update:leftDrawerOpen']);
+const emit = defineEmits(['update:leftDrawerOpen'])
 
 const props = withDefaults(defineProps<Props>(), {
   leftDrawerOpen: false,
-});
+})
 
 function toggleLeftDrawer() {
-  emit('update:leftDrawerOpen', !props.leftDrawerOpen);
+  emit('update:leftDrawerOpen', !props.leftDrawerOpen)
 }
 
-const { logout } = useAuth0();
+const { logout } = useAuth0()
+const authStore = useAuthStore()
 
 const logoutUser = async () => {
-  await logout();
-  await router.push('/login');
-};
+  await logout()
+  await router.push('/login')
+}
 </script>
 <template>
   <q-header elevated class="h-[60px] bg-white text-black">
@@ -39,13 +40,13 @@ const logoutUser = async () => {
       />
 
       <q-toolbar-title> BikeTag </q-toolbar-title>
-      <div class="cursor-pointer inline-block">
-        <div class="flex items-center">
+      <div class="inline-block cursor-pointer">
+        <div class="flex items-center" v-if="authStore.getIsAuthenticated">
           <span
             class="pr-[15px] text-base font-medium capitalize"
             v-if="!$q.platform.is.mobile"
           >
-            {{ useAuthStore().getLoginUser?.name }}
+            {{ authStore?.getLoginUser?.name }}
           </span>
           <q-img
             width="35px"

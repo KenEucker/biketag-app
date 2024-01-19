@@ -29,25 +29,50 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth0 } from '@auth0/auth0-vue';
-import { ref, watch } from 'vue';
-import { useAuthStore } from './stores/auth';
-import { useRoute } from 'vue-router';
-const { isLoading, user, isAuthenticated } = useAuth0();
-const authStore = useAuthStore();
-const route = useRoute();
+import { useAuth0 } from '@auth0/auth0-vue'
+import { ref, watch } from 'vue'
+import { useAuthStore } from './stores/auth'
+import { useRoute } from 'vue-router'
+import { useBikeTagAdminStore } from 'biketag-admin'
+const { isLoading, user, isAuthenticated } = useAuth0()
+const authStore = useAuthStore()
+const route = useRoute()
 
-const loader = ref<boolean>(true);
+const testBA = async () => {
+  const biketagAdminStore = useBikeTagAdminStore()
+  await biketagAdminStore.fetchAmbassadors()
+  await biketagAdminStore.fetchGames()
+
+  const testAmbassadorByName = biketagAdminStore.getAmbassador('Ken Eucker')
+  if (testAmbassadorByName) {
+    const testAmbassadorByEmail = biketagAdminStore.getAmbassador(
+      testAmbassadorByName.email
+    )
+    console.log('testAmbassadorByName', testAmbassadorByName.name)
+    console.log('testAmbassadorByEmail', testAmbassadorByEmail!.name)
+    console.log(
+      'ambassadors games',
+      biketagAdminStore.ambassadorsGames(testAmbassadorByName.name)
+    )
+    console.log(
+      'seattles ambassadors',
+      biketagAdminStore.gamesAmbassadors('Seattle')
+    )
+  }
+}
+testBA()
+
+const loader = ref<boolean>(true)
 watch(
   () => isLoading.value,
   () => {
     if (!isLoading.value) {
-      authStore.$state.loginUser = user;
-      authStore.$state.isAuthenticated = isAuthenticated.value;
-      authStore.$state.authInitLoader = isLoading.value;
-      loader.value = isLoading.value;
+      authStore.$state.loginUser = user
+      authStore.$state.isAuthenticated = isAuthenticated.value
+      authStore.$state.authInitLoader = isLoading.value
+      loader.value = isLoading.value
     }
   },
   { deep: true, immediate: true }
-);
+)
 </script>

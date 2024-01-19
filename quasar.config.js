@@ -9,7 +9,8 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require('quasar/wrappers')
-const biketag = require('biketag-vue')
+// const biketag = require('biketag-vue')
+const biketagAdmin = require('biketag-admin')
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -66,11 +67,12 @@ module.exports = configure(function (/* ctx */) {
       // analyze: true,
       // env: {},
       env: {
-        ...biketag.BikeTagEnv,
+        ...biketagAdmin.BikeTagEnv,
         ...require('dotenv').config().parsed,
       },
 
       extendViteConf(viteConf) {
+        viteConf.define.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false
         Object.assign(viteConf.optimizeDeps, {
           include: ['vue-google-maps-community-fork', 'fast-deep-equal'],
         })
