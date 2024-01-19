@@ -111,7 +111,7 @@ const splitCamelCase = (str: string) =>
               dense
               v-model.trim="profile.user_metadata.name"
               placeholder="User Name"
-              readonly
+              disable
             />
           </div>
         </div>
@@ -122,7 +122,7 @@ const splitCamelCase = (str: string) =>
               outlined
               dense
               v-model.trim="profile.email"
-              readonly
+              disable
               placeholder="User Email"
             />
           </div>

@@ -148,7 +148,7 @@ const typeEqualsTo = (value: string | undefined, type: string | number) => {
                   outlined
                   type="number"
                   v-model="(tag as unknown as TagType)[key]"
-                  :readonly="readOnly.includes(key)"
+                  :disable="readOnly.includes(key)"
                   dense
                   class="mb-3"
                   flat
@@ -156,7 +156,7 @@ const typeEqualsTo = (value: string | undefined, type: string | number) => {
                 <q-input
                   outlined
                   v-model="(tag as unknown as TagType)[key]"
-                  :readonly="readOnly.includes(key)"
+                  :disable="readOnly.includes(key)"
                   dense
                   flat
                 />
@@ -174,7 +174,7 @@ const typeEqualsTo = (value: string | undefined, type: string | number) => {
           <div>
             <label for="">Latitude</label>
             <q-input
-              readonly
+              disable
               outlined
               dense
               v-model.trim="gps.lat"
@@ -187,7 +187,7 @@ const typeEqualsTo = (value: string | undefined, type: string | number) => {
           <div>
             <label for="">Longitude</label>
             <q-input
-              readonly
+              disable
               outlined
               dense
               v-model.trim="gps.lng"

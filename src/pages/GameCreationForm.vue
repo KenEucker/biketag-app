@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { Notify } from 'quasar'
+import { Notify, QTableProps } from 'quasar'
 import BikeTagClient from 'biketag'
 import MapView from '../components/global/MapView.vue'
 import ImportForm from '../components/global/ImportForm.vue'
@@ -93,8 +93,16 @@ const newSettingKey = ref('')
 const newSettingValue = ref('')
 const addNewSetting = () => {
   if (newSettingKey.value) {
-    game.value.settings[newSettingKey.value] = newSettingValue.value
-    game.value.settings = Object.assign({ ...game.value.settings })
+    if (isEdit.value) {
+      delete game.value.settings[editOldValue.value.key]
+      game.value.settings[newSettingKey.value] = newSettingValue.value
+      game.value.settings = Object.assign({ ...game.value.settings })
+      editOldValue.value = null
+      isEdit.value = false
+    } else {
+      game.value.settings[newSettingKey.value] = newSettingValue.value
+      game.value.settings = Object.assign({ ...game.value.settings })
+    }
   }
   newSettingKey.value = ''
   newSettingValue.value = ''
@@ -102,8 +110,8 @@ const addNewSetting = () => {
 const removeSetting = (name: string) => {
   delete game.value.settings[name]
 }
-const capitalizeFirstLetter = (str: string) =>
-  str.charAt(0).toUpperCase() + str.slice(1)
+// const capitalizeFirstLetter = (str: string) =>
+//   str.charAt(0).toUpperCase() + str.slice(1)
 const updateCurrentStep = (by: number) => {
   current_step.value += by
   if (!skipSettings.value && current_step.value > 2) {
@@ -163,6 +171,51 @@ const handleNext = () => {
 // Function to handle moving to the previous step
 const handlePrevious = () => {
   state.value.step = Math.max(state.value.step - 1, 1)
+}
+
+const rows = computed((): QTableProps['rows'] => {
+  const data: Record<string, string>[] = []
+  Object.keys(game.value.settings).forEach((a) => {
+    data.push({ key: a, value: game.value.settings[a] })
+  })
+  return data
+})
+
+const columns = computed((): QTableProps['columns'] => {
+  return [
+    {
+      name: 'key',
+      align: 'left',
+      label: 'Key',
+      field: 'key',
+      sortable: false,
+    },
+    {
+      name: 'value',
+      align: 'left',
+      label: 'Value',
+      field: 'value',
+      sortable: false,
+    },
+    {
+      name: 'action',
+      align: 'left',
+      label: 'Action',
+      field: 'action',
+      sortable: false,
+    },
+  ]
+})
+
+const isEdit = ref<boolean>(false)
+
+const editOldValue = ref()
+
+const editSetting = (row: Record<string, string>) => {
+  newSettingKey.value = row.key
+  newSettingValue.value = row.value
+  editOldValue.value = row
+  isEdit.value = true
 }
 </script>
 
@@ -307,7 +360,7 @@ const handlePrevious = () => {
                 <div>
                   <label for="">Latitude</label>
                   <q-input
-                    readonly
+                    disable
                     outlined
                     dense
                     v-model.trim="gps.lat"
@@ -320,7 +373,7 @@ const handlePrevious = () => {
                 <div>
                   <label for="">Longitude</label>
                   <q-input
-                    readonly
+                    disable
                     outlined
                     dense
                     v-model.trim="gps.lng"
@@ -408,58 +461,72 @@ const handlePrevious = () => {
         <div>
           <p class="p-0 text-base font-medium py-2">Settings</p>
           <q-separator class="mb-4" />
-          <div class="grid md:grid-cols-2 grid-cols-1 gap-x-4">
-            <div
-              class="mb-3 grid md:grid-cols-3 grid-cols-1 gap-x-4 align-center"
-            >
-              <div class="mb-3">
-                <label for="">Setting key</label>
-                <q-input
-                  outlined
-                  dense
-                  v-model.trim="newSettingKey"
-                  placeholder="Setting key"
-                >
-                </q-input>
-              </div>
-              <div class="mb-3">
-                <label for="">Setting value</label>
-                <q-input
-                  outlined
-                  dense
-                  v-model.trim="newSettingValue"
-                  placeholder="Setting value"
-                >
-                </q-input>
-              </div>
-              <div class="mt-4 md:text-left text-center">
-                <q-btn round dense icon="o_add_circle" @click="addNewSetting" />
-              </div>
-            </div>
-            <div>
-              <q-item
+          <div class="grid grid-cols-2 gap-x-4">
+            <div class="mb-3">
+              <label for="">Setting key</label>
+              <q-input
+                outlined
                 dense
-                class="w-full mb-3"
-                flat
-                v-for="(key, index) in settings"
-                :key="`${key}-${index}`"
+                v-model.trim="newSettingKey"
+                placeholder="Setting key"
               >
-                <q-item-section>
-                  <q-input
-                    :label="capitalizeFirstLetter(key)"
-                    v-model="game.settings[key]"
-                    dense
-                    flat
-                  />
-                </q-item-section>
-                <q-item-section avatar>
-                  <q-btn
-                    icon="o_delete"
-                    unelevated
-                    @click="removeSetting(key)"
-                  />
-                </q-item-section>
-              </q-item>
+              </q-input>
+            </div>
+            <div class="mb-3">
+              <label for="">Setting value</label>
+              <q-input
+                outlined
+                dense
+                v-model.trim="newSettingValue"
+                placeholder="Setting value"
+              >
+              </q-input>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-x-4">
+            <div class="text-center">
+              <q-btn
+                color="primary"
+                :icon="!isEdit ? 'add' : 'edit'"
+                :label="!isEdit ? 'Add' : 'Edit'"
+                class="capitalize my-2 rounded-lg"
+                @click="addNewSetting"
+              />
+            </div>
+          </div>
+          <div class="grid md:grid-cols-1 gap-x-4 mt-4">
+            <div>
+              <q-table
+                :rows="rows"
+                flat
+                dense
+                bordered
+                :columns="columns"
+                table-header-class="!h-[40px] bg-slate-100"
+                row-key="name"
+                hide-pagination
+              >
+                <template #body-cell-action="props">
+                  <q-td :props="props">
+                    <q-btn
+                      icon="o_delete"
+                      unelevated
+                      dense
+                      size="sm"
+                      class="text-red"
+                      @click="removeSetting(props.row.key)"
+                    />
+                    <q-btn
+                      icon="o_edit"
+                      dense
+                      class="text-primary ms-2"
+                      unelevated
+                      size="sm"
+                      @click="editSetting(props.row)"
+                    />
+                  </q-td>
+                </template>
+              </q-table>
             </div>
           </div>
         </div>
