@@ -66,7 +66,12 @@ const logoutUser = async () => {
                     Inbox
                   </q-item-section>
                 </q-item> -->
-            <q-item clickable v-close-popup disable>
+            <q-item
+              clickable
+              v-close-popup
+              :disable="!useAuthStore().isAuthenticated"
+              @click="router.push('/profile')"
+            >
               <q-item-section
                 class="!justify-start flex flex-row items-center w-full gap-2"
               >

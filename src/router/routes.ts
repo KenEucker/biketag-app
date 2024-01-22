@@ -7,13 +7,13 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      {
-        path: '',
-        component: () => import('pages/IndexPage.vue'),
-        meta: {
-          isAuthRequired: true,
-        },
-      },
+      // {
+      //   path: '',
+      //   component: () => import('pages/IndexPage.vue'),
+      //   meta: {
+      //     isAuthRequired: true,
+      //   },
+      // },
       {
         path: '/games',
         name: 'GamesDashboard',
@@ -36,6 +36,22 @@ const routes: RouteRecordRaw[] = [
         path: '/games/ambassador',
         name: 'AddAmbassador',
         component: () => import('pages/AmbassadorForm.vue'),
+        meta: {
+          isAuthRequired: true,
+        },
+      },
+      {
+        path: '/games/player/action',
+        name: 'AddPlayer',
+        component: () => import('pages/PlayerForm.vue'),
+        meta: {
+          isAuthRequired: true,
+        },
+      },
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('pages/ProfilePage.vue'),
         meta: {
           isAuthRequired: true,
         },
