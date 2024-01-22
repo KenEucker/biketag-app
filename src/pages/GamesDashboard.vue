@@ -146,7 +146,7 @@ const getGameUrl = (game: Game): string =>
         <p
           class="col-span-3 col-start-1 pt-2 text-lg font-medium text-primary-400"
         >
-          Game List
+          Games
         </p>
         <q-input
           outlined

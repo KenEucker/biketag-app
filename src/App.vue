@@ -43,22 +43,33 @@ const testBA = async () => {
   await biketagAdminStore.fetchAmbassadors()
   await biketagAdminStore.fetchGames()
 
-  const testAmbassadorByName = biketagAdminStore.getAmbassador('Ken Eucker')
+  const testPlayerName = 'Ken Eucker'
+  const testGameName = 'Seattle'
+  const testAmbassadorByName = biketagAdminStore.getAmbassador(testPlayerName)
   if (testAmbassadorByName) {
     const testAmbassadorByEmail = biketagAdminStore.getAmbassador(
       testAmbassadorByName.email
     )
+    if (testAmbassadorByEmail) {
+      console.log('testAmbassadorByEmail', testAmbassadorByEmail.name)
+    }
+
     console.log('testAmbassadorByName', testAmbassadorByName.name)
-    console.log('testAmbassadorByEmail', testAmbassadorByEmail!.name)
     console.log(
       'ambassadors games',
       biketagAdminStore.ambassadorsGames(testAmbassadorByName.name)
     )
-    console.log(
-      'seattles ambassadors',
-      biketagAdminStore.gamesAmbassadors('Seattle')
-    )
   }
+
+  console.log(
+    `${testGameName}'s ambassadors`,
+    biketagAdminStore.gamesAmbassadors(testGameName)
+  )
+  await biketagAdminStore.fetchTags(testGameName)
+  console.log(
+    `${testGameName}'s tags`,
+    await biketagAdminStore.getTags(testGameName)
+  )
 }
 testBA()
 

@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import BikeTagLogo from 'src/components/logo/BikeTagLogo.vue';
-import { computed } from 'vue';
+import BikeTagLogo from 'src/components/logo/BikeTagLogo.vue'
+import { computed } from 'vue'
 
 interface Props {
-  leftDrawerOpen: boolean;
+  leftDrawerOpen: boolean
 }
 
-const emit = defineEmits(['update:leftDrawerOpen']);
+const emit = defineEmits(['update:leftDrawerOpen'])
 
 const props = withDefaults(defineProps<Props>(), {
   leftDrawerOpen: false,
-});
+})
 
 const leftDrawer = computed({
   get() {
-    return props.leftDrawerOpen;
+    return props.leftDrawerOpen
   },
   set(value) {
-    emit('update:leftDrawerOpen', value);
+    emit('update:leftDrawerOpen', value)
   },
-});
+})
 
 export interface linkProps {
-  title: string;
-  caption?: string;
-  path?: string;
-  icon?: string;
+  title: string
+  caption?: string
+  path?: string
+  icon?: string
 }
 const essentialLinks: linkProps[] = [
   {
@@ -33,7 +33,7 @@ const essentialLinks: linkProps[] = [
     icon: 'home',
     path: '/games',
   },
-];
+]
 </script>
 <template>
   <q-drawer
@@ -43,12 +43,12 @@ const essentialLinks: linkProps[] = [
     class="bg-gray-700 text-slate-400"
   >
     <q-list>
-      <q-item class="justify-center items-center py-4">
+      <q-item class="items-center justify-center py-4">
         <q-item-section avatar class="flex flex-row">
           <bike-tag-logo />
           <q-item-section
             header
-            class="text-black font-medium text-xl place-self-center ms-2"
+            class="text-xl font-medium text-black place-self-center ms-2"
             ><span class="text-2xl font-semibold text-slate-200"
               >BikeTag</span
             ></q-item-section
@@ -57,7 +57,7 @@ const essentialLinks: linkProps[] = [
       </q-item>
     </q-list>
     <!-- <q-list>
-        <q-item-label header class="text-slate-400 uppercase text-xs pb-0">
+        <q-item-label header class="pb-0 text-xs uppercase text-slate-400">
           Essential Links
         </q-item-label>
       </q-list> -->
