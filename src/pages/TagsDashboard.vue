@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getThumbnail, getLocalDateTime } from 'src/utils/global'
 import { useAuthStore } from 'src/stores/auth'
 import ExportForm from 'src/components/ExportForm.vue'
-import { Tag } from 'biketag/lib/common/schema'
+import { Tag } from 'biketag/dist/common/schema'
 import TagForm from '../components/forms/TagForm.vue'
 
 type StateType = {

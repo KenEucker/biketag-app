@@ -39,7 +39,7 @@ const logoutUser = async () => {
         @click="toggleLeftDrawer"
       />
 
-      <q-toolbar-title> The BikeTag Game </q-toolbar-title>
+      <q-toolbar-title> {{ router.currentRoute.value.name }}</q-toolbar-title>
       <div class="inline-block cursor-pointer">
         <div class="flex items-center" v-if="authStore.getIsAuthenticated">
           <span

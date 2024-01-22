@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Game } from 'biketag/lib/common/schema'
+import { Game } from 'biketag/dist/common/schema'
 import { QTableProps, useQuasar } from 'quasar'
 import { useBikeTagStore } from 'biketag-vue'
 import { computed, onMounted, reactive, ref } from 'vue'
@@ -148,7 +148,7 @@ const getGameUrl = (game: Game): string =>
       <q-btn
         v-if="isAuthenticated"
         color="primary"
-        class="my-2 ms-2 capitalize rounded-lg"
+        class="my-2 capitalize rounded-lg ms-2"
         outline
         icon="add"
         label="Player"

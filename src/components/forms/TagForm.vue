@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 // import { useBikeTagStore } from 'biketag-vue'
-// import { Tag } from 'biketag/lib/common/schema';
+// import { Tag } from 'biketag/dist/common/schema';
 import MapView from '../global/MapView.vue'
-import { Tag } from 'biketag/lib/common/schema'
+import { Tag } from 'biketag/dist/common/schema'
 import { Notify } from 'quasar'
 
 const emit = defineEmits(['update:tagUpdateForm'])

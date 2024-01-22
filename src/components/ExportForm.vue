@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { Notify } from 'quasar'
 import JSZip from 'jszip'
-import { Tag } from 'biketag/lib/common/schema'
+import { Tag } from 'biketag/dist/common/schema'
 import { computed, ref } from 'vue'
 
 const zip = new JSZip()

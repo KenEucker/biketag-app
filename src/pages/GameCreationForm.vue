@@ -4,7 +4,7 @@ import { Notify, QTableProps } from 'quasar'
 import BikeTagClient from 'biketag'
 import MapView from '../components/global/MapView.vue'
 import ImportForm from '../components/global/ImportForm.vue'
-import { Tag } from 'biketag/lib/common/schema'
+import { Tag } from 'biketag/dist/common/schema'
 import TagForm from '../components/forms/TagForm.vue'
 import { useBikeTagStore } from 'biketag-vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -227,21 +227,21 @@ const editSetting = (row: Record<string, string>) => {
     >
     </q-inner-loading>
     <!-- Stepper component -->
-    <q-toolbar class="bg-slate-200 p-2">
+    <q-toolbar class="p-2 bg-slate-200">
       <q-toolbar-title>
         <div class="grid grid-cols-8 md:gap-x-4 gap-x-4">
-          <div class="self-center flex col-span-4">
+          <div class="flex self-center col-span-4">
             <q-btn
               dense
               round
               flat
               size="md"
               icon="arrow_back"
-              class="p-0 m-0 self-center h-fit me-3"
+              class="self-center p-0 m-0 h-fit me-3"
               @click="router.push('/games')"
             ></q-btn>
             <div>
-              <p class="p-0 text-sm font-medium pt-1 md:pt-0">
+              <p class="p-0 pt-1 text-sm font-medium md:pt-0">
                 STEP:
                 {{
                   state.step === 1
@@ -256,7 +256,7 @@ const editSetting = (row: Record<string, string>) => {
                 }}
                 OF 3
               </p>
-              <p class="p-0 text-lg text-gray-500 font-medium">
+              <p class="p-0 text-lg font-medium text-gray-500">
                 {{
                   state.step === 1
                     ? 'General Info'
@@ -271,7 +271,7 @@ const editSetting = (row: Record<string, string>) => {
               </p>
             </div>
           </div>
-          <div class="col-start-5 col-span-4 flex">
+          <div class="flex col-span-4 col-start-5">
             <q-linear-progress
               rounded
               :value="progression / 100"
@@ -279,7 +279,7 @@ const editSetting = (row: Record<string, string>) => {
               size="5px"
               color="green"
             />
-            <span class="self-center pt-2 ms-3 text-sm"
+            <span class="self-center pt-2 text-sm ms-3"
               >{{ progression }}%</span
             >
           </div>
@@ -290,9 +290,9 @@ const editSetting = (row: Record<string, string>) => {
     <q-stepper v-model="state.step" ref="stepper" color="primary" animated>
       <!-- Step 1: Ambassador information -->
       <q-step :name="1" title="" icon="settings" :done="state.step > 1">
-        <div class="grid md:grid-cols-2 grid-cols-1 gap-x-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
           <div>
-            <p class="p-0 text-base font-medium py-2">
+            <p class="p-0 py-2 text-base font-medium">
               Game General Information
             </p>
             <q-separator class="mb-4" />
@@ -314,7 +314,7 @@ const editSetting = (row: Record<string, string>) => {
                 placeholder="Logo URL"
               />
             </div>
-            <p class="p-0 text-base font-medium py-2">Region</p>
+            <p class="p-0 py-2 text-base font-medium">Region</p>
             <div class="mb-3">
               <label for="">Slug</label>
               <q-input
@@ -353,7 +353,7 @@ const editSetting = (row: Record<string, string>) => {
             </div>
           </div>
           <div>
-            <p class="p-0 text-base font-medium py-2">Boundary</p>
+            <p class="p-0 py-2 text-base font-medium">Boundary</p>
             <q-separator class="mb-4" />
             <div class="grid grid-cols-3 gap-x-4">
               <div>
@@ -395,7 +395,7 @@ const editSetting = (row: Record<string, string>) => {
                 </div>
               </div>
             </div>
-            <div class="flex justify-center md:m-4 m-0 my-4">
+            <div class="flex justify-center m-0 my-4 md:m-4">
               <MapView
                 class="w-[100%] md:h-[380px] h-[300px]"
                 :gps="gps"
@@ -415,9 +415,9 @@ const editSetting = (row: Record<string, string>) => {
         :done="state.step > 2"
       >
         <div>
-          <p class="p-0 text-base font-medium py-2">Ambassadors</p>
+          <p class="p-0 py-2 text-base font-medium">Ambassadors</p>
           <q-separator class="mb-4" />
-          <div class="grid md:grid-cols-2 grid-cols-1 gap-x-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
             <div class="mb-3">
               <label for="">Add an Ambassador</label>
               <q-input
@@ -459,7 +459,7 @@ const editSetting = (row: Record<string, string>) => {
       </q-step>
       <q-step :name="3" title="" icon="settings" :done="state.step > 1">
         <div>
-          <p class="p-0 text-base font-medium py-2">Settings</p>
+          <p class="p-0 py-2 text-base font-medium">Settings</p>
           <q-separator class="mb-4" />
           <div class="grid grid-cols-2 gap-x-4">
             <div class="mb-3">
@@ -489,12 +489,12 @@ const editSetting = (row: Record<string, string>) => {
                 color="primary"
                 :icon="!isEdit ? 'add' : 'edit'"
                 :label="!isEdit ? 'Add' : 'Edit'"
-                class="capitalize my-2 rounded-lg"
+                class="my-2 capitalize rounded-lg"
                 @click="addNewSetting"
               />
             </div>
           </div>
-          <div class="grid md:grid-cols-1 gap-x-4 mt-4">
+          <div class="grid mt-4 md:grid-cols-1 gap-x-4">
             <div>
               <q-table
                 :rows="rows"
@@ -539,7 +539,7 @@ const editSetting = (row: Record<string, string>) => {
         v-if="!route.params.name"
       >
         <div>
-          <p class="p-0 text-base font-medium py-2">First Mystery tag</p>
+          <p class="p-0 py-2 text-base font-medium">First Mystery tag</p>
           <ImportForm
             class="m-auto mb-2"
             @dataImported="loadTag"
@@ -551,7 +551,7 @@ const editSetting = (row: Record<string, string>) => {
       <!-- Navigation buttons -->
       <template v-slot:navigation>
         <q-stepper-navigation class="bg-slate-200 !p-0 !pr-6">
-          <div class="text-right py-2">
+          <div class="py-2 text-right">
             <q-btn
               v-if="state.step > 1"
               unelevated

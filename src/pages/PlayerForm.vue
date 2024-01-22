@@ -82,29 +82,29 @@ const handleCreatePlayer = () => {
 <template>
   <q-card flat bordered class="mb-10">
     <!-- Stepper component -->
-    <q-toolbar class="bg-slate-200 p-2">
+    <q-toolbar class="p-2 bg-slate-200">
       <q-toolbar-title>
         <div class="grid grid-cols-8 md:gap-x-4 gap-x-4">
-          <div class="self-center flex col-span-4">
+          <div class="flex self-center col-span-4">
             <q-btn
               dense
               round
               flat
               size="md"
               icon="arrow_back"
-              class="p-0 m-0 self-center h-fit me-3"
+              class="self-center p-0 m-0 h-fit me-3"
               @click="router.push('/games')"
             ></q-btn>
             <div>
-              <p class="p-0 text-sm font-medium pt-1 md:pt-0">
+              <p class="p-0 pt-1 text-sm font-medium md:pt-0">
                 STEP: {{ state.step == 1 ? 0 : 1 }} OF 1
               </p>
-              <p class="p-0 text-lg text-gray-500 font-medium">
+              <p class="p-0 text-lg font-medium text-gray-500">
                 {{ state.step == 1 ? 'General Info' : 'Assign Games' }}
               </p>
             </div>
           </div>
-          <div class="col-start-5 col-span-4 flex">
+          <div class="flex col-span-4 col-start-5">
             <q-linear-progress
               rounded
               :value="progress"
@@ -112,7 +112,7 @@ const handleCreatePlayer = () => {
               size="5px"
               color="green"
             />
-            <span class="self-center pt-2 ms-3 text-sm"
+            <span class="self-center pt-2 text-sm ms-3"
               >{{ progress * 100 }}%</span
             >
           </div>
@@ -151,7 +151,6 @@ const handleCreatePlayer = () => {
               outlined
               dense
               v-model.trim="state.bicon"
-              :rules="biconValidation"
               placeholder="Bicon"
             />
           </div>
@@ -186,7 +185,7 @@ const handleCreatePlayer = () => {
         <!-- Navigation buttons -->
         <template v-slot:navigation>
           <q-stepper-navigation class="bg-slate-200 !p-0 !pr-6">
-            <div class="text-right py-2">
+            <div class="py-2 text-right">
               <q-btn
                 v-if="state.step > 1"
                 unelevated

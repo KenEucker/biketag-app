@@ -2,16 +2,17 @@
   "name": "biketag-app",
   "version": "0.0.1",
   "description": "The administrative application for BikeTag games",
-  "productName": "biketag-app",
+  "productName": "biketag",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "netlify dev --functionsPort 7200",
+    "dev": "npm run dev:netlify && npm run dev:quasar",
+    "dev:netlify": "netlify dev --functionsPort 7200",
     "dev:rerun": "npm run dev:clear && npm run dev",
     "dev:clear": "rm -rf node_modules/.q-cache .quasar",
-    "devfe": "quasar dev",
+    "dev:quasar": "quasar dev",
     "build": "quasar build"
   },
   "dependencies": {
