@@ -38,3 +38,7 @@ export const getThumbnail = (imgUrl: string) => {
 // Get time for game tag detail
 export const getLocalDateTime = (timestamp: number) =>
   new Date(timestamp * 1000).toLocaleTimeString()
+
+// Get date for game tag detail
+export const getLocalDate = (timestamp: number) =>
+  new Date(timestamp * 1000).toLocaleDateString()

@@ -188,7 +188,7 @@ const updateTagForm = (tagData: Tag) => {
             class="p-0 m-0"
             @click="router.push('/games')"
           ></q-btn>
-          Tag List
+          Tags
         </p>
         <q-input
           outlined
